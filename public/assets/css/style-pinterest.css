@@ -1,0 +1,86 @@
+/* Sidebar */
+.sidenav {
+    width: 80px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1040;
+    background: #fff;
+    border-right: 1px solid #eee;
+  }
+  
+  /* Navbar */
+  .pinterest-nav {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    position: fixed;
+    top: 0;
+    left: 80px;
+    right: 0;
+    height: 64px;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+  }
+  
+  .pinterest-search {
+    background: #efefef;
+    border: none;
+    border-radius: 25px;
+    height: 44px;
+    padding: 0 1.2em;
+    font-size: 15px;
+    width: 100%;
+  }
+  
+  .pinterest-search:focus {
+    background: #fff;
+    box-shadow: 0 0 0 3px #ddd;
+    outline: none;
+  }
+  
+  /* Main content */
+  .main-content {
+    margin-left: 80px;
+    padding-top: 70px;
+  }
+  
+  /* Masonry grid */
+  .masonry {
+    column-count: 5;
+    column-gap: 16px;
+    padding: 0 16px;
+  }
+  
+  .pin {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  
+  .pin img {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    transition: transform .2s;
+  }
+  
+  .pin:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0,0,0,.1);
+  }
+  
+  /* Responsif */
+  @media (max-width: 992px) {
+    .masonry { column-count: 3; }
+  }
+  @media (max-width: 768px) {
+    .masonry { column-count: 2; }
+  }
+  @media (max-width: 576px) {
+    .masonry { column-count: 1; }
+  }
+  

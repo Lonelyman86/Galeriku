@@ -1,0 +1,165 @@
+/* ====== GRID LAYOUT ala Pinterest ====== */
+.grid-container-01{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap:14px;
+    align-items:start;
+    /* biar nggak nempel tepi, opsional:
+    padding: 8px;
+    */
+  }
+  
+  /* ====== CARD ====== */
+  .card-03{
+    width:100%;
+    height:auto;
+    padding:.8em;
+    background-image: linear-gradient(#1c415e, #2b5d83);
+    border-radius:12px;
+    box-shadow:0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+    display:block;        /* jangan inline-block, biar grid yang ngatur */
+    margin:0;             /* jangan pakai margin-left manual */
+  }
+  
+  /* ====== IMAGE ====== */
+  .card-foto{ border-radius:.5rem; overflow:hidden }
+  .card-foto img{
+    display:block;
+    width:100%;
+    height:auto;
+    aspect-ratio: 4 / 5;  /* stabilkan tinggi kartu; ubah sesuai selera */
+    object-fit:cover;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .card-foto img:hover{
+    transform: translateY(-6px) scale(1.01);  /* cukup manis, tidak gempa 25% */
+    box-shadow: rgba(226,196,63,.25) 0 13px 47px -5px,
+                rgba(180,71,71,.30) 0 8px 16px -8px;
+  }
+  
+  /* ====== TEXT ====== */
+  .card-inform{ padding-top:10px }
+  .text-judul{
+    font-weight:600;
+    font-size:1em;
+    line-height:1.5;
+    color:#fff;
+    margin:0 0 4px;
+  }
+  .text-dalem-01{
+    font-size:.9em;
+    color:#fff;
+    margin:0 0 10px;
+  }
+  
+  /* ====== FOOTER / ACTIONS ====== */
+  .card-akhir-01{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:10px;
+    border-top:1px solid #ddd;
+  }
+  
+  .tombol-modal,
+  .tombol-delete{
+    border:1px solid #736be050;
+    padding:.3em .6em;
+    cursor:pointer;
+    border-radius:9px;
+    transition:.2s ease-in-out;
+    background:#d8e3f7d2;
+    color:#010b36;
+  }
+  .tombol-modal + .tombol-modal,
+  .tombol-modal + .tombol-delete,
+  .tombol-delete + .tombol-modal{ margin-left:8px }
+  
+  .tombol-modal:hover,
+  .tombol-delete:hover{
+    border-color:#254b7e;
+    background:#8fa7f569;
+  }
+  
+  /* ====== COMMENTS ====== */
+  .card-footer-01{
+    display:block;
+    max-height:320px;
+    overflow-y:auto;
+  }
+  
+  .input-group-1{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    margin-top:10px;
+  }
+  .input-group-1 textarea{
+    outline:0;
+    background:#fff;
+    box-shadow: inset 0 0 0 1px transparent;
+    padding:.6em;
+    border-radius:14px;
+    border:1px solid #333;
+    color:#000;
+    width: calc(100% - 20px);   /* FIX: hilangkan koma nyasar */
+    resize: vertical;
+  }
+  .tombol-komen{
+    border:0;
+    background:#020da3;
+    color:#fff;
+    padding:.6em .8em;
+    border-radius:10px;
+    font-weight:700;
+    /* FIX: jangan absolute, bikin layout rusak */
+  }
+  
+  /* ====== LIKE ====== */
+  .like-comment-container{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .like-comment-container button{ max-width:40px }
+  .tombol-like{ margin-top:12px }
+  
+  /* ====== OPTIONAL: versi kartu putih seperti Pinterest asli ====== */
+  /*
+  .card-03{ background:#fff; }
+  .text-judul, .text-dalem-01{ color:#111; }
+  */
+/* ===== Frame dasar ala Pinterest ===== */
+.sidenav{
+    width:80px; position:fixed; top:0; left:0; bottom:0; z-index:1040;
+    background:#fff; border-right:1px solid #eee;
+  }
+  .sidenav .nav-link{ display:block; text-align:center; padding:14px 0; border-radius:12px; margin:6px 10px; color:#333 }
+  .sidenav .nav-link:hover{ background:#efefef; color:#000 }
+  
+  /* Navbar putih, search full width */
+  .p-nav{
+    background:#fff; border-bottom:1px solid #e9e9e9; box-shadow:0 1px 4px rgba(0,0,0,.05);
+    position:fixed; top:0; left:80px; right:0; height:64px; z-index:1030; display:flex; align-items:center;
+  }
+  .p-nav-search{ width:100%; max-width:none }
+  .p-nav-input{
+    background:#efefef; border:none; border-radius:25px; height:44px; padding:.6em 1.2em; font-size:15px;
+    transition: background .2s, box-shadow .2s;
+  }
+  .p-nav-input:focus{ background:#fff; box-shadow:0 0 0 3px #e2e2e2; outline:none }
+  .p-avatar{ border:1px solid #ddd }
+  
+  /* Offset konten agar tidak ketiban */
+  .main-content{ margin-left:80px; padding-top:64px }
+  
+  /* Kartu/grid (kamu sudah pakai, ini jaga-jaga) */
+  .grid-container-01{ display:grid; grid-template-columns:repeat(auto-fit, minmax(12rem,1fr)); gap:14px; align-items:start; padding:12px }
+  .card-03{ background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.06); overflow:hidden }
+  .card-foto img{ display:block; width:100%; height:auto; object-fit:cover }
+  
+  
+  
+
+
