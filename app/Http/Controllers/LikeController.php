@@ -41,9 +41,12 @@ class LikeController extends Controller
 {
     $user = Auth::user();
 
-    $likedPhotos = Foto::whereHas('like', function ($query) use ($user) {
+    $likedPhotos = Foto::where('status', 'approved')
+    ->whereHas('like', function ($query) use ($user) {
         $query->where('user_id', $user->id);
-    })->with(['user', 'album', 'komentarfoto.user', 'like'])->get();
+    })
+    ->with(['user', 'album', 'komentarfoto.user', 'like'])
+    ->get();
 
     $albums = \App\Models\Album::where('user_id', $user->id)->get(); // ⬅️ TAMBAHKAN INI
 

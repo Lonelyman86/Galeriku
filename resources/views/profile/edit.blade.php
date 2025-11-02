@@ -16,7 +16,7 @@
 
           <div class="d-flex align-items-center gap-3 mb-4">
           @if(Auth::user()->avatar != null)
-    <img src="{{  Auth::user()->avatar_url }}" alt="Profile"
+    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Profile"
          class="rounded-circle border" width="36" height="36">
     @else
          <img src="{{ asset('assets/img/default-profile.png')  }}" alt="Profile"

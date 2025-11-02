@@ -69,3 +69,12 @@ Route::get('/search', [SearchController::class, 'search'])->name('search');
         Route::patch('/profile',[ProfileController::class, 'update'])->name('profile.update'); // update data + avatar + password opsional
     });
     Route::get('/albums/{album}', [AlbumController::class, 'show'])->name('album.show');
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/foto', [App\Http\Controllers\Admin\FotoAdminController::class, 'index'])->name('admin.foto.index');
+    Route::patch('/foto/{id}/approve', [App\Http\Controllers\Admin\FotoAdminController::class, 'approve'])->name('admin.foto.approve');
+    Route::patch('/foto/{id}/reject', [App\Http\Controllers\Admin\FotoAdminController::class, 'reject'])->name('admin.foto.reject');
+    Route::delete('/foto/{id}', [App\Http\Controllers\Admin\FotoAdminController::class, 'destroy'])->name('admin.foto.destroy');
+});
+

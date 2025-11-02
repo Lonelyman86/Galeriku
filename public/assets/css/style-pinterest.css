@@ -83,4 +83,7 @@
   @media (max-width: 576px) {
     .masonry { column-count: 1; }
   }
-  
+
+.badge.bg-danger {
+  font-size: 0.7rem;
+}

@@ -12,7 +12,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $foto = Foto::all();
+$foto = Foto::where('status', 'approved')->get();
         $komentar = Komentar::all();
         $albums = Album::all();
         return view('layouts.home', [
