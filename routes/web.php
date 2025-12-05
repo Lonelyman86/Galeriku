@@ -64,11 +64,14 @@ Route::get('/search', [SearchController::class, 'search'])->name('search');
 
 });
     // Profil
-    Route::middleware('auth')->group(function () {
+    Route::middleware('auth')->group(function ()    {
         Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile');   // tampil + form
         Route::patch('/profile',[ProfileController::class, 'update'])->name('profile.update'); // update data + avatar + password opsional
+        Route::delete('/albums/{album}', [AlbumController::class, 'destroy'])
+        ->name('albums.destroy');
     });
     Route::get('/albums/{album}', [AlbumController::class, 'show'])->name('album.show');
+    
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');

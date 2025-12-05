@@ -1,15 +1,6 @@
 @extends('main')
 @section('content')
 
-{{-- FAB "Create New" (opsional, biar konsisten di semua halaman) --}}
-<div class="fab-create">
-  <button class="fab-btn">＋</button>
-  <div class="fab-menu">
-    <a href="/createalbum">Create New Album</a>
-    <a href="/createfoto">Create New Foto</a>
-  </div>
-</div>
-
 <h1 class="page-title">Liked Photos</h1>
 
 <style>
@@ -110,7 +101,7 @@
 
       {{-- Meta bawah kartu --}}
       <div class="pin-meta">
-        <div class="pin-title">{{ $item->user->username }}: {{ $item->judul_foto }}</div>
+        <div class="pin-title">{{ $item->judul_foto }}</div>
         @if(!empty($item->deskripsi_foto))
           <div class="pin-desc">{{ $item->deskripsi_foto }}</div>
         @endif

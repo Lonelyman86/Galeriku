@@ -2,7 +2,6 @@
 @section('content')
 
 <style>
-  /* ====== STYLE YANG SUDAH ADA ====== */
   .page-title{
     font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
     font-size: 22px; margin: 16px 8px 8px 16px; font-weight: 700;
@@ -114,7 +113,7 @@
   </div>
 </div>
 
-<h1 class="page-title">📸 Studio Foto Saya</h1>
+<h1 class="page-title">Studio Saya</h1>
 
 <div class="masonry">
 @foreach ($foto as $item)
@@ -287,10 +286,28 @@
   <h1 class="page-title">Album</h1>
   <div class="album-wrap">
     @foreach ($albums as $album)
-      <a href="{{ route('album.show', ['album' => $album->id]) }}" class="album-card">
-        <p class="text-judul">{{ $album->nama_album }}</p>
-        <p class="text-dalem-01">{{ $album->deskripsi }}</p>
-      </a>
+      <div style="position: relative;">
+        <a href="{{ route('album.show', ['album' => $album->id]) }}" class="album-card">
+          <p class="text-judul">{{ $album->nama_album }}</p>
+          <p class="text-dalem-01">{{ $album->deskripsi }}</p>
+        </a>
+
+        @auth
+          @if(auth()->id() == $album->user_id)
+            <form action="{{ route('albums.destroy', $album->id) }}"
+                  method="POST"
+                  onsubmit="return confirm('Yakin ingin menghapus album ini? Semua relasi foto ke album ini akan dilepas.');"
+                  style="position:absolute; top:10px; right:12px;">
+              @csrf
+              @method('DELETE')
+              <button type="submit"
+                      style="border:0; padding:4px 8px; font-size:11px; border-radius:999px; background:#ef4444; color:#fff; cursor:pointer;">
+                Hapus
+              </button>
+            </form>
+          @endif
+        @endauth
+      </div>
     @endforeach
   </div>
 @else

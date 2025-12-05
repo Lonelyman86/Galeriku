@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Foto;
 use App\Models\Komentar;
 use App\Models\Album;
-use Illuminate\Support\Facades\Storage; // Pastikan ini diimpor
-use Illuminate\Support\Facades\Auth; // Pastikan ini diimpor untuk Auth::id()
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class FotoController extends Controller
 {
@@ -20,13 +20,24 @@ class FotoController extends Controller
 
     public function index ()
     {
-        $foto = Foto::all();
-        $komentar = Komentar::all();
-        $albums = Album::all();
+        // PERBAIKAN EFISIENSI (OPTIMASI):
+        // 1. with(...): Mengambil data relasi (user, album, like, komentar) sekaligus di awal.
+        // 2. latest(): Mengurutkan dari yang paling baru diupload.
+        // 3. paginate(12): Membatasi hanya 12 foto per halaman (ganti angka sesuai kebutuhan).
+        $foto = Foto::with(['user', 'album', 'like', 'komentarfoto.user'])
+                    ->latest()
+                    ->paginate(12);
+
+        // HAPUS atau matikan baris ini karena boros memori:
+        // $komentar = Komentar::all(); 
+
+        // Album tetap diambil untuk keperluan dropdown modal (misal: "Masukan ke Album")
+        $albums = Album::all(); 
+
         return view('foto', [
             "title" => "foto",
-            "foto" => $foto ,
-            "comments" => $komentar,
+            "foto" => $foto, 
+            // "comments" => $komentar, // Tidak perlu dikirim lagi
             "albums" => $albums
         ]);
     }
@@ -38,26 +49,23 @@ class FotoController extends Controller
             'judul_foto' => 'required|string|max:255',
             'deskripsi_foto' => 'required|string',
             'album_id' => 'nullable',
-            // 'user_id' => 'required' // Baris ini dihapus/dikomentari karena user_id akan diambil dari Auth::id()
         ]);
 
         if ($request->hasFile('lokasi_file')) {
             $file = $request->file('lokasi_file');
             $filename = time() . '_' . $file->hashName();
 
-            // --- PERBAIKAN PENTING DI SINI ---
-            // Simpan file menggunakan Storage Facade Laravel ke disk 'public'
-            // Ini akan menyimpannya di storage/app/public/foto/
+            // Simpan fisik file
             $file->storeAs('public/foto', $filename);
-            // --- AKHIR PERBAIKAN ---
 
             $foto = new Foto();
             $foto->judul_foto = $request->judul_foto;
-            $foto->user_id = Auth::id(); // Ambil ID user yang sedang login
+            $foto->user_id = Auth::id();
             $foto->deskripsi_foto = $request->deskripsi_foto;
             $foto->lokasi_file = $filename;
             $foto->tanggal_unggah = now();
-            // $foto->album_id = $request->album_id; // Tambahkan ini jika album_id perlu disimpan saat upload awal
+            // Jika Anda ingin user bisa langsung pilih album saat upload, aktifkan baris di bawah:
+            // $foto->album_id = $request->album_id; 
             $foto->save();
 
             return redirect('studio')->with('success', 'Foto berhasil diunggah!');
@@ -74,6 +82,7 @@ class FotoController extends Controller
 
         $foto = Foto::findOrFail($photoId);
 
+        // Pastikan hanya pemilik foto yang bisa memindahkan album
         if (Auth::id() !== $foto->user_id) {
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengubah album foto ini.');
         }
@@ -90,17 +99,16 @@ class FotoController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk menghapus foto ini.');
         }
 
+        // Hapus file fisik gambar
         if (Storage::disk('public')->exists('foto/' . $photo->lokasi_file)) {
             Storage::disk('public')->delete('foto/' . $photo->lokasi_file);
         }
 
- // Hapus semua likes terkait foto ini
- $photo->like()->delete();
+        // Hapus data relasi (cleanup database)
+        $photo->like()->delete();
+        $photo->komentarfoto()->delete();
 
- // Hapus semua komentar terkait foto ini (kalau perlu)
- $photo->komentarfoto()->delete();
-
-
+        // Hapus record foto
         $photo->delete();
 
         return redirect()->back()->with('success', 'Foto berhasil dihapus!');

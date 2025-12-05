@@ -18,20 +18,29 @@ class SignupController extends Controller
 
     public function store(Request $request)
     {
+        // OPTIMASI VALIDASI:
+        // 1. Hapus 'name' jika di database Anda menggunakan 'fullname'.
+        // 2. Hapus 'max:15' pada password agar user bisa bikin password panjang (lebih aman).
+        // 3. Ubah password min:7 jadi min:8 (standar minimal saat ini).
         
         $validatedData = $request->validate([
-            'fullname' => 'required|max:45',
-            'name' => 'required|min:3|max:10',
-            'address' => 'required',
-            'username' => ['required', 'min:7', 'max:15', 'unique:users'],
-            'email' => 'required|email:dns|unique:users',
-            'password' => 'required|min:7|max:15' 
+            'fullname' => 'required|string|max:100', // Sesuaikan max dengan ProfileController
+            // 'name' => 'required|min:3|max:10', // HAPUS INI jika tidak ada kolom 'name' di DB
+            'address'  => 'required|string',
+            'username' => ['required', 'min:3', 'max:30', 'unique:users'], // Disamakan dengan ProfileController
+            'email'    => 'required|email:dns|unique:users',
+            'password' => 'required|min:8' // Jangan pakai max untuk password!
         ]);
 
-
+        // Enkripsi Password (Sudah Benar)
         $validatedData['password'] = Hash::make($validatedData['password']);
 
+        // Jika Anda menghapus validasi 'name' di atas, baris ini aman.
+        // Tapi jika form HTML masih mengirim input 'name' dan Anda ingin mengabaikannya saat save ke DB:
+        // unset($validatedData['name']); 
+
         User::create($validatedData);
-        return redirect('/sign-in')->with('success', 'Registration successfull! Welcome to the club!');
+
+        return redirect('/sign-in')->with('success', 'Registration successful! Welcome to the club!');
     }
 }

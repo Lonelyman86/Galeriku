@@ -52,7 +52,7 @@
 
 {{-- ====== STATE: tidak ada hasil ====== --}}
 @if(($fotos->isEmpty() ?? true) && ($albums->isEmpty() ?? true))
-  <p class="text-muted" style="margin: 0 16px;">Tidak ditemukan foto atau album yang cocok.</p>
+  <p class="text-muted" style="margin: 0 16px;">Tidak ditemukan Foto atau Album yang cocok.</p>
 @endif
 
 {{-- ====== LIST FOTO (Masonry) ====== --}}

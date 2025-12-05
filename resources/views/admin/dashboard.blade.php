@@ -1,6 +1,20 @@
 @extends('main')
 
 @section('content')
+<style>
+    .chart-wrapper {
+    max-width: 300px;   /* ukuran donat */
+    max-height: 300px;
+    margin: 0 auto;
+}
+
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+</style>
+
 <div class="container py-4">
 
     {{-- Header --}}
@@ -73,12 +87,19 @@
     </div>
 
     {{-- Chart --}}
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
-            <h5 class="fw-bold mb-4"><i class="bi bi-graph-up-arrow text-danger me-2"></i>Grafik Status Foto</h5>
-            <canvas id="fotoChart" height="120"></canvas>
+<div class="card border-0 shadow-sm">
+    <div class="card-body text-center">
+
+        <h5 class="fw-bold mb-4">
+            <i class="bi bi-graph-up-arrow text-danger me-2"></i>Grafik Status Foto
+        </h5>
+
+        <div class="chart-wrapper">
+            <canvas id="fotoChart"></canvas>
         </div>
+
     </div>
+</div>
 </div>
 
 {{-- Custom Hover Style --}}

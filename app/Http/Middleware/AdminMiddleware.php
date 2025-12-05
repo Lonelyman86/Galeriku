@@ -8,17 +8,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-public function handle($request, Closure $next)
-{
-    if (auth()->user()->role !== 1) {
-        abort(403, 'Akses ditolak.');
-    }
-    return $next($request);
-}
+    public function handle($request, Closure $next)
+    {
+        // 1. Cek apakah user sudah login? (auth()->check())
+        // 2. Jika sudah, cek apakah role_id-nya BUKAN 1 (Bukan Admin)
+        if (!auth()->check() || auth()->user()->role_id !== 1) {
+            abort(403, 'Akses ditolak.');
+        }
 
+        return $next($request);
+    }
 }

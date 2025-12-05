@@ -22,6 +22,7 @@
                 <div class="col-md-5">
                   <h5 class="fw-bold mb-1">{{ $item->judul_foto }}</h5>
                   <p class="text-muted mb-2">{{ $item->deskripsi_foto }}</p>
+                  <p class="text-muted mb-2">{{$item->user->username}}</p>
                   <div class="mb-3">
                     <form method="POST" action="{{ route('likes.toggle', ['photo' => $item->id]) }}">
                       @csrf

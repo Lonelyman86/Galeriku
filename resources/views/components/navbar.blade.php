@@ -24,7 +24,7 @@
          height="36"> @else <img src="{{ asset('assets/img/default-profile.png') }}" alt="Profile" class="rounded-circle border" width="36" height="36"> @endif
 
             {{-- 🧩 Tambahin badge kalau admin --}}
-            @if(Auth::user()->role == 1)
+            @if(Auth::user()->role_id == 1)
               <span class="badge bg-danger ms-2">Admin</span>
             @endif
           </a>
@@ -33,7 +33,7 @@
             <li><a class="dropdown-item" href="{{ route('profile') }}">Profile</a></li>
 
             {{-- Tambahan link ke dashboard admin --}}
-            @if(Auth::user()->role == 1)
+            @if(Auth::user()->role_id == 1)
               <li><a class="dropdown-item text-danger" href="{{ route('admin.dashboard') }}">
                 <i class="bi bi-speedometer2 me-2"></i>Dashboard Admin
               </a></li>

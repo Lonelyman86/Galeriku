@@ -29,6 +29,7 @@
                         <tr class="table-row-hover">
                             <td>
                                 <div class="d-flex align-items-center gap-2">
+                                    {{-- Cek avatar user (Optimasi null safety) --}}
                                     <img src="{{ $foto->user->avatar ? asset('storage/' . $foto->user->avatar) : asset('assets/img/default-profile.png') }}"
                                          alt="Profile"
                                          class="rounded-circle border"
@@ -38,7 +39,7 @@
                                 </div>
                             </td>
 
-                            <td class="fw-semibold">{{ $foto->judul }}</td>
+                            <td class="fw-semibold">{{ $foto->judul_foto }}</td> {{-- Pastikan nama kolom sesuai DB (judul_foto) --}}
                             <td>{{ $foto->album->nama_album ?? '-' }}</td>
 
                             {{-- Status Badge --}}
@@ -61,25 +62,26 @@
                                     @if($foto->status === 'pending')
                                         <form action="{{ route('admin.foto.approve', $foto->id) }}" method="POST">
                                             @csrf @method('PATCH')
-                                            <button class="btn btn-sm btn-success">
-                                                <i class="bi bi-check-circle me-1"></i> Setujui
+                                            <button class="btn btn-sm btn-success" title="Setujui">
+                                                <i class="bi bi-check-circle"></i>
                                             </button>
                                         </form>
 
                                         {{-- Tombol Tolak buka modal --}}
                                         <button type="button"
                                                 class="btn btn-sm btn-warning text-white"
+                                                title="Tolak"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#rejectModal"
                                                 data-action="{{ route('admin.foto.reject', $foto->id) }}">
-                                            <i class="bi bi-x-circle me-1"></i> Tolak
+                                            <i class="bi bi-x-circle"></i>
                                         </button>
                                     @endif
 
-                                    <form action="{{ route('admin.foto.destroy', $foto->id) }}" method="POST" onsubmit="return confirm('Yakin hapus foto ini?')">
+                                    <form action="{{ route('admin.foto.destroy', $foto->id) }}" method="POST" onsubmit="return confirm('Yakin hapus foto ini secara permanen?')">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash3 me-1"></i> Hapus
+                                        <button class="btn btn-sm btn-danger" title="Hapus Permanen">
+                                            <i class="bi bi-trash3"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -97,11 +99,16 @@
                     <p class="mt-2">Belum ada foto yang diupload user.</p>
                 </div>
             @endif
+
+            {{-- PERBAIKAN 1: Tombol Pagination Wajib Ada --}}
+            <div class="d-flex justify-content-center mt-4">
+                {{ $fotos->links() }}
+            </div>
+
         </div>
     </div>
 </div>
 
-<!-- Modal Penolakan -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form id="rejectForm" method="POST">
@@ -115,7 +122,9 @@
 
         <div class="modal-body">
           <p class="mb-3 text-muted">Pilih salah satu alasan kenapa foto ini ditolak:</p>
-          <select name="note" id="noteSelect" class="form-select mb-3" required>
+          
+          {{-- Hapus name="note" di sini agar tidak bentrok, kita handle via JS --}}
+          <select id="noteSelect" class="form-select mb-3" required>
             <option value="">-- Pilih Alasan --</option>
             <option value="Foto mengandung SARA">Foto mengandung SARA</option>
             <option value="Konten tidak pantas">Konten tidak pantas</option>
@@ -129,8 +138,11 @@
             <option value="Lainnya">Lainnya</option>
           </select>
 
-          {{-- Input alasan custom muncul kalau pilih "Lainnya" --}}
-          <input type="text" name="custom_note" id="customNote" class="form-control d-none" placeholder="Tulis alasan lainnya...">
+          {{-- Input alasan custom --}}
+          <input type="text" id="customNote" class="form-control d-none" placeholder="Tulis alasan lainnya...">
+          
+          {{-- Input Hidden untuk menampung nilai final yang dikirim ke controller --}}
+          <input type="hidden" name="note" id="finalNote">
         </div>
 
         <div class="modal-footer">
@@ -142,19 +154,25 @@
   </div>
 </div>
 
-{{-- Script untuk modal --}}
+{{-- Script untuk modal (PERBAIKAN LOGIKA) --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const rejectModal = document.getElementById('rejectModal');
     const rejectForm = document.getElementById('rejectForm');
     const noteSelect = document.getElementById('noteSelect');
     const customNote = document.getElementById('customNote');
+    const finalNote = document.getElementById('finalNote'); // Input hidden
 
     // Set action form dinamis pas tombol ditekan
     rejectModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
         const action = button.getAttribute('data-action');
         rejectForm.setAttribute('action', action);
+        
+        // Reset form saat modal dibuka
+        noteSelect.value = "";
+        customNote.value = "";
+        customNote.classList.add('d-none');
     });
 
     // Munculin input custom kalau pilih "Lainnya"
@@ -162,17 +180,26 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.value === 'Lainnya') {
             customNote.classList.remove('d-none');
             customNote.required = true;
+            customNote.focus();
         } else {
             customNote.classList.add('d-none');
             customNote.required = false;
-            customNote.value = '';
         }
     });
 
-    // Pas submit: kalau ada custom note, replace value utama
-    rejectForm.addEventListener('submit', function () {
-        if (noteSelect.value === 'Lainnya' && customNote.value.trim() !== '') {
-            noteSelect.value = customNote.value;
+    // PERBAIKAN: Logika submit yang benar
+    rejectForm.addEventListener('submit', function (e) {
+        // Tentukan nilai mana yang dipakai
+        if (noteSelect.value === 'Lainnya') {
+            finalNote.value = customNote.value; // Pakai teks manual
+        } else {
+            finalNote.value = noteSelect.value; // Pakai pilihan dropdown
+        }
+        
+        // Cek validasi sederhana
+        if (!finalNote.value.trim()) {
+            e.preventDefault();
+            alert('Harap pilih alasan atau isi alasan lainnya!');
         }
     });
 });
@@ -197,6 +224,10 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 .card {
     border-radius: 12px;
+}
+/* Styling Pagination agar rapi */
+.pagination {
+    margin-bottom: 0;
 }
 </style>
 @endsection

@@ -27,7 +27,7 @@ class SigninController extends Controller
             return redirect()->intended('/');
         }
 
-        return back()->with('loginError', 'Boo, you failed');
+        return back()->with('loginError', 'Password Atau Email Salah');
     }
 
     public function logout(Request $request)

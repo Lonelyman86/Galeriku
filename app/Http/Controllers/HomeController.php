@@ -12,13 +12,23 @@ class HomeController extends Controller
 {
     public function index()
     {
-$foto = Foto::where('status', 'approved')->get();
-        $komentar = Komentar::all();
+        // PERBAIKAN: Gunakan 'with' untuk mengambil data User, Album, Like, dan Komentar sekaligus.
+        // Ini mengubah ratusan query menjadi hanya 2-3 query (Eager Loading).
+        $foto = Foto::with(['user', 'album', 'like', 'komentarfoto.user'])
+                    ->where('status', 'approved')
+                    ->latest() // Mengurutkan dari yang terbaru (opsional, tapi disarankan)
+                    ->get();
+
+        // PENYESUAIAN: Baris di bawah ini dimatikan karena komentar sudah diambil lewat $foto (di atas).
+        // Mengambil Komentar::all() akan memakan banyak RAM jika komentar sudah ribuan.
+        // $komentar = Komentar::all(); 
+
         $albums = Album::all();
+
         return view('layouts.home', [
             'title' => 'Home',
             'foto' => $foto,
-            'comments' => $komentar,
+            // 'comments' => $komentar, // Tidak perlu dikirim jika view menggunakan $item->komentarfoto
             'albums' => $albums
         ]);
     }
@@ -27,13 +37,21 @@ $foto = Foto::where('status', 'approved')->get();
     {
         if (Auth::check()) {
             $user = Auth::user();
-            $foto = Foto::where('user_id', $user->id)->get();
-            $komentar = Komentar::all();
+            
+            // PERBAIKAN: Terapkan optimasi yang sama untuk Studio
+            $foto = Foto::with(['user', 'album', 'like', 'komentarfoto.user'])
+                        ->where('user_id', $user->id)
+                        ->latest()
+                        ->get();
+
+            // $komentar = Komentar::all(); // Dimatikan demi performa
+            
             $albums = Album::where('user_id', $user->id)->get();
+            
             return view('layouts.studio', [
                 'title' => 'Studio',
                 'foto' => $foto,
-                'comments' => $komentar,
+                // 'comments' => $komentar,
                 'albums' => $albums
             ]);
         } else {
@@ -42,20 +60,20 @@ $foto = Foto::where('status', 'approved')->get();
     }
 
     public function likedPhotos()
-{
-    if (Auth::check()) {
-        $user = Auth::user();
-        $likedPhotos = $user->likedPhotos()->with(['user', 'album'])->get();
-        $albums = Album::where('user_id', $user->id)->get(); // Tambahkan ini
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            // Bagian ini sudah cukup baik karena sudah pakai 'with'
+            $likedPhotos = $user->likedPhotos()->with(['user', 'album'])->get();
+            $albums = Album::where('user_id', $user->id)->get();
 
-        return view('layouts.liked', [
-            'title' => 'Liked Photos',
-            'foto' => $likedPhotos,
-            'albums' => $albums // Kirim ke view
-        ]);
-    } else {
-        return redirect()->route('sign-in');
+            return view('layouts.liked', [
+                'title' => 'Liked Photos',
+                'foto' => $likedPhotos,
+                'albums' => $albums
+            ]);
+        } else {
+            return redirect()->route('sign-in');
+        }
     }
-}
-
 }
