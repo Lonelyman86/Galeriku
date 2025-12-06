@@ -11,21 +11,13 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // OPTIMASI: 
-        // 1. Ambil kolom spesifik saja (id, username, avatar) agar hemat bandwidth.
-        // 2. Gunakan paginate(20) agar tidak meload ribuan foto sekaligus.
-        $foto = Foto::with([
-                'user:id,username,avatar', // Sesuaikan 'username' dgn 'name' jika perlu
-                'album:id,nama_album',
-                'like:id,foto_id,user_id',
-                'komentarfoto:id,foto_id,user_id,isi_komentar', 
-                'komentarfoto.user:id,username,avatar'
-            ])
-            ->where('status', 'approved')
-            ->latest()
-            ->paginate(20); // Menampilkan 20 foto per halaman
+        // Pakai Scope 'withCompleteDetails' yang kita buat di Model tadi
+        $foto = Foto::withCompleteDetails()
+                    ->where('status', 'approved')
+                    ->latest()
+                    ->paginate(20); // Ganti 20 sesuai keinginan
 
-        // Album untuk sidebar/filter (ambil kolom yg perlu saja)
+        // Album untuk keperluan lain (sidebar dll)
         $albums = Album::select('id', 'nama_album', 'user_id')->get();
 
         return view('layouts.home', [
@@ -40,27 +32,18 @@ class HomeController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             
-            // OPTIMASI: Sama seperti index, gunakan pagination & select columns
-            $foto = Foto::with([
-                    'user:id,username,fullname,avatar',
-                    'album:id,nama_album',
-                    'like:id,foto_id,user_id',
-                    'komentarfoto.user:id,username,fullname,avatar'
-                ])
-                ->where('user_id', $user->id)
-                ->latest()
-                ->paginate(20);
+            // Pakai Scope juga disini
+            $foto = Foto::withCompleteDetails()
+                        ->where('user_id', $user->id)
+                        ->latest()
+                        ->paginate(20);
             
             $albums = Album::where('user_id', $user->id)->get();
-            $albumOption = Album::select('id', 'nama_album')
-                            ->where('user_id', Auth::id())
-                            ->get();
-                    
+            
             return view('layouts.studio', [
                 'title' => 'Studio',
                 'foto' => $foto,
-                'albums' => $albums,
-                'albumOption' => $albumOption
+                'albums' => $albums
             ]);
         } else {
             return redirect()->route('sign-in');
@@ -72,13 +55,10 @@ class HomeController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             
-            // OPTIMASI: Eager loading pada relasi likedPhotos
+            // Scope juga bisa dipakai lewat relasi
             $likedPhotos = $user->likedPhotos()
-                ->with([
-                    'user:id,username,avatar',
-                    'album:id,nama_album'
-                ])
-                ->paginate(20); // Gunakan paginate juga disini
+                ->withCompleteDetails()
+                ->paginate(20);
 
             $albums = Album::where('user_id', $user->id)->get();
 

@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Like;
 use App\Models\Foto;
-use App\Models\Album;
-use App\Models\Notification;   // ✅ tambahin ini
+use App\Models\Album; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,59 +11,21 @@ class LikeController extends Controller
 {
     public function toggle($photoId)
     {
-        $user  = Auth::user();
-        $photo = Foto::findOrFail($photoId); // 404 kalau ga ada
-
-        $existingLike = Like::where('user_id', $user->id)
-                            ->where('foto_id', $photo->id)
-                            ->first();
-
-        if ($existingLike) {
-            // UNLIKE
-            $existingLike->delete();
-            return redirect()->back()->with('danger', 'Photo unliked successfully');
-        } else {
-            // LIKE
-            Like::create([
-                'user_id' => $user->id,
-                'foto_id' => $photo->id,
-            ]);
-
-            // ✅ BUAT NOTIFIKASI, kalau yang punya foto bukan diri sendiri
-            if ($photo->user_id != $user->id) {
-                Notification::create([
-                    'user_id'  => $photo->user_id,   // penerima notif (pemilik foto)
-                    'actor_id' => $user->id,         // yang nge-like
-                    'type'     => 'like',
-                    'data'     => [
-                        'foto_id'    => $photo->id,
-                        'foto_title' => $photo->judul ?? $photo->title ?? null,
-                        'album_id'   => $photo->album_id ?? null,
-                    ],
-                ]);
-            }
-
-            return redirect()->back()->with('success', 'Photo liked successfully');
-        }
-    }
-
-    public function likedPhotos()
-    {
         $user = Auth::user();
+        $photo = Foto::findOrFail($photoId);
 
-        $likedPhotos = Foto::where('status', 'approved')
-            ->whereHas('like', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->with(['user', 'album', 'komentarfoto.user'])
-            ->withCount('like')
-            ->paginate(12);
+        // 1 Baris Ajaib: Otomatis Like/Unlike
+        // Notifikasi juga otomatis dibuat oleh Model Like (fungsi booted) saat attached
+        $status = $user->likedPhotos()->toggle($photo->id);
 
-        $albums = Album::where('user_id', $user->id)->get();
+        // Cek hasil toggle
+        if (count($status['attached']) > 0) {
+            return back()->with('success', 'Photo liked successfully');
+        }
 
-        return view('layouts.liked', [
-            'foto'   => $likedPhotos,
-            'albums' => $albums,
-        ]);
+        return back()->with('danger', 'Photo unliked successfully');
     }
+
+    // Function likedPhotos bisa dihapus jika sudah tidak dipakai 
+    // (karena biasanya sudah dihandle oleh HomeController@likedPhotos)
 }

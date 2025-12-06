@@ -8,8 +8,29 @@ use Illuminate\Database\Eloquent\Model;
 class Komentar extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'foto_id', 'isi_komentar'];
+
+    protected $guarded = ['id'];
     protected $table = 'komentarfoto';
+
+    // --- [BARU] EVENT OTOMATIS ---
+    // Setiap kali komentar berhasil dibuat, fungsi ini jalan otomatis
+    protected static function booted()
+    {
+        static::created(function ($komentar) {
+            // Ambil data foto terkait untuk tahu siapa pemiliknya
+            $foto = $komentar->foto;
+
+            // Cek: Jangan kirim notif jika mengomentari foto sendiri
+            if ($foto && $foto->user_id != $komentar->user_id) {
+                \App\Models\Notification::create([
+                    'user_id'  => $foto->user_id, // Penerima (Pemilik Foto)
+                    'actor_id' => $komentar->user_id, // Pengirim (Komentator)
+                    'type'     => 'comment',
+                    'data'     => ['foto_id' => $foto->id],
+                ]);
+            }
+        });
+    }
 
     public function user()
     {
@@ -18,6 +39,6 @@ class Komentar extends Model
 
     public function foto()
     {
-        return $this->belongsTo(Foto::class);
+        return $this->belongsTo(Foto::class, 'foto_id');
     }
 }
