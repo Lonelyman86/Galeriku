@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Pagination
+        Paginator::useBootstrapFive();
+
+        // =====================================================
+        //  NOTIFIKASI GLOBAL UNTUK SEMUA VIEW
+        // =====================================================
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $user = Auth::user();
+        
+                $view->with('unreadNotificationsCount',
+                    $user->notifications()->whereNull('read_at')->count()
+                );
+        
+                $view->with('recentNotifications',
+                    $user->notifications()->latest()->take(10)->get()
+                );
+            }
+        });
     }
 }

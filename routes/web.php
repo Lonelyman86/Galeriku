@@ -11,6 +11,9 @@ use App\Http\Controllers\SigninController;
 use App\Http\Controllers\SignupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FotoAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,61 +26,71 @@ use App\Http\Controllers\SearchController;
 |
 */
 
-
+// Halaman Utama & Search
 Route::get('/', [HomeController::class, 'index']);
-
-//Cari
 Route::get('/search', [SearchController::class, 'search'])->name('search');
 
-// Guest-only routes
-    Route::middleware('guest')->group(function () {
+// Guest-only routes (Belum Login)
+Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SigninController::class, 'index'])->name('login');
     Route::post('/sign-in', [SigninController::class, 'authenticate']);
     Route::get('/sign-up', [SignupController::class, 'index']);
     Route::post('/sign-up', [SignupController::class, 'store']);
 });
 
-// Authenticated-only routes
-    Route::middleware('auth')->group(function () {
+// Authenticated-only routes (Sudah Login)
+Route::middleware('auth')->group(function () {
     Route::post('/logout', [SigninController::class, 'logout'])->name('logout');
-
     Route::get('/studio', [HomeController::class, 'StudioIndex']);
 
-    // Foto routes
+    // --- Foto Routes ---
     Route::get('/foto', [FotoController::class, 'index'])->name('foto');
     Route::get('/createfoto', [FotoController::class, 'create']);
     Route::post('/upload/photo', [FotoController::class, 'upload'])->name('upload.photo');
     Route::post('foto/{photo}/update-album', [FotoController::class, 'updateAlbum'])->name('foto.update.album');
     Route::delete('/photos/{photo}', [FotoController::class, 'destroy'])->name('photos.destroy');
 
-    // Album routes
+    // --- Album Routes ---
     Route::get('/createalbum', [AlbumController::class, 'index']);
     Route::post('/album/new', [AlbumController::class, 'store'])->name('album.new');
     
+    // [BARU] Route untuk fitur "Ambil dari Galeri" (Mass Add Photos)
+    Route::post('/album/{album}/add-existing', [AlbumController::class, 'addExistingPhotos'])->name('album.add_existing');
+    Route::patch(
+        '/albums/{album}',
+        [AlbumController::class, 'update']
+    )->name('albums.update');
+    
+    Route::delete(
+        '/albums/{album}',
+        [AlbumController::class, 'destroy']
+    )->name('albums.destroy');
 
-    // Komentar dan like
+    // --- Komentar & Like ---
     Route::post('/albums/{photo}/toggle-like', [LikeController::class, 'toggle'])->name('likes.toggle');
     Route::get('/albums/{photo}/check-like', [LikeController::class, 'checkLike'])->name('likes.check');
     Route::post('/photos/{photo}/komentar', [KomentarController::class, 'store'])->name('komentar.store');
     Route::get('/liked', [LikeController::class, 'likedPhotos'])->name('photo.liked');
+    // Opsional: Jika ada route duplicate untuk like, bisa disederhanakan
     Route::post('/photos/{id}/like', [LikeController::class, 'toggle'])->name('photo.like');
 
-});
-    // Profil
-    Route::middleware('auth')->group(function ()    {
-        Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile');   // tampil + form
-        Route::patch('/profile',[ProfileController::class, 'update'])->name('profile.update'); // update data + avatar + password opsional
-        Route::delete('/albums/{album}', [AlbumController::class, 'destroy'])
-        ->name('albums.destroy');
-    });
-    Route::get('/albums/{album}', [AlbumController::class, 'show'])->name('album.show');
+    // --- Profil ---
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     
-
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/foto', [App\Http\Controllers\Admin\FotoAdminController::class, 'index'])->name('admin.foto.index');
-    Route::patch('/foto/{id}/approve', [App\Http\Controllers\Admin\FotoAdminController::class, 'approve'])->name('admin.foto.approve');
-    Route::patch('/foto/{id}/reject', [App\Http\Controllers\Admin\FotoAdminController::class, 'reject'])->name('admin.foto.reject');
-    Route::delete('/foto/{id}', [App\Http\Controllers\Admin\FotoAdminController::class, 'destroy'])->name('admin.foto.destroy');
+    // --- Notifikasi ---
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 });
 
+// Route ini di luar 'auth' agar album bisa dilihat publik (jika diinginkan)
+// Tapi fitur edit/hapus di dalamnya tetap diproteksi logic Controller/View
+Route::get('/albums/{album}', [AlbumController::class, 'show'])->name('album.show');
+
+// --- Admin Routes ---
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/foto', [FotoAdminController::class, 'index'])->name('admin.foto.index');
+    Route::patch('/foto/{id}/approve', [FotoAdminController::class, 'approve'])->name('admin.foto.approve');
+    Route::patch('/foto/{id}/reject', [FotoAdminController::class, 'reject'])->name('admin.foto.reject');
+    Route::delete('/foto/{id}', [FotoAdminController::class, 'destroy'])->name('admin.foto.destroy');
+});

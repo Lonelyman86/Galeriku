@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Foto;
 use App\Models\Album;
+use App\Models\User; // <-- tambahin kalau mau pakai
 
 class SearchController extends Controller
 {
@@ -16,23 +17,39 @@ class SearchController extends Controller
             return redirect()->back()->with('error', 'Masukkan kata kunci pencarian.');
         }
 
-        // OPTIMASI: 
-        // 1. Eager Loading (with): Ambil data user, album, like, & komentar sekaligus agar tidak query berulang.
-        // 2. limit(50): Batasi hasil pencarian maksimal 50 foto agar server tidak berat.
-        //    (Pencarian biasanya tidak perlu pagination yang kompleks, cukup batasi hasil teratas).
-        
+        // FOTO:
+        // - judul_foto mengandung keyword
+        // - ATAU user.fullname / username mengandung keyword
         $fotos = Foto::with(['user', 'album', 'like', 'komentarfoto.user'])
-                    ->where('judul_foto', 'like', "%{$query}%")
-                    ->latest()
-                    ->take(50) // Ambil 50 foto terbaru yang cocok
-                    ->get();
+            ->where(function ($q) use ($query) {
+                $q->where('judul_foto', 'like', "%{$query}%")
+                  ->orWhereHas('user', function ($uq) use ($query) {
+                      $uq->where('fullname', 'like', "%{$query}%")
+                         ->orWhere('username', 'like', "%{$query}%");
+                  });
+            })
+            ->latest()
+            ->take(50)
+            ->get();
 
-        $albums = Album::with('user') // Ambil data pemilik album juga
-                    ->where('nama_album', 'like', "%{$query}%")
-                    ->latest()
-                    ->take(20) // Batasi 20 album
-                    ->get();
+        // ALBUM masih sama
+        $albums = Album::with('user')
+            ->where('nama_album', 'like', "%{$query}%")
+            ->latest()
+            ->take(20)
+            ->get();
 
-        return view('search.results', compact('query', 'fotos', 'albums'));
+        // (opsional) kalau mau sekalian tampilkan daftar user yang cocok
+        $users = User::where('fullname', 'like', "%{$query}%")
+            ->orWhere('username', 'like', "%{$query}%")
+            ->take(20)
+            ->get();
+
+        return view('search.results', [
+            'query'  => $query,
+            'fotos'  => $fotos,
+            'albums' => $albums,
+            'users'  => $users,   // <- kalau mau dipakai di blade
+        ]);
     }
 }

@@ -87,3 +87,9 @@
 .badge.bg-danger {
   font-size: 0.7rem;
 }
+
+.offcanvas-notif {
+  width: 320px;         /* lebar panel notif */
+  margin-left: 72px;    /* samakan dengan lebar sidebar kamu */
+  border-right: 1px solid #eee;
+}

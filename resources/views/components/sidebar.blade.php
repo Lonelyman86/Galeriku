@@ -6,32 +6,66 @@
   </div>
 
   <ul class="nav flex-column text-center flex-grow-1">
+    
+    {{-- Home --}}
     <li class="nav-item my-1">
-      <a class="nav-link text-dark py-3 rounded-3" href="/" title="Home"><i class="bi bi-house fs-4"></i></a>
+      <a class="nav-link text-dark py-3 rounded-3" href="/" title="Home">
+        <i class="bi bi-house fs-4"></i>
+      </a>
     </li>
 
     @auth
-    @if(Auth::user()->role_id == 1)
+      {{-- Admin Menu --}}
+      @if(Auth::user()->role_id == 1)
         <li class="nav-item my-1">
           <a class="nav-link text-danger py-3 rounded-3" href="{{ route('admin.dashboard') }}" title="Admin Dashboard">
             <i class="bi bi-speedometer2 fs-4"></i>
           </a>
         </li>
+
         <li class="nav-item my-1">
           <a class="nav-link text-danger py-3 rounded-3" href="{{ route('admin.foto.index') }}" title="Kelola Foto">
             <i class="bi bi-images fs-4"></i>
           </a>
         </li>
       @endif
+
+      {{-- Studio --}}
       <li class="nav-item my-1">
-        <a class="nav-link text-dark py-3 rounded-3" href="/studio" title="Studio"><i class="bi bi-brush fs-4"></i></a>
-      </li>
-      <li class="nav-item my-1">
-        <a class="nav-link text-dark py-3 rounded-3" href="/liked" title="Liked"><i class="bi bi-heart fs-4"></i></a>
+        <a class="nav-link text-dark py-3 rounded-3" href="/studio" title="Studio">
+          <i class="bi bi-brush fs-4"></i>
+        </a>
       </li>
 
-      {{-- ✅ Tambahan khusus admin --}}
-      
+      {{-- Liked --}}
+      <li class="nav-item my-1">
+        <a class="nav-link text-dark py-3 rounded-3" href="/liked" title="Liked">
+          <i class="bi bi-heart fs-4"></i>
+        </a>
+      </li>
+
+      {{-- =========================================================
+           NOTIFIKASI (TOMBOL BEL)
+      ========================================================== --}}
+      <li class="nav-item my-1">
+  <a class="nav-link text-dark py-3 rounded-3 position-relative"
+     href="#"
+     data-bs-toggle="offcanvas"
+     data-bs-target="#notifDrawer"
+     title="Notifikasi">
+    <i class="bi bi-bell fs-4"></i>
+
+    @if(!empty($unreadNotificationsCount) && $unreadNotificationsCount > 0)
+      <span class="position-absolute bottom-0 end-0 translate-middle badge rounded-pill bg-danger"
+            style="font-size: 0.65rem; min-width: 18px;">
+        {{ $unreadNotificationsCount }}
+      </span>
+    @endif
+  </a>
+</li>
+
+
     @endauth
+
   </ul>
 </aside>

@@ -47,6 +47,11 @@ class User extends Authenticatable
             : asset('assets/img/default-profile.png'); // SESUAIKAN path default image
     }
 
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->latest();
+    }
+
     // HELPER ADMIN (Clean Code)
     public function isAdmin()
     {

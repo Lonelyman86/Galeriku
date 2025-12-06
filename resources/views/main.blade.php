@@ -23,6 +23,45 @@
     @yield('content')
   </main>
 
+  {{-- =========================================
+     OFFCANVAS NOTIFIKASI
+   ========================================= --}}
+@auth
+<div class="offcanvas offcanvas-start offcanvas-notif"
+     tabindex="-1"
+     id="notifDrawer"
+     data-bs-backdrop="false">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Pemberitahuan</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    @if(isset($recentNotifications) && $recentNotifications->isNotEmpty())
+      <ul class="list-group list-group-flush">
+        @foreach($recentNotifications as $notif)
+          <li class="list-group-item d-flex justify-content-between align-items-start {{ $notif->read_at ? '' : 'bg-light' }}">
+            <div>
+              <div class="fw-semibold">{{ $notif->message }}</div>
+              <small class="text-muted">{{ $notif->created_at->diffForHumans() }}</small>
+            </div>
+          </li>
+        @endforeach
+      </ul>
+
+      <form action="{{ route('notifications.read-all') }}" method="POST" class="mt-3">
+        @csrf
+        <button class="btn btn-sm btn-outline-secondary w-100">
+          Tandai semua dibaca
+        </button>
+      </form>
+    @else
+      <p class="text-muted mb-0">Belum ada notifikasi.</p>
+    @endif
+  </div>
+</div>
+@endauth
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
