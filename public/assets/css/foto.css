@@ -1,0 +1,107 @@
+.grid-container-01 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); /* Responsif Grid */
+    gap: 20px;
+    align-items: start;
+    padding: 20px;
+}
+
+.card-03 {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-foto {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+}
+
+.card-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Agar gambar tidak gepeng */
+}
+
+.card-inform {
+    padding: 10px 15px;
+}
+
+.text-judul {
+    font-weight: bold;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-dalem-01 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.card-akhir-01 {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-tombol-01 {
+    display: flex;
+    gap: 5px;
+}
+
+.tombol-modal, .tombol-delete {
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.tombol-modal {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.tombol-modal:hover {
+    background: #d0d0d0;
+}
+
+.tombol-delete {
+    background: #ff4d4d;
+    color: white;
+}
+
+.tombol-delete:hover {
+    background: #cc0000;
+}
+
+/* Pagination */
+.pagination-wrapper {
+    margin: 2rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Modal Styling */
+.detail-foto {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.list-group-item {
+    font-size: 0.9rem;
+}

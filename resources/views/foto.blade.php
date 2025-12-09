@@ -81,7 +81,7 @@
                                         @csrf
                                         <button type="submit" class="btn btn-danger btn-sm card-text float-start">❤</button>
                                         {{-- Hitung jumlah like dari data yang sudah di-eager load --}}
-                                        <span>{{ $item->like->count() }}</span>
+                                        <span>{{ $item->like->count }}</span>
                                     </form>
                                 </div>
 

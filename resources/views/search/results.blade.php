@@ -2,174 +2,337 @@
 
 @section('content')
 
-<h1 class="page-title">Hasil untuk: “{{ $query }}”</h1>
+{{-- LIBRARIES (JANGAN DIHAPUS) --}}
+<script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
 
 <style>
-  .page-title{
-    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
-    font-size: 22px; margin: 16px 8px 8px 16px; font-weight: 700;
+  /* === 1. STYLE PIN (FOTO) - Persis Home === */
+  .pin-wrapper {
+    position: relative; border-radius: 16px; overflow: hidden; background: #f3f4f6;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform .2s ease, box-shadow .2s ease;
   }
-  .fab-create{ position: fixed; right: 24px; bottom: 24px; z-index: 30; }
-  .fab-btn{ width:56px; height:56px; border-radius:999px; border:0; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.2); background:#ef4444; color:#fff; font-size:24px; }
-  .fab-create:hover .fab-menu{ opacity:1; visibility:visible; transform:translateY(0); }
-  .fab-menu{ position:absolute; right:0; bottom:70px; background:#fff; border-radius:12px; padding:8px; box-shadow:0 10px 24px rgba(0,0,0,.18); display:flex; flex-direction:column; gap:6px; opacity:0; visibility:hidden; transform:translateY(8px); transition:all .18s ease; }
-  .fab-menu a{ padding:8px 12px; border-radius:8px; text-decoration:none; color:#111; font-size:14px; white-space:nowrap; }
-  .fab-menu a:hover{ background:#f3f4f6; }
+  .pin-wrapper:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); z-index: 5; }
+  .pin-wrapper img { width: 100%; height: auto; display: block; cursor: pointer; }
 
-  .masonry{ column-count:5; column-gap:16px; padding:8px 16px 64px; }
-  @media (max-width:1200px){ .masonry{ column-count:4; } }
-  @media (max-width:992px){ .masonry{ column-count:3; } }
-  @media (max-width:768px){ .masonry{ column-count:2; } }
-  @media (max-width:480px){ .masonry{ column-count:1; } }
+  /* Tombol Menu 3 Titik */
+  .pin-menu-btn {
+    position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%;
+    border: 0; background: rgba(0, 0, 0, .6); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; opacity: 0; transition: all .2s ease; cursor: pointer; z-index: 10;
+  }
+  .pin-wrapper:hover .pin-menu-btn, .pin-menu-btn.active { opacity: 1; }
+  .pin-menu-btn:hover { background: rgba(0, 0, 0, .8); transform: scale(1.1); }
 
-  .pin{ display:inline-block; width:100%; margin:0 0 16px; break-inside:avoid; position:relative; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 1px 0 rgba(0,0,0,.04); }
-  .pin img{ width:100%; height:auto; display:block; object-fit:cover; background:#f3f4f6; }
-  .pin:hover .pin-overlay{ opacity:1; }
-  .pin-overlay{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; padding:8px; opacity:0; transition:opacity .15s ease; pointer-events:none; background:linear-gradient(to bottom, rgba(0,0,0,.08), rgba(0,0,0,.35)); }
-  .pin-actions{ display:flex; gap:8px; justify-content:flex-end; }
-  .pin-actions form, .pin-actions button{ pointer-events:auto; }
+  /* Dropdown Menu */
+  .pin-menu {
+    position: absolute; top: 46px; right: 10px; min-width: 160px; background: #fff;
+    border-radius: 12px; box-shadow: 0 10px 24px rgba(0, 0, 0, .2); padding: 6px 0; font-size: 13px;
+    z-index: 20; display: none;
+  }
+  .pin-menu.show { display: block; animation: fadeInMenu 0.1s ease-out; }
+  @keyframes fadeInMenu { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-  .btn-ghost, .btn-danger, .btn-primary{ border:0; border-radius:999px; padding:8px 12px; font-size:13px; cursor:pointer; background:rgba(255,255,255,.9); }
-  .btn-danger{ background:#ef4444; color:#fff; }
-  .btn-primary{ background:#2563eb; color:#fff; }
-  .btn-ghost{ background:rgba(255,255,255,.85); }
-  .btn-ghost:hover{ background:#fff; }
-  .btn-danger:hover, .btn-primary:hover{ filter:brightness(.95); }
+  .pin-menu-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px;
+    border: 0; background: transparent; text-align: left; font-size: 13px; font-weight: 500;
+    color: #333; cursor: pointer; text-decoration: none; transition: background 0.1s;
+  }
+  .pin-menu-item:hover { background: #f3f4f6; }
 
-  .pin-meta{ padding:10px 12px 12px; display:flex; flex-direction:column; gap:4px; font-size:13px; color:#111; background:#fff; }
-  .pin-title{ font-weight:700; line-height:1.25; }
-  .pin-desc{ color:#6b7280; font-size:12px; line-height:1.3; }
-  .pin-sub{ color:#60a5fa; font-size:12px; }
+  /* === 2. STYLE RESULT CARD (USER & ALBUM) === */
+  .result-card {
+    position: relative; border-radius: 16px; overflow: hidden; background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform .2s ease, box-shadow .2s ease;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; height: 100%; text-decoration: none;
+  }
+  .result-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); z-index: 5; }
+  .album-card-style { background: #f8f9fa; color: #333; }
+  .album-card-style:hover { background: #fff; }
 
-  .detail-foto{ max-width:100%; height:auto; }
-
-  .album-wrap{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px; padding:8px 16px 24px; }
-  .album-card{ display:block; padding:14px; border-radius:14px; background:#fff; text-decoration:none; color:#111; box-shadow:0 1px 0 rgba(0,0,0,.04); }
-  .album-card:hover{ background:#f8fafc; }
-  .text-judul{ font-weight:700; margin:0 0 4px; }
-  .text-dalem-01{ margin:0; font-size:12px; color:#6b7280; }
+  /* === 3. MODAL STYLE === */
+  .modal-image-wrapper {
+    position: relative; width: 100%; height: 100%; background: #f8f9fa;
+    display: flex; justify-content: center; align-items: center; min-height: 400px; padding: 24px;
+  }
+  .modal-image-wrapper img { 
+      max-width: 100%; max-height: 85vh; object-fit: contain; 
+      border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+  .pin-menu-btn-modal { top: 24px; right: 24px; opacity: 1; }
+  .pin-menu-modal { top: 60px; right: 24px; }
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 </style>
 
-{{-- ====== STATE: tidak ada hasil ====== --}}
-@if(($fotos->isEmpty() ?? true) && ($albums->isEmpty() ?? true))
-  <p class="text-muted" style="margin: 0 16px;">Tidak ditemukan Foto atau Album yang cocok.</p>
-@endif
+<div class="container py-4">
+    <h3 class="mb-4 fw-bold px-2">Hasil untuk: "<span>{{ $query }}</span>"</h3>
 
-{{-- ====== LIST FOTO (Masonry) ====== --}}
-@if(!$fotos->isEmpty())
-  <div class="masonry">
-    @foreach ($fotos as $item)
-      <div class="pin">
-        <a data-bs-toggle="modal" data-bs-target="#ContohModal{{$item->id}}">
-          <img src="{{ asset('storage/foto/'.$item->lokasi_file)}}" alt="{{ $item->judul_foto }}" loading="lazy">
-        </a>
-
-        <div class="pin-overlay">
-          <div class="pin-actions">
-            <form id="like-form-{{$item->id}}" method="POST" action="{{ route('likes.toggle', ['photo' => $item->id]) }}">
-              @csrf
-              <button type="submit" class="btn-ghost">❤ {{ $item->like->count() }}</button>
-            </form>
-
-            @auth
-              @if(Auth::id() == $item->user_id)
-                <form action="{{ route('photos.destroy', $item->id)}}" method="POST" onsubmit="return confirm('Yakin hapus foto ini?')">
-                  @csrf @method('delete')
-                  <button type="submit" class="btn-danger">Delete</button>
-                </form>
-              @endif
-            @endauth
-          </div>
-        </div>
-
-        <div class="pin-meta">
-          <div class="pin-title">{{ $item->judul_foto }}</div>
-          @if(!empty($item->deskripsi_foto))
-            <div class="pin-desc">{{ $item->deskripsi_foto }}</div>
-          @endif
-          <div class="pin-sub">
-            @if($item->album)
-              {{ $item->album->nama_album }}
-            @else
-              Didn't have an album
-            @endif
-          </div>
-          <div style="font-size:12px; color:#374151;">
-            @if(isset($item->user))
-              <b>@auth {{ $item->user->username }} @endauth</b>
-            @endif
-          </div>
-        </div>
-      </div>
-
-      {{-- Modal Detail Post --}}
-      <div class="modal fade" id="ContohModal{{$item->id}}" tabindex="-1" aria-labelledby="contohModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 920px;">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="contohModalLabel">Detail Post</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    {{-- ==========================================
+         SECTION 1: USER (PENGGUNA)
+         ========================================== --}}
+    @if(isset($users) && $users->count() > 0)
+        <h5 class="fw-bold mb-3 mt-2 px-2"><i class="bi bi-people me-2"></i>Pengguna</h5>
+        <div class="row g-3 mb-5">
+            @foreach($users as $user)
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="result-card">
+                    <a href="{{ route('profile.public', $user->id) }}" class="text-decoration-none text-center">
+                        <img src="{{ $user->avatar ? asset('storage/'.$user->avatar) : asset('assets/img/default-profile.png') }}" 
+                             class="rounded-circle mb-3 border shadow-sm" 
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                        <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 150px;">{{ $user->username }}</h6>
+                        <small class="text-muted text-truncate d-block mb-3">{{ $user->fullname }}</small>
+                    </a>
+                    @auth
+                        <form action="{{ route('user.follow', $user->id) }}" method="POST" class="w-100">
+                            @csrf
+                            @if(Auth::user()->isFollowing($user))
+                                <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill w-100 fw-bold"><i class="bi bi-check2"></i> Mengikuti</button>
+                            @else
+                                <button type="submit" class="btn btn-danger btn-sm rounded-pill w-100 fw-bold">Ikuti</button>
+                            @endif
+                        </form>
+                    @endauth
+                </div>
             </div>
-            <div class="modal-body">
-              <div class="row g-3">
-                <div class="col-md-7">
-                  <img src="{{ asset('storage/foto/'.$item->lokasi_file)}}" class="detail-foto" />
-                </div>
-                <div class="col-md-5">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <form id="like-form-modal-{{$item->id}}" method="POST" action="{{ route('likes.toggle', ['photo' => $item->id]) }}">
-                      @csrf
-                      <button type="submit" class="btn btn-danger btn-sm">❤</button>
-                      <span>{{ $item->like->count() }}</span>
-                    </form>
-                  </div>
+            @endforeach
+        </div>
+        <hr class="text-muted my-5">
+    @endif
 
-                  @auth
-                  <form class="card-footer-01" method="POST" action="{{ route('komentar.store', ['photo' => $item->id]) }}">
-                    @csrf
-                    <div class="input-group">
-                      <textarea name="isi_komentar" rows="1" placeholder="Add a comment" class="form-control"></textarea>
-                      <button type="submit" class="btn btn-primary">Kirim</button>
-                    </div>
-                  </form>
-                  @endauth
-
-                  @if ($item->komentarfoto->count() > 0)
-                    <div class="list-group list-group-flush mt-3">
-                      @foreach ($item->komentarfoto as $comment)
-                        <div class="list-group-item">
-                          <h6 class="list-group-item-heading">
-                            <strong>{{ $comment->user->fullname }}</strong>
-                            <span class="text-muted ms-2">{{ $comment->created_at->diffForHumans() }}</span>
-                          </h6>
-                          <p class="list-group-item-text mb-0">{{ $comment->isi_komentar }}</p>
+    {{-- ==========================================
+         SECTION 2: ALBUM
+         ========================================== --}}
+    @if(!$albums->isEmpty())
+        <h5 class="fw-bold mb-3 px-2"><i class="bi bi-journal-album me-2"></i>Album</h5>
+        <div class="row g-3 mb-5">
+            @foreach($albums as $album)
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="{{ route('album.show', ['album' => $album->id]) }}" class="text-decoration-none">
+                        <div class="result-card album-card-style">
+                            <i class="bi bi-folder-fill text-warning display-4 mb-2"></i>
+                            <h6 class="text-dark fw-bold text-truncate mb-0 w-100 text-center">{{ $album->nama_album }}</h6>
+                            <small class="text-muted">{{ $album->user->username ?? 'Unknown' }}</small>
                         </div>
-                      @endforeach
-                    </div>
-                  @else
-                    <p class="mt-3 mb-0">Tidak ada komentar.</p>
-                  @endif
+                    </a>
                 </div>
+            @endforeach
+        </div>
+        <hr class="text-muted my-5">
+    @endif
+
+    {{-- ==========================================
+         SECTION 3: FOTO (MASONRY FULL FEATURE)
+         ========================================== --}}
+    @if(!$fotos->isEmpty())
+        <h5 class="fw-bold mb-3 px-2"><i class="bi bi-images me-2"></i>Foto</h5>
+        
+        <div class="row" id="masonry-grid-search">
+            @foreach ($fotos as $item)
+            <div class="col-6 col-md-4 col-lg-3 mb-4 masonry-item">
+                
+                {{-- PIN WRAPPER (Style Home) --}}
+                <div class="pin-wrapper">
+                    {{-- Gambar --}}
+                    <img src="{{ asset('storage/foto/'.$item->lokasi_file) }}" 
+                         alt="{{ $item->judul_foto }}"
+                         onclick="openSingleModal({{ $item->id }})">
+
+                    {{-- Tombol 3 Titik --}}
+                    <button type="button" class="pin-menu-btn" data-menu-target="pin-menu-{{ $item->id }}" onclick="toggleMenu(event, 'pin-menu-{{ $item->id }}')">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+
+                    {{-- Menu Dropdown --}}
+                    <div id="pin-menu-{{ $item->id }}" class="pin-menu">
+                        <a href="{{ asset('storage/foto/'.$item->lokasi_file) }}" download class="pin-menu-item">
+                            <i class="bi bi-download"></i> <span>Unduh gambar</span>
+                        </a>
+                        <a href="{{ route('profile.public', $item->user->id ?? 0) }}" class="pin-menu-item">
+                            <i class="bi bi-person"></i> Lihat Profil
+                        </a> 
+                    </div>
+                </div>
+
+            </div>
+            @endforeach
+        </div>
+    @endif
+
+    {{-- State Kosong --}}
+    @if(($users->isEmpty() ?? true) && ($albums->isEmpty() ?? true) && ($fotos->isEmpty() ?? true))
+        <div class="text-center py-5">
+            <img src="{{ asset('assets/img/empty-box.png') }}" style="width: 150px; opacity: 0.5;">
+            <p class="text-muted mt-3">Tidak ditemukan hasil untuk "<b>{{ $query }}</b>"</p>
+        </div>
+    @endif
+</div>
+
+{{-- ===============================================
+     SINGLE MODAL (SAMA SEPERTI HOME)
+   =============================================== --}}
+<div class="modal fade" id="globalDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius: 20px; overflow: hidden; border:none;">
+      <div class="modal-body p-0">
+        <div class="row g-0" style="min-height: 500px;">
+          
+          {{-- Kiri: Gambar --}}
+          <div class="col-lg-8 bg-light d-flex align-items-center justify-content-center position-relative">
+            <div class="modal-image-wrapper">
+              <img id="modalImg" src="" alt="">
+              <button type="button" class="pin-menu-btn pin-menu-btn-modal" onclick="toggleMenu(event, 'pin-menu-modal-global')">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <div id="pin-menu-modal-global" class="pin-menu pin-menu-modal">
+                <a id="modalDownloadBtn" href="" download class="pin-menu-item">
+                  <i class="bi bi-download"></i><span>Unduh gambar</span>
+                </a>
               </div>
             </div>
           </div>
+
+          {{-- Kanan: Detail --}}
+          <div class="col-lg-4 bg-white d-flex flex-column" style="max-height: 90vh;">
+            <div class="p-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center">
+                      <a id="modalUserLink" href="#">
+                          <img id="modalAvatar" src="" class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">
+                      </a>
+                      <div>
+                         <a id="modalUsername" href="#" class="fw-bold text-dark text-decoration-none d-block lh-1"></a>
+                         <small id="modalTime" class="text-muted" style="font-size: 11px;"></small>
+                      </div>
+                  </div>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <h5 id="modalTitle" class="fw-bold mb-1 fs-6"></h5>
+                <p id="modalDesc" class="text-secondary mb-0 small"></p>
+            </div>
+
+            <div class="flex-grow-1 p-3 overflow-auto custom-scrollbar" style="background: #f9fafb;">
+                <div class="mb-3">
+                   <form id="modalLikeForm" method="POST" action="">
+                     @csrf
+                     <button type="submit" class="btn btn-danger rounded-pill px-4 btn-sm w-100">
+                       ❤ Like <span id="modalLikeCount" class="ms-1 fw-bold"></span>
+                     </button>
+                   </form>
+                </div>
+                <h6 class="fw-bold small text-muted mb-2">Komentar</h6>
+                <div id="modalCommentsList"></div>
+            </div>
+
+            @auth
+            <div class="p-3 border-top bg-white">
+              <form id="modalCommentForm" method="POST" action="">
+                @csrf
+                <div class="input-group">
+                  <input type="text" name="isi_komentar" class="form-control rounded-start-pill ps-3 bg-light border-0" placeholder="Tulis komentar..." required>
+                  <button class="btn btn-primary rounded-end-pill px-3">Kirim</button>
+                </div>
+              </form>
+            </div>
+            @else
+            <div class="p-3 border-top text-center bg-white"><small><a href="{{ route('login') }}" class="fw-bold">Login</a> untuk berkomentar</small></div>
+            @endauth
+          </div>
         </div>
       </div>
-    @endforeach
+    </div>
   </div>
-@endif
+</div>
 
-{{-- ====== LIST ALBUM (pakai layout yang sama) ====== --}}
-@if(!$albums->isEmpty())
-  <h1 class="page-title">Album</h1>
-  <div class="album-wrap">
-    @foreach ($albums as $album)
-      <a href="{{ route('album.show', ['album' => $album->id]) }}" class="album-card">
-        <p class="text-judul">{{ $album->nama_album }}</p>
-        <p class="text-dalem-01">{{ $album->deskripsi }}</p>
-      </a>
-    @endforeach
-  </div>
-@endif
+@push('scripts')
+<script>
+  // 1. Init Masonry
+  var gridSearch = document.querySelector('#masonry-grid-search');
+  if(gridSearch) {
+    imagesLoaded(gridSearch, function() {
+      new Masonry(gridSearch, { itemSelector: '.masonry-item', percentPosition: true });
+    });
+  }
+
+  // 2. Data Backend
+  const photosData = @json($fotos); // <-- Variabel dari SearchController
+  const baseUrlFoto = "{{ asset('storage/foto') }}";
+  const baseUrlAvatar = "{{ asset('storage') }}"; 
+  const defaultAvatar = "{{ asset('assets/img/default-profile.png') }}";
+  
+  const routes = {
+      profile: "{{ route('profile.public', '000') }}",
+      like: "{{ route('likes.toggle', ['photo' => '000']) }}",
+      comment: "{{ route('komentar.store', ['photo' => '000']) }}"
+  };
+
+  // 3. Logic Single Modal
+  function openSingleModal(id) {
+      const item = photosData.find(p => p.id === id);
+      if(!item) return;
+
+      document.getElementById('modalImg').src = baseUrlFoto + '/' + item.lokasi_file;
+      document.getElementById('modalDownloadBtn').href = baseUrlFoto + '/' + item.lokasi_file;
+      document.getElementById('modalTitle').innerText = item.judul_foto;
+      document.getElementById('modalDesc').innerText = item.deskripsi_foto;
+
+      const user = item.user || {};
+      const avatarPath = user.avatar ? (baseUrlAvatar + '/' + user.avatar) : defaultAvatar;
+      const profileUrl = routes.profile.replace('000', user.id);
+      
+      document.getElementById('modalAvatar').src = avatarPath;
+      document.getElementById('modalUsername').innerText = user.username || 'Unknown';
+      document.getElementById('modalUsername').href = profileUrl;
+      document.getElementById('modalUserLink').href = profileUrl;
+      document.getElementById('modalTime').innerText = new Date(item.created_at).toLocaleDateString();
+
+      document.getElementById('modalLikeCount').innerText = item.like ? item.like.length : 0;
+      document.getElementById('modalLikeForm').action = routes.like.replace('000', item.id);
+
+      const commForm = document.getElementById('modalCommentForm');
+      if(commForm) commForm.action = routes.comment.replace('000', item.id);
+
+      const listDiv = document.getElementById('modalCommentsList');
+      listDiv.innerHTML = '';
+
+      if (item.komentarfoto && item.komentarfoto.length > 0) {
+          item.komentarfoto.forEach(c => {
+              const cUser = c.user || {};
+              const cAvatar = cUser.avatar ? (baseUrlAvatar + '/' + cUser.avatar) : defaultAvatar;
+              const html = `
+                <div class="mb-2 d-flex gap-2">
+                    <div class="flex-shrink-0"><img src="${cAvatar}" class="rounded-circle" width="28" height="28" style="object-fit: cover;"></div>
+                    <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100">
+                        <span class="fw-bold small d-block">${cUser.username || 'Anonim'}</span>
+                        <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
+                    </div>
+                </div>`;
+              listDiv.innerHTML += html;
+          });
+      } else {
+          listDiv.innerHTML = '<div class="text-center py-4"><p class="text-muted small">Belum ada komentar.</p></div>';
+      }
+
+      const myModal = new bootstrap.Modal(document.getElementById('globalDetailModal'));
+      myModal.show();
+  }
+
+  // 4. Logic Menu
+  function toggleMenu(event, menuId) {
+    event.stopPropagation(); 
+    const menu = document.getElementById(menuId);
+    document.querySelectorAll('.pin-menu').forEach(m => {
+      if (m.id !== menuId) m.classList.remove('show');
+    });
+    if (menu) menu.classList.toggle('show');
+  }
+
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.pin-menu').forEach(m => m.classList.remove('show'));
+  });
+</script>
+@endpush
 
 @endsection

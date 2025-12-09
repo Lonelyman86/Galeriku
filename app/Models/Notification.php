@@ -32,26 +32,31 @@ class Notification extends Model
         return $this->belongsTo(User::class, 'actor_id');
     }
 
-    // ✅ LOGIKA PESAN NOTIFIKASI
+    // ✅ UPDATE LOGIKA PESAN DISINI
     public function getMessageAttribute()
     {
         $actor = $this->actor;
 
-        // Jika user pengirim sudah dihapus
         if (!$actor) {
             return 'Seseorang berinteraksi dengan postinganmu';
         }
 
-        // Prioritas nama: Fullname > Username > "Seseorang"
         $displayName = $actor->fullname ?: $actor->username ?: 'Seseorang';
 
         switch ($this->type) {
             case 'like':
                 return $displayName . ' menyukai fotomu';
             
-            // ✅ PERUBAHAN DI SINI (Ganti 'follow' jadi 'comment')
             case 'comment':
                 return $displayName . ' mengomentari postinganmu';
+
+            // [BARU] Notifikasi Follow
+            case 'follow':
+                return $displayName . ' mulai mengikuti Anda';
+
+            // [BARU] Notifikasi Postingan Baru
+            case 'new_post':
+                return $displayName . ' baru saja memposting foto baru';
             
             default:
                 return 'Notifikasi baru';

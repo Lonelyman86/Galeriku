@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash; // WAJIB: Import Hash
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\Foto;
+use App\Models\Album;
 
 class ProfileController extends Controller
 {
@@ -29,13 +32,14 @@ class ProfileController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
+            // Hapus avatar lama jika ada
             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
+            // Simpan avatar baru
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
-        // PERBAIKAN: Enkripsi password sebelum update
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
@@ -45,5 +49,26 @@ class ProfileController extends Controller
         $user->update($validated);
 
         return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    // Function ini yang dipanggil oleh Route::get('/user/{id}', ...)
+    public function showPublicProfile($id)
+    {
+        // 1. Cari User (Jika tidak ketemu, otomatis 404)
+        $user = User::findOrFail($id);
+
+        // 2. Ambil Foto Milik User (Hanya yang Approved)
+        $foto = Foto::where('user_id', $id)
+                    ->where('status', 'approved') // WAJIB: Jangan tampilkan foto pending/rejected
+                    ->with(['like', 'komentarfoto.user', 'album']) // Eager loading biar cepat
+                    ->latest()
+                    ->paginate(12); // Pagination biar halaman gak berat kalau fotonya ribuan
+
+        // 3. Ambil Album Milik User
+        $albums = Album::where('user_id', $id)->get();
+
+        // 4. Return ke View
+        // Pastikan nama file kamu di folder: resources/views/profile/show.blade.php
+        return view('profile.public', compact('user', 'foto', 'albums'));
     }
 }

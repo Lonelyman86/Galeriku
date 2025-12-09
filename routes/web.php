@@ -14,6 +14,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FotoAdminController;
+use App\Http\Controllers\FollowController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,23 +55,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/createalbum', [AlbumController::class, 'index']);
     Route::post('/album/new', [AlbumController::class, 'store'])->name('album.new');
     
-    // [BARU] Route untuk fitur "Ambil dari Galeri" (Mass Add Photos)
+    // Route untuk fitur "Ambil dari Galeri" (Mass Add Photos)
     Route::post('/album/{album}/add-existing', [AlbumController::class, 'addExistingPhotos'])->name('album.add_existing');
-    Route::patch(
-        '/albums/{album}',
-        [AlbumController::class, 'update']
-    )->name('albums.update');
-    
-    Route::delete(
-        '/albums/{album}',
-        [AlbumController::class, 'destroy']
-    )->name('albums.destroy');
+    Route::patch('/albums/{album}', [AlbumController::class, 'update'])->name('albums.update');
+    Route::delete('/albums/{album}', [AlbumController::class, 'destroy'])->name('albums.destroy');
 
     // --- Komentar & Like ---
     Route::post('/albums/{photo}/toggle-like', [LikeController::class, 'toggle'])->name('likes.toggle');
     Route::get('/albums/{photo}/check-like', [LikeController::class, 'checkLike'])->name('likes.check');
     Route::post('/photos/{photo}/komentar', [KomentarController::class, 'store'])->name('komentar.store');
-    Route::get('/liked', [LikeController::class, 'likedPhotos'])->name('photo.liked');
+    Route::get('/liked', [HomeController::class, 'likedPhotos'])->name('photo.liked');
     // Opsional: Jika ada route duplicate untuk like, bisa disederhanakan
     Route::post('/photos/{id}/like', [LikeController::class, 'toggle'])->name('photo.like');
 
@@ -78,13 +72,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     
+    // --- Follow System (BARU) ---
+    Route::post('/user/{user}/follow', [FollowController::class, 'toggle'])->name('user.follow');
+    
     // --- Notifikasi ---
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 });
 
 // Route ini di luar 'auth' agar album bisa dilihat publik (jika diinginkan)
-// Tapi fitur edit/hapus di dalamnya tetap diproteksi logic Controller/View
 Route::get('/albums/{album}', [AlbumController::class, 'show'])->name('album.show');
+Route::get('/user/{id}', [ProfileController::class, 'showPublicProfile'])->name('profile.public');
 
 // --- Admin Routes ---
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

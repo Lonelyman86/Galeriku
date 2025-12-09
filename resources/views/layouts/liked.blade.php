@@ -1,7 +1,7 @@
 @extends('main')
 @section('content')
 
-<h1 class="page-title">Liked Photos</h1>
+<h1 class="page-title">Foto Yang Disukai</h1>
 
 <style>
   .page-title{ font-family: ui-sans-serif, system-ui; font-size: 22px; margin: 16px 8px; font-weight: 700; }

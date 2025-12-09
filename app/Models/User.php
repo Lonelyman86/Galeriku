@@ -58,4 +58,23 @@ class User extends Authenticatable
         // Asumsi: 1 adalah kode untuk Admin
         return $this->role_id === 1;
     }
+
+    // 1. Relasi: Siapa saja yang mem-follow user ini (Pengikut)
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')->withTimestamps();
+    }
+
+    // 2. Relasi: Siapa saja yang di-follow oleh user ini (Mengikuti)
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')->withTimestamps();
+    }
+
+    // 3. Helper: Cek apakah user ini sedang mem-follow user lain ($user)
+    // Dipakai untuk menentukan tombol "Ikuti" atau "Mengikuti" yang muncul
+    public function isFollowing(User $user)
+    {
+        return $this->following()->where('followed_id', $user->id)->exists();
+    }
 }

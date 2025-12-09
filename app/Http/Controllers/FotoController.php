@@ -19,13 +19,8 @@ class FotoController extends Controller
 
     public function index ()
     {
-        // OPTIMASI: Select kolom spesifik
-        $foto = Foto::with([
-                'user:id,username,fullname,avatar', 
-                'album:id,nama_album', 
-                'like:id,foto_id,user_id', 
-                'komentarfoto.user:id,username,fullname,avatar'
-            ])
+        // PERBAIKAN: Gunakan scopeWithCompleteDetails agar konsisten dan efisien
+        $foto = Foto::withCompleteDetails()
             ->latest()
             ->paginate(12);
 
@@ -41,7 +36,7 @@ class FotoController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'lokasi_file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
+            'lokasi_file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', 
             'judul_foto' => 'required|string|max:255',
             'deskripsi_foto' => 'required|string',
             'album_id' => 'nullable',
@@ -51,7 +46,6 @@ class FotoController extends Controller
             $file = $request->file('lokasi_file');
             $filename = time() . '_' . $file->hashName();
 
-            // Simpan fisik file (Cara standar Laravel)
             $file->storeAs('public/foto', $filename);
 
             $foto = new Foto();
@@ -60,7 +54,7 @@ class FotoController extends Controller
             $foto->deskripsi_foto = $request->deskripsi_foto;
             $foto->lokasi_file = $filename;
             $foto->tanggal_unggah = now();
-            // $foto->album_id = $request->album_id; // Opsional jika fitur pilih album aktif
+            // $foto->album_id = $request->album_id; 
             $foto->save();
 
             return redirect('studio')->with('success', 'Foto berhasil diunggah!');
@@ -71,8 +65,6 @@ class FotoController extends Controller
 
     public function updateAlbum(Request $request, $photoId)
     {
-        // PERBAIKAN DI SINI:
-        // Ubah 'required' jadi 'nullable' agar bisa menerima data kosong (untuk hapus dari album)
         $request->validate([
             'album_id' => 'nullable|exists:albums,id',
         ]);
@@ -86,7 +78,6 @@ class FotoController extends Controller
         $foto->album_id = $request->album_id;
         $foto->save();
 
-        // Pesan notifikasi dinamis (sesuai aksi)
         $message = $request->album_id ? 'Foto berhasil ditambahkan ke album.' : 'Foto berhasil dikeluarkan dari album.';
 
         return redirect()->back()->with('success', $message);

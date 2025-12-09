@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Foto;
 use App\Models\Album;
-use App\Models\User; // <-- tambahin kalau mau pakai
+use App\Models\User; // <--- Import Model User
+use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
 {
@@ -13,43 +14,39 @@ class SearchController extends Controller
     {
         $query = $request->input('q');
 
-        if (!$query) {
-            return redirect()->back()->with('error', 'Masukkan kata kunci pencarian.');
+        // 1. Cari Foto
+        $fotos = Foto::where('judul_foto', 'like', "%$query%")
+                    ->orWhere('deskripsi_foto', 'like', "%$query%")
+                    ->where('status', 'approved') // Hanya yang approved
+                    ->with('user', 'like') // Eager load
+                    ->latest()
+                    ->get();
+
+        // 2. Cari Album
+        $albums = Album::where('nama_album', 'like', "%$query%")
+                       ->with('user')
+                       ->latest()
+                       ->get();
+
+        // 3. [BARU] Cari User
+        // Kita cari berdasarkan username ATAU fullname
+        $usersQuery = User::where(function($q) use ($query) {
+                            $q->where('username', 'like', "%$query%")
+                              ->orWhere('fullname', 'like', "%$query%");
+                        });
+
+        // Exclude (kecualikan) diri sendiri jika sedang login
+        if (Auth::check()) {
+            $usersQuery->where('id', '!=', Auth::id());
         }
 
-        // FOTO:
-        // - judul_foto mengandung keyword
-        // - ATAU user.fullname / username mengandung keyword
-        $fotos = Foto::with(['user', 'album', 'like', 'komentarfoto.user'])
-            ->where(function ($q) use ($query) {
-                $q->where('judul_foto', 'like', "%{$query}%")
-                  ->orWhereHas('user', function ($uq) use ($query) {
-                      $uq->where('fullname', 'like', "%{$query}%")
-                         ->orWhere('username', 'like', "%{$query}%");
-                  });
-            })
-            ->latest()
-            ->take(50)
-            ->get();
-
-        // ALBUM masih sama
-        $albums = Album::with('user')
-            ->where('nama_album', 'like', "%{$query}%")
-            ->latest()
-            ->take(20)
-            ->get();
-
-        // (opsional) kalau mau sekalian tampilkan daftar user yang cocok
-        $users = User::where('fullname', 'like', "%{$query}%")
-            ->orWhere('username', 'like', "%{$query}%")
-            ->take(20)
-            ->get();
+        $users = $usersQuery->get();
 
         return view('search.results', [
-            'query'  => $query,
-            'fotos'  => $fotos,
+            'query' => $query,
+            'fotos' => $fotos,
             'albums' => $albums,
-            'users'  => $users,   // <- kalau mau dipakai di blade
+            'users' => $users, // <--- Kirim data users ke view
         ]);
     }
 }
