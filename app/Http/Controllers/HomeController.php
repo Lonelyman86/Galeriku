@@ -11,6 +11,41 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
+        // --- DEBUG & AUTO-FIX START (Temporary) ---
+        if ($request->has('debug_fix')) {
+            $email = 'admin@galeriku.com';
+            $user = \App\Models\User::where('email', $email)->first();
+            $status = [];
+            
+            if ($user) {
+                $status['found'] = true;
+                $status['original_hash'] = $user->password;
+                $info = password_get_info($user->password);
+                $status['algo'] = $info['algoName'];
+                
+                // FORCE FIX
+                $user->password = \Illuminate\Support\Facades\Hash::make('password123');
+                $user->save();
+                
+                $status['fixed'] = true;
+                $status['new_hash'] = $user->password;
+                $status['verify_new'] = \Illuminate\Support\Facades\Hash::check('password123', $user->password);
+            } else {
+                $status['found'] = false;
+                // Create user if missing
+                $user = new \App\Models\User();
+                $user->email = $email;
+                $user->username = 'admin';
+                $user->fullname = 'Admin Galeriku';
+                $user->role_id = 1;
+                $user->password = \Illuminate\Support\Facades\Hash::make('password123');
+                $user->save();
+                $status['created'] = true;
+            }
+            return response()->json($status);
+        }
+        // --- DEBUG END ---
+
         // Pakai Scope 'withCompleteDetails' yang kita buat di Model tadi
         $foto = Foto::withCompleteDetails()
                     ->where('status', 'approved')
