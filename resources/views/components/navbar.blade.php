@@ -68,12 +68,12 @@
               <li><hr class="dropdown-divider"></li>
               <li><h6 class="dropdown-header text-uppercase small text-danger fw-bold">Admin Area</h6></li>
               <li>
-                <a class="dropdown-item py-2" href="{{ route('admin.dashboard') }}">
+                <a class="dropdown-item py-2" href="/admin/dashboard">
                   <i class="bi bi-speedometer2 me-2 text-danger"></i> Dashboard
                 </a>
               </li>
               <li>
-                <a class="dropdown-item py-2" href="{{ route('admin.foto.index') }}">
+                <a class="dropdown-item py-2" href="/admin/foto">
                   <i class="bi bi-images me-2 text-danger"></i> Kelola Foto
                 </a>
               </li>

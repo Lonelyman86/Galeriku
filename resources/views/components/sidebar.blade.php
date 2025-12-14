@@ -18,13 +18,13 @@
       {{-- Admin Menu --}}
       @if(Auth::user()->role_id == 1)
         <li class="nav-item my-1">
-          <a class="nav-link text-danger py-3 rounded-3" href="{{ route('admin.dashboard') }}" title="Admin Dashboard">
+          <a class="nav-link text-danger py-3 rounded-3" href="/admin/dashboard" title="Admin Dashboard">
             <i class="bi bi-speedometer2 fs-4"></i>
           </a>
         </li>
 
         <li class="nav-item my-1">
-          <a class="nav-link text-danger py-3 rounded-3" href="{{ route('admin.foto.index') }}" title="Kelola Foto">
+          <a class="nav-link text-danger py-3 rounded-3" href="/admin/foto" title="Kelola Foto">
             <i class="bi bi-images fs-4"></i>
           </a>
         </li>
