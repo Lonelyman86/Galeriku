@@ -12,7 +12,7 @@ class AdminMiddleware
     {
         // 1. Cek apakah user sudah login? (auth()->check())
         // 2. Jika sudah, cek apakah role_id-nya BUKAN 1 (Bukan Admin)
-        if (!auth()->check() || auth()->user()->role_id !== 1) {
+        if (!auth()->check() || auth()->user()->role_id != 1) {
             abort(403, 'Akses ditolak.');
         }
 
