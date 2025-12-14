@@ -116,26 +116,57 @@
 {{-- ChartJS --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('fotoChart');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: @json($chartData['labels']),
-            datasets: [{
-                data: @json($chartData['data']),
-                backgroundColor: ['#FACC15', '#22C55E', '#EF4444'],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { 
-                    position: 'bottom',
-                    labels: { font: { size: 14 } }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('fotoChart');
+        
+        // 1. Check LocalStorage explicitly to avoid race condition with main layout script
+        const isDarkStored = localStorage.getItem('theme') === 'dark';
+        const isDarkClass = document.body.classList.contains('dark-mode');
+        // If either storage says dark OR class is already present, use dark text
+        const isDarkMode = isDarkStored || isDarkClass;
+        
+        const textColor = isDarkMode ? '#e0e0e0' : '#333';
+        
+        // Function to init chart
+        let myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: @json($chartData['labels']),
+                datasets: [{
+                    data: @json($chartData['data']),
+                    backgroundColor: ['#FACC15', '#22C55E', '#EF4444'],
+                    borderWidth: 0, // No border
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        position: 'bottom',
+                        labels: { 
+                            color: textColor,
+                            font: { size: 14 } 
+                        }
+                    }
                 }
             }
+        });
+
+        // Listen for Dark Mode Toggle
+        const toggleBtn = document.getElementById('darkModeToggle');
+        if(toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                // Wait slightly for class change
+                setTimeout(() => {
+                    const newIsDark = document.body.classList.contains('dark-mode');
+                    const newColor = newIsDark ? '#e0e0e0' : '#333';
+                    myChart.options.plugins.legend.labels.color = newColor;
+                    myChart.update();
+                }, 50);
+            });
         }
     });
 </script>

@@ -1,0 +1,434 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Global / Shared --- */
+.detail-foto {
+    max-width: 100%;
+    height: auto;
+}
+
+.pagination-wrapper {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Photos Index --- */
+.grid-container-01 {
+    display: grid;
+    grid-template: auto / 12rem 12rem 12rem 12rem;
+    grid-gap: 13px;
+    grid-column: auto;
+    grid-template-areas: 'myArea myArea . . .';
+    align-items: start;
+}
+
+/* --- Photos Create --- */
+.create-pin {
+    padding: 16px 16px 40px;
+}
+
+.create-title {
+    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 8px 0 16px 8px;
+    color: #111;
+}
+
+.create-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    align-items: start;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+@media (max-width: 992px) {
+    .create-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.uploader {
+    width: 100%;
+}
+
+.dropzone {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #ececea;
+    border-radius: 20px;
+    border: 2px dashed transparent;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.dropzone.dragover {
+    border-color: #111;
+    background: #e8e8e6;
+}
+
+.dz-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 16px;
+    color: #111;
+}
+
+.dz-icon {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 999px;
+    border: 1px solid #111;
+    text-align: center;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.dz-text {
+    font-size: 14px;
+}
+
+.dz-hint {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 12px;
+}
+
+#preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.file-meta {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.field-label {
+    font-size: 12px;
+    color: #4b5563;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+.pill-input,
+.pill-textarea {
+    background: #ececea;
+    border-radius: 16px;
+    padding: 12px 14px;
+    border: 1px solid transparent;
+}
+
+.pill-input:focus-within,
+.pill-textarea:focus-within {
+    border-color: #111;
+    background: #e8e8e6;
+}
+
+.pill-input input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 14px;
+    color: #111;
+}
+
+.pill-textarea textarea {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 14px;
+    color: #111;
+    resize: vertical;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.btn-submit {
+    background: #111;
+    color: #fff;
+    border: 0;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-submit:hover {
+    background: #333;
+}
+
+/* --- Albums Show --- */
+.page-title {
+    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    font-size: 22px;
+    margin: 16px 8px 8px 16px;
+    font-weight: 700;
+}
+
+.album-header {
+    position: relative;
+}
+
+.album-edit-btn {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    z-index: 25;
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.fab-create {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 40;
+}
+
+.fab-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .2);
+    background: #ef4444;
+    color: #fff;
+    font-size: 24px;
+    transition: transform 0.2s;
+}
+
+.fab-btn:hover {
+    transform: scale(1.1);
+}
+
+.masonry {
+    column-count: 5;
+    column-gap: 16px;
+    padding: 8px 16px 64px;
+}
+
+@media (max-width:1200px) {
+    .masonry {
+        column-count: 4;
+    }
+}
+
+@media (max-width:992px) {
+    .masonry {
+        column-count: 3;
+    }
+}
+
+@media (max-width:768px) {
+    .masonry {
+        column-count: 2;
+    }
+}
+
+@media (max-width:480px) {
+    .masonry {
+        column-count: 1;
+    }
+}
+
+.pin {
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 16px;
+    break-inside: avoid;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .04);
+    transition: transform .2s ease;
+}
+
+.pin:hover {
+    transform: translateY(-3px);
+}
+
+.pin img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    background: #f3f4f6;
+}
+
+.pin-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px;
+    opacity: 0;
+    transition: opacity .15s ease;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, .08), rgba(0, 0, 0, .35));
+}
+
+.pin:hover .pin-overlay {
+    opacity: 1;
+}
+
+.pin-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.pin-actions form,
+.pin-actions button {
+    pointer-events: auto;
+}
+
+.btn-ghost,
+.btn-danger,
+.btn-primary {
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, .9);
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: #fff;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #fff;
+}
+
+.btn-ghost {
+    background: rgba(255, 255, 255, .85);
+}
+
+.btn-ghost:hover {
+    background: #fff;
+}
+
+.btn-danger:hover,
+.btn-primary:hover {
+    filter: brightness(.95);
+}
+
+.pin-meta {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: #111;
+    background: #fff;
+}
+
+.pin-title {
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.pin-desc {
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.pin-sub {
+    color: #60a5fa;
+    font-size: 12px;
+}
+
+.status-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    text-align: center;
+    font-size: 14px;
+    color: #fff;
+    opacity: 0;
+    border-radius: 16px;
+    transition: opacity .3s ease;
+    padding: 10px;
+}
+
+.pin:hover .status-overlay {
+    opacity: 1;
+}
+
+.status-pending {
+    background: rgba(255, 193, 7, 0.75);
+}
+
+.status-rejected {
+    background: rgba(220, 53, 69, 0.75);
+}
+
+.img-checkbox-container {
+    position: relative;
+    cursor: pointer;
+    display: block;
+}
+
+.img-checkbox-container input[type="checkbox"] {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.img-checkbox-container img {
+    border: 3px solid transparent;
+    transition: 0.2s;
+    border-radius: 8px;
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.img-checkbox-container input:checked+img {
+    border-color: #2563eb;
+    opacity: 0.8;
+    transform: scale(0.95);
+}

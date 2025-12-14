@@ -1,28 +1,7 @@
 @extends('main')
 @section('content')
 
-<style>
-.grid-container-01 {
-    display: grid;
-    grid-template: auto / 12rem 12rem 12rem 12rem;
-    grid-gap: 13px;
-    grid-column: auto;
-    grid-template-areas: 'myArea myArea . . .';
-    align-items: start;
-}
 
-.detail-foto {
-    max-width: 100%;
-    max-height: auto;
-}
-
-/* Tambahan CSS agar Pagination terlihat rapi */
-.pagination-wrapper {
-    margin-top: 2rem;
-    display: flex;
-    justify-content: center;
-}
-</style>
 
 <div class="grid-container-01">
 @foreach ($foto as $item)

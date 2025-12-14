@@ -9,105 +9,154 @@
         <span class="badge bg-danger fs-6 px-3 py-2">Admin Panel</span>
     </div>
 
-    {{-- Table Card --}}
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>User</th>
-                            <th>Judul</th>
-                            <th>Album</th>
-                            <th>Status</th>
-                            <th>Note</th>
-                            <th class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($fotos as $foto)
-                        <tr class="table-row-hover">
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    {{-- Cek avatar user (Optimasi null safety) --}}
-                                    <img src="{{ $foto->user->avatar ? asset('storage/' . $foto->user->avatar) : asset('assets/img/default-profile.png') }}"
-                                         alt="Profile"
-                                         class="rounded-circle border"
-                                         width="32"
-                                         height="32">
-                                    <span class="fw-semibold">{{ $foto->user->username }}</span>
-                                </div>
-                            </td>
+    {{-- BUTTON ABS (Client-Side) --}}
+    <ul class="nav nav-pills mb-4 gap-2" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active bg-danger text-white" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab" aria-controls="photos" aria-selected="true">
+                <i class="bi bi-grid-fill me-2"></i>Semua Foto
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link bg-white text-secondary border" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab" aria-controls="reports" aria-selected="false">
+                <i class="bi bi-flag-fill me-2"></i>Laporan Masuk 
+                @if($reports->total() > 0)
+                <span class="badge bg-danger ms-2">{{ $reports->total() }}</span>
+                @endif
+            </button>
+        </li>
+    </ul>
 
-                            <td class="fw-semibold">{{ $foto->judul_foto }}</td> {{-- Pastikan nama kolom sesuai DB (judul_foto) --}}
-                            <td>{{ $foto->album->nama_album ?? '-' }}</td>
-
-                            {{-- Status Badge --}}
-                            <td>
-                                <span class="badge 
-                                    @if($foto->status == 'approved') bg-success 
-                                    @elseif($foto->status == 'rejected') bg-danger 
-                                    @else bg-warning text-dark @endif
-                                ">
-                                    {{ ucfirst($foto->status) }}
-                                </span>
-                            </td>
-
-                            {{-- Note --}}
-                            <td>{{ $foto->note ?? '-' }}</td>
-
-                            {{-- Tombol Aksi --}}
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    @if($foto->status === 'pending')
-                                        <form action="{{ route('admin.foto.approve', $foto->id) }}" method="POST">
-                                            @csrf @method('PATCH')
-                                            <button class="btn btn-sm btn-success" title="Setujui">
-                                                <i class="bi bi-check-circle"></i>
-                                            </button>
-                                        </form>
-
-                                        {{-- Tombol Tolak buka modal --}}
-                                        <button type="button"
-                                                class="btn btn-sm btn-warning text-white"
-                                                title="Tolak"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#rejectModal"
-                                                data-action="{{ route('admin.foto.reject', $foto->id) }}">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-
-                                    <form action="{{ route('admin.foto.destroy', $foto->id) }}" method="POST" onsubmit="return confirm('Yakin hapus foto ini secara permanen?')">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-danger" title="Hapus Permanen">
-                                            <i class="bi bi-trash3"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            {{-- Jika belum ada foto --}}
-            @if($fotos->isEmpty())
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-images fs-1"></i>
-                    <p class="mt-2">Belum ada foto yang diupload user.</p>
+    <div class="tab-content" id="adminTabsContent">
+        
+        {{-- TAB 1: SEMUA FOTO --}}
+        <div class="tab-pane fade show active" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Judul</th>
+                                    <th>Album</th>
+                                    <th>Status</th>
+                                    <th>Note</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($fotos as $foto)
+                                <tr class="table-row-hover">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ $foto->user->avatar ? asset('storage/' . $foto->user->avatar) : asset('assets/img/default-profile.png') }}"
+                                                 class="rounded-circle border" width="32" height="32">
+                                            <span class="fw-semibold">{{ $foto->user->username }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="fw-semibold">{{ $foto->judul_foto }}</td>
+                                    <td>{{ $foto->album->nama_album ?? '-' }}</td>
+                                    <td>
+                                        <span class="badge @if($foto->status == 'approved') bg-success @elseif($foto->status == 'rejected') bg-danger @else bg-warning text-dark @endif">
+                                            {{ ucfirst($foto->status) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $foto->note ?? '-' }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            @if($foto->status === 'pending')
+                                                <form action="{{ route('admin.foto.approve', $foto->id) }}" method="POST">
+                                                    @csrf @method('PATCH')
+                                                    <button class="btn btn-sm btn-success" title="Setujui"><i class="bi bi-check-circle"></i></button>
+                                                </form>
+                                                <button type="button" class="btn btn-sm btn-warning text-white" title="Tolak" data-bs-toggle="modal" data-bs-target="#rejectModal" data-action="{{ route('admin.foto.reject', $foto->id) }}"><i class="bi bi-x-circle"></i></button>
+                                            @endif
+                                            <form action="{{ route('admin.foto.destroy', $foto->id) }}" method="POST" onsubmit="return confirm('Yakin hapus foto ini secara permanen?')">
+                                                @csrf @method('DELETE')
+                                                <button class="btn btn-sm btn-danger" title="Hapus Permanen"><i class="bi bi-trash3"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @if($fotos->isEmpty())
+                        <div class="text-center py-5 text-muted"><i class="bi bi-images fs-1"></i><p class="mt-2">Belum ada foto yang diupload user.</p></div>
+                    @endif
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $fotos->appends(['reports_page' => $reports->currentPage()])->links() }}
+                    </div>
                 </div>
-            @endif
-
-            {{-- PERBAIKAN 1: Tombol Pagination Wajib Ada --}}
-            <div class="d-flex justify-content-center mt-4">
-                {{ $fotos->links() }}
             </div>
-
         </div>
+
+        {{-- TAB 2: LAPORAN MASUK --}}
+        <div class="tab-pane fade" id="reports" role="tabpanel" aria-labelledby="reports-tab">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pelapor</th>
+                                    <th>Alasan</th>
+                                    <th>Foto Dilaporkan</th>
+                                    <th>Tanggal</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($reports as $report)
+                                <tr class="table-row-hover">
+                                    <td>
+                                        {{ $report->user->username ?? 'Unknown' }}
+                                        <div class="small text-muted">{{ $report->user->email ?? '-' }}</div>
+                                    </td>
+                                    <td>{{ $report->reason }}</td>
+                                    <td>
+                                        @if($report->foto)
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="{{ asset('storage/foto/'.$report->foto->lokasi_file) }}" target="_blank">
+                                                    <img src="{{ asset('storage/foto/'.$report->foto->lokasi_file) }}" width="60" class="rounded">
+                                                </a>
+                                                <div class="small lh-sm">
+                                                    <strong>{{Str::limit($report->foto->judul_foto, 20)}}</strong><br>
+                                                    <span class="text-muted">by {{ $report->foto->user->username ?? '?' }}</span>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <span class="badge bg-secondary">Foto Terhapus</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $report->created_at->format('d M Y') }}</td>
+                                    <td>
+                                        <form action="{{ route('admin.reports.ban', $report->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus foto ini? Tindakan ini tidak dapat dibatalkan.')">
+                                            @csrf @method('PATCH')
+                                            <button class="btn btn-danger btn-sm" title="Hapus Foto & Resolve"><i class="bi bi-trash-fill"></i> Hapus</button>
+                                        </form>
+                                        <form action="{{ route('admin.reports.dismiss', $report->id) }}" method="POST" class="d-inline">
+                                            @csrf @method('PATCH')
+                                            <button class="btn btn-secondary btn-sm" title="Abaikan Laporan"><i class="bi bi-x-lg"></i> Abaikan</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="5" class="text-center py-4 text-muted">Tidak ada laporan baru.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $reports->appends(['page' => $fotos->currentPage()])->links() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-</div>
 
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -154,9 +203,50 @@
   </div>
 </div>
 
-{{-- Script untuk modal (PERBAIKAN LOGIKA) --}}
+{{-- Script untuk modal & Tab Persistence --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // 1. Tab Persistence & Dynamic Styling
+    var triggerTabList = [].slice.call(document.querySelectorAll('#adminTabs button'))
+    triggerTabList.forEach(function (triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
+
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault()
+            tabTrigger.show()
+            
+            // Save state
+            localStorage.setItem('activeAdminTab', event.target.id);
+            
+            // Update Styling
+            updateTabStyles(triggerEl);
+        })
+    })
+
+    // Load saved tab
+    var activeTabId = localStorage.getItem('activeAdminTab');
+    if(activeTabId && document.getElementById(activeTabId)){
+        var tabToShow = new bootstrap.Tab(document.getElementById(activeTabId));
+        tabToShow.show();
+        updateTabStyles(document.getElementById(activeTabId));
+    }
+
+    function updateTabStyles(activeEl) {
+        document.querySelectorAll('#adminTabs button').forEach(btn => {
+            if(btn === activeEl) {
+                // Active: Merah
+                btn.classList.add('bg-danger', 'text-white');
+                btn.classList.remove('bg-white', 'text-secondary', 'border');
+            } else {
+                // Inactive: Abu/Putih
+                btn.classList.remove('bg-danger', 'text-white');
+                btn.classList.add('bg-white', 'text-secondary', 'border');
+            }
+        });
+    }
+    
+    // -------------------------------------------------------------------
+    
     const rejectModal = document.getElementById('rejectModal');
     const rejectForm = document.getElementById('rejectForm');
     const noteSelect = document.getElementById('noteSelect');

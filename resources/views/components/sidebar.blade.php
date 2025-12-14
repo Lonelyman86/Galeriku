@@ -68,4 +68,11 @@
     @endauth
 
   </ul>
+
+  {{-- Dark Mode Toggle --}}
+  <div class="text-center pb-4">
+    <button id="darkModeToggle" class="btn btn-link link-dark p-0 border-0" title="Dark Mode">
+      <i class="bi bi-moon fs-4" id="darkModeIcon"></i>
+    </button>
+  </div>
 </aside>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Foto;
+use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage; // WAJIB: Tambahkan ini untuk hapus file fisik
 
@@ -11,14 +12,18 @@ class FotoAdminController extends Controller
 {
     public function index()
     {
-        // OPTIMASI: Ganti get() dengan paginate(20)
-        // Admin tidak perlu memuat 10.000 foto sekaligus, cukup 20 per halaman.
-        // with('user', 'album') dipertahankan agar tidak N+1 Query.
+        // Photos Pagination (default 'page')
         $fotos = Foto::with(['user', 'album'])
                      ->latest()
-                     ->paginate(20); 
+                     ->paginate(100, ['*'], 'page'); 
+        
+        // Reports Pagination (custom 'reports_page' to avoid conflict)
+        $reports = Report::with(['user', 'foto'])
+                         ->where('status', 'pending')
+                         ->latest()
+                         ->paginate(10, ['*'], 'reports_page');
 
-        return view('admin.foto.index', compact('fotos'));
+        return view('admin.foto.index', compact('fotos', 'reports'));
     }
 
     public function approve($id)

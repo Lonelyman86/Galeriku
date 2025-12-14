@@ -14,12 +14,14 @@ class User extends Authenticatable
 
     protected $fillable = [
         'username',
+        'fullname',
         'email',
         'password',
-        'fullname',
-        'address',
-        'avatar',
+        'google_id',
         'role_id', // WAJIB: Tambahkan ini agar bisa diisi saat seeding admin
+        'avatar',
+        'address',
+        'bio', // Add bio
     ];
 
     protected $hidden = [
@@ -30,8 +32,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'role_id' => 'integer', // Casting ke integer biar aman
+        'role_id' => 'integer',
     ];
+
+    // Relasi: User memiliki banyak foto
+    public function fotos()
+    {
+        return $this->hasMany(Foto::class, 'user_id');
+    }
 
     // Relasi ke Foto yang disukai
     public function likedPhotos()

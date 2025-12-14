@@ -14,7 +14,9 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FotoAdminController;
+use App\Http\Controllers\Admin\ReportAdminController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +51,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/createfoto', [FotoController::class, 'create']);
     Route::post('/upload/photo', [FotoController::class, 'upload'])->name('upload.photo');
     Route::post('foto/{photo}/update-album', [FotoController::class, 'updateAlbum'])->name('foto.update.album');
+    Route::get('/photos/{photo}/edit', [FotoController::class, 'edit'])->name('photos.edit');
+    Route::patch('/photos/{photo}', [FotoController::class, 'update'])->name('photos.update');
     Route::delete('/photos/{photo}', [FotoController::class, 'destroy'])->name('photos.destroy');
 
     // --- Album Routes ---
@@ -75,6 +79,9 @@ Route::middleware('auth')->group(function () {
     // --- Follow System (BARU) ---
     Route::post('/user/{user}/follow', [FollowController::class, 'toggle'])->name('user.follow');
     
+    // --- Report System (BARU) ---
+    Route::post('/report', [ReportController::class, 'store'])->name('report.store');
+    
     // --- Notifikasi ---
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 });
@@ -90,4 +97,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::patch('/foto/{id}/approve', [FotoAdminController::class, 'approve'])->name('admin.foto.approve');
     Route::patch('/foto/{id}/reject', [FotoAdminController::class, 'reject'])->name('admin.foto.reject');
     Route::delete('/foto/{id}', [FotoAdminController::class, 'destroy'])->name('admin.foto.destroy');
+
+    // Admin Reports
+    // Route::get('/reports', [ReportAdminController::class, 'index'])->name('admin.reports.index'); // Digabung ke foto.index
+    Route::patch('/reports/{id}/ban', [ReportAdminController::class, 'ban'])->name('admin.reports.ban');
+    Route::patch('/reports/{id}/dismiss', [ReportAdminController::class, 'dismiss'])->name('admin.reports.dismiss');
 });

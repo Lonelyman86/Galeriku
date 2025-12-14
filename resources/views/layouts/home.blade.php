@@ -76,39 +76,19 @@
 
   {{-- CONTAINER UTAMA --}}
   <div class="row" id="masonry-grid">
-    @foreach ($foto as $item)
-      <div class="col-6 col-md-4 col-lg-3 mb-4 masonry-item">
-        
-        {{-- WRAPPER FOTO --}}
-        <div class="pin-wrapper">
-          {{-- Gambar Utama (Klik Trigger Modal JS) --}}
-          <img
-            src="{{ asset('storage/foto/'.$item->lokasi_file) }}"
-            alt="{{ $item->judul_foto }}"
-            onclick="openSingleModal({{ $item->id }})"
-          >
-
-          {{-- Tombol 3 Titik (Grid) --}}
-          <button type="button" class="pin-menu-btn" data-menu-target="pin-menu-{{ $item->id }}" onclick="toggleMenu(event, 'pin-menu-{{ $item->id }}')">
-            <i class="bi bi-three-dots"></i>
-          </button>
-
-          {{-- Menu Dropdown (Grid) --}}
-          <div id="pin-menu-{{ $item->id }}" class="pin-menu">
-            <a href="{{ asset('storage/foto/'.$item->lokasi_file) }}" download class="pin-menu-item">
-              <i class="bi bi-download"></i> <span>Unduh gambar</span>
-            </a>
-            <a href="{{ route('profile.public', $item->user->id ?? 0) }}" class="pin-menu-item">
-               <i class="bi bi-person"></i> Lihat Profil
-            </a> 
-          </div>
-        </div>
-      </div>
-    @endforeach
+    @include('partials.photo-grid', ['foto' => $foto])
   </div>
 
   <div class="d-flex justify-content-center mt-5 mb-5">
-      {{ $foto->withQueryString()->links() }}
+      {{-- Loading Spinner --}}
+      <div id="loading-spinner" class="spinner-border text-primary d-none" role="status">
+          <span class="visually-hidden">Loading...</span>
+      </div>
+      
+      {{-- End of Content Message --}}
+      <div id="end-of-content" class="text-muted small d-none">
+          Sudah sampai bawah
+      </div>
   </div>
 </div>
 
@@ -135,18 +115,22 @@
                 <a id="modalDownloadBtn" href="" download class="pin-menu-item">
                   <i class="bi bi-download"></i><span>Unduh gambar</span>
                 </a>
+                {{-- REPORT BUTTON --}}
+                <button type="button" class="pin-menu-item text-danger" onclick="openReportModal()">
+                   <i class="bi bi-flag"></i> <span>Laporkan Gambar</span>
+                </button>
               </div>
             </div>
           </div>
 
           {{-- Kanan: Detail --}}
-          <div class="col-lg-4 bg-white d-flex flex-column" style="max-height: 90vh;">
+          <div class="col-lg-4 bg-white d-flex flex-column modal-right-col" style="max-height: 90vh;">
             {{-- Header User --}}
             <div class="p-3 border-bottom">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                   <div class="d-flex align-items-center">
                       <a id="modalUserLink" href="#">
-                          <img id="modalAvatar" src="" class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">
+                          <div id="modalAvatarContainer"></div>
                       </a>
                       <div>
                          <a id="modalUsername" href="#" class="fw-bold text-dark text-decoration-none d-block lh-1"></a>
@@ -157,10 +141,13 @@
                 </div>
                 <h5 id="modalTitle" class="fw-bold mb-1 fs-6"></h5>
                 <p id="modalDesc" class="text-secondary mb-0 small"></p>
+
+                {{-- Category & Tags Placeholders --}}
+                <div id="modalCategoryTag" class="mt-2"></div>
             </div>
 
             {{-- Body: Komentar --}}
-            <div class="flex-grow-1 p-3 overflow-auto custom-scrollbar" style="background: #f9fafb;">
+            <div class="flex-grow-1 p-3 overflow-auto custom-scrollbar bg-light modal-comment-bg">
                 <div class="mb-3">
                    {{-- Tombol Like --}}
                    <form id="modalLikeForm" method="POST" action="">
@@ -201,18 +188,122 @@
   </div>
 </div>
 
+
+{{-- REPORT MODAL --}}
+<div class="modal fade" id="reportModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Laporkan Foto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ route('report.store') }}" method="POST">
+        @csrf
+        <input type="hidden" name="foto_id" id="reportFotoId">
+        <div class="modal-body">
+            <p class="mb-3">Mengapa Anda melaporkan foto ini?</p>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Konten seksual atau telanjang" id="r1" required>
+                <label class="form-check-label" for="r1">Konten seksual atau telanjang</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Kekerasan atau berbahaya" id="r2">
+                <label class="form-check-label" for="r2">Kekerasan atau berbahaya</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Pelecehan atau intimidasi" id="r3">
+                <label class="form-check-label" for="r3">Pelecehan atau intimidasi</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Spam atau menyesatkan" id="r4">
+                <label class="form-check-label" for="r4">Spam atau menyesatkan</label>
+            </div>
+        </div>
+        <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-danger rounded-pill px-4">Kirim Laporan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 @push('scripts')
 <script>
   // === 1. Init Masonry (Sama seperti kodemu) ===
   var grid = document.querySelector('#masonry-grid');
+  var msnry; // Global instance
+  
   if(grid) {
     imagesLoaded(grid, function() {
-      new Masonry(grid, { itemSelector: '.masonry-item', percentPosition: true });
+      msnry = new Masonry(grid, { itemSelector: '.masonry-item', percentPosition: true });
     });
   }
 
-  // === 2. Data dari Backend (PENTING untuk Efisiensi) ===
-  const photosData = @json($foto->items());
+  // === 2. Infinite Scroll Logic ===
+  // Gunakan 'let' agar bisa diupdate
+  let photosData = @json($foto->items()); 
+  let nextPageUrl = "{{ $foto->nextPageUrl() }}";
+  let isLoading = false;
+
+  window.addEventListener('scroll', () => {
+      // Logic Scroll: Jika scroll dekat bawah (500px sebelum mentok)
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+          loadMoreImages();
+      }
+  });
+
+  function loadMoreImages() {
+      if (isLoading || !nextPageUrl) return;
+      
+      isLoading = true;
+      document.getElementById('loading-spinner').classList.remove('d-none');
+
+      fetch(nextPageUrl, {
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+      })
+      .then(response => response.json())
+      .then(data => {
+          // 1. Append HTML
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = data.html;
+          
+          const newItems = Array.from(tempDiv.children);
+          grid.append(...newItems);
+          
+          // 2. Update Modals Data
+          if(data.data && Array.isArray(data.data)) {
+              photosData.push(...data.data);
+          }
+          
+          // 3. Update Next URL
+          nextPageUrl = data.next_page_url;
+          if(!nextPageUrl) {
+              document.getElementById('end-of-content').classList.remove('d-none');
+          }
+
+          // 4. Update Masonry
+          imagesLoaded(grid, function() {
+              if(msnry) {
+                  msnry.appended(newItems);
+                  msnry.layout();
+              } else {
+                  // Fallback kalau instance entah kenapa belum ada
+                  msnry = new Masonry(grid, { itemSelector: '.masonry-item', percentPosition: true });
+              }
+          });
+
+          isLoading = false;
+          document.getElementById('loading-spinner').classList.add('d-none');
+      })
+      .catch(err => {
+          console.error(err);
+          isLoading = false;
+          document.getElementById('loading-spinner').classList.add('d-none');
+      });
+  }
+
+  // === 3. Data Static ===
   const baseUrlFoto = "{{ asset('storage/foto') }}";
   // Fix URL Avatar (Menghapus 'avatars' ganda)
   const baseUrlAvatar = "{{ asset('storage') }}"; 
@@ -236,12 +327,37 @@
       document.getElementById('modalTitle').innerText = item.judul_foto;
       document.getElementById('modalDesc').innerText = item.deskripsi_foto;
 
+      // Isi Category & Tags
+      const catTagDiv = document.getElementById('modalCategoryTag');
+      let catTagHtml = '';
+      
+      const baseUrlSearch = "{{ url('search') }}"; // Base Search URL
+
+      // 1. Kategori
+      if(item.category) {
+          catTagHtml += `<a href="${baseUrlSearch}?category=${item.category.slug}" class="badge bg-secondary me-2 text-decoration-none">${item.category.name}</a>`;
+      }
+
+      // 2. Tags
+      if(item.tags && item.tags.length > 0) {
+          item.tags.forEach(tag => {
+              catTagHtml += `<a href="${baseUrlSearch}?tag=${tag.slug}" class="text-decoration-none me-1" style="font-size:12px;">#${tag.name}</a>`;
+          });
+      }
+      
+      catTagDiv.innerHTML = catTagHtml;
+
       // Isi User Info
       const user = item.user || {};
-      const avatarPath = user.avatar ? (baseUrlAvatar + '/' + user.avatar) : defaultAvatar;
       const profileUrl = routes.profile.replace('000', user.id);
       
-      document.getElementById('modalAvatar').src = avatarPath;
+      const modalAvatarContainer = document.getElementById('modalAvatarContainer');
+      if(user.avatar) {
+          modalAvatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">`;
+      } else {
+          modalAvatarContainer.innerHTML = `<i class="bi bi-person-circle me-2 default-avatar-icon" style="font-size: 36px;"></i>`;
+      }
+
       document.getElementById('modalUsername').innerText = user.username || 'Unknown';
       document.getElementById('modalUsername').href = profileUrl;
       document.getElementById('modalUserLink').href = profileUrl;
@@ -263,16 +379,22 @@
       if (item.komentarfoto && item.komentarfoto.length > 0) {
           item.komentarfoto.forEach(c => {
               const cUser = c.user || {};
-              const cAvatar = cUser.avatar ? (baseUrlAvatar + '/' + cUser.avatar) : defaultAvatar;
+              // Avatar Logic Comment
+              let avatarHtml = '';
+              if(cUser.avatar) {
+                  avatarHtml = `<img src="${baseUrlAvatar}/${cUser.avatar}" class="rounded-circle" width="28" height="28" style="object-fit: cover;">`;
+              } else {
+                  avatarHtml = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
+              }
               
               const html = `
                 <div class="mb-2 d-flex gap-2">
                     <div class="flex-shrink-0">
-                        <img src="${cAvatar}" class="rounded-circle" width="28" height="28" style="object-fit: cover;">
+                        ${avatarHtml}
                     </div>
-                    <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100">
-                        <span class="fw-bold small d-block">${cUser.username || 'Anonim'}</span>
-                        <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
+                    <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble">
+                        <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
+                        <p class="mb-0 small text-dark lh-sm mt-1 comment-text">${c.isi_komentar}</p>
                     </div>
                 </div>`;
               listDiv.innerHTML += html;
@@ -294,6 +416,27 @@
       if (m.id !== menuId) m.classList.remove('show');
     });
     if (menu) menu.classList.toggle('show');
+  }
+
+  // === Global Variable for Report ===
+  let currentReportFotoId = null;
+
+  function openReportModal() {
+      // Ambil ID dari modal yg sedang terbuka (globalDetailModal)
+      // Kita butuh ID foto yang sedang dilihat. 
+      // Trik: Kita simpan ID saat openSingleModal dipanggil
+      if(currentReportFotoId) {
+          document.getElementById('reportFotoId').value = currentReportFotoId;
+          const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+          reportModal.show();
+      }
+  }
+
+  // Inject logic ke openSingleModal
+  const originalOpenModal = openSingleModal;
+  openSingleModal = function(id) {
+      currentReportFotoId = id; // Simpan ID
+      originalOpenModal(id);
   }
 
   document.addEventListener('click', function () {

@@ -30,7 +30,7 @@
         <li class="nav-item dropdown d-flex align-items-center">
           
           {{-- 1. KLIK AVATAR: Langsung ke Halaman Public Profile --}}
-          <a href="{{ route('profile.public', Auth::user()->id) }}" class="d-block p-1" title="Lihat Galeri Saya">
+          <a href="{{ route('profile.public', Auth::user()->id) }}" class="d-block p-1 text-decoration-none" title="Lihat Galeri Saya">
             @if(Auth::user()->avatar)
               <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
                    alt="Profile"
@@ -39,11 +39,7 @@
                    width="36"
                    height="36">
             @else
-              <img src="{{ asset('assets/img/default-profile.png') }}" 
-                   alt="Profile" 
-                   class="rounded-circle border" 
-                   width="36" 
-                   height="36">
+              <i class="bi bi-person-circle default-avatar-icon" style="font-size: 36px;"></i>
             @endif
           </a>
 

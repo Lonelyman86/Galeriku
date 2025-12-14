@@ -27,6 +27,7 @@ class ProfileController extends Controller
             'username' => ['required','string','min:3','max:30', Rule::unique('users','username')->ignore($user->id)],
             'email'    => ['required','email','max:120', Rule::unique('users','email')->ignore($user->id)],
             'address'  => ['nullable','string','max:500'],
+            'bio'      => ['nullable','string','max:1000'], // Add bio
             'avatar'   => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
             'password' => ['nullable','confirmed','min:8'],
         ]);
@@ -52,7 +53,7 @@ class ProfileController extends Controller
     }
 
     // Function ini yang dipanggil oleh Route::get('/user/{id}', ...)
-    public function showPublicProfile($id)
+    public function showPublicProfile(Request $request, $id)
     {
         // 1. Cari User (Jika tidak ketemu, otomatis 404)
         $user = User::findOrFail($id);
@@ -63,6 +64,14 @@ class ProfileController extends Controller
                     ->with(['like', 'komentarfoto.user', 'album']) // Eager loading biar cepat
                     ->latest()
                     ->paginate(12); // Pagination biar halaman gak berat kalau fotonya ribuan
+
+        if ($request->ajax()) {
+            $view = view('partials.public-profile-grid', ['foto' => $foto, 'user' => $user])->render();
+            return response()->json([
+                'html' => $view,
+                'next_page_url' => $foto->nextPageUrl()
+            ]);
+        }
 
         // 3. Ambil Album Milik User
         $albums = Album::where('user_id', $id)->get();

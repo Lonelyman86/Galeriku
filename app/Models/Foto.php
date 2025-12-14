@@ -38,6 +38,16 @@ class Foto extends Model
         return $this->belongsToMany(User::class, 'likefoto', 'foto_id', 'user_id')->withTimestamps();
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'foto_tag');
+    }
+
     // --- [BARU] SCOPE QUERY EFISIEN ---
     // Gunanya: Biar di Controller gak perlu nulis 'with' panjang-panjang lagi
     public function scopeWithCompleteDetails($query)
@@ -46,7 +56,9 @@ class Foto extends Model
             'user:id,username,fullname,avatar',
             'album:id,nama_album',
             'like:id,foto_id,user_id',
-            'komentarfoto.user:id,username,fullname,avatar'
+            'komentarfoto.user:id,username,fullname,avatar',
+            'category:id,name,slug',
+            'tags:id,name,slug'
         ]);
     }
 }

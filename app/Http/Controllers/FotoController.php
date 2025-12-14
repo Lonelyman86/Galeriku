@@ -5,15 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Foto;
 use App\Models\Album;
+use App\Models\Category;
+use App\Models\Tag;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreFotoRequest;
 
 class FotoController extends Controller
 {
     public function create ()
     {
-        return view('pages.fotoaction.createfoto', [
-            "title" => "Create New Post"
+        $categories = Category::all();
+        return view('photos.create', [
+            "title" => "Create New Post",
+            "categories" => $categories
         ]);
     }
 
@@ -24,23 +30,20 @@ class FotoController extends Controller
             ->latest()
             ->paginate(12);
 
-        $albums = Album::select('id', 'nama_album')->get(); 
+        $albums = Album::select('id', 'nama_album')
+            ->where('user_id', Auth::id())
+            ->get(); 
 
-        return view('foto', [
+        return view('photos.index', [
             "title" => "foto",
             "foto" => $foto, 
             "albums" => $albums
         ]);
     }
 
-    public function upload(Request $request)
+    public function upload(StoreFotoRequest $request)
     {
-        $request->validate([
-            'lokasi_file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', 
-            'judul_foto' => 'required|string|max:255',
-            'deskripsi_foto' => 'required|string',
-            'album_id' => 'nullable',
-        ]);
+        // Validation handled by StoreFotoRequest
 
         if ($request->hasFile('lokasi_file')) {
             $file = $request->file('lokasi_file');
@@ -55,7 +58,33 @@ class FotoController extends Controller
             $foto->lokasi_file = $filename;
             $foto->tanggal_unggah = now();
             // $foto->album_id = $request->album_id; 
+            
+            // 1. Simpan Category
+            if ($request->filled('category_id')) {
+                $foto->category_id = $request->category_id;
+            }
+
             $foto->save();
+
+            // 2. Simpan Tags (Format: "anime, waifu, sunset")
+            if ($request->filled('tags')) {
+                $tagNames = explode(',', $request->tags); // Pisah berdasarkan koma
+                $tagIds = [];
+
+                foreach ($tagNames as $tagName) {
+                    $name = trim($tagName);
+                    if ($name) {
+                        // Cari atau Buat Tag baru
+                        $tag = Tag::firstOrCreate(
+                            ['slug' => Str::slug($name)],
+                            ['name' => $name]
+                        );
+                        $tagIds[] = $tag->id;
+                    }
+                }
+                // Sync (Hubungkan foto dengan tag)
+                $foto->tags()->sync($tagIds);
+            }
 
             return redirect('studio')->with('success', 'Foto berhasil diunggah!');
         }
@@ -81,6 +110,58 @@ class FotoController extends Controller
         $message = $request->album_id ? 'Foto berhasil ditambahkan ke album.' : 'Foto berhasil dikeluarkan dari album.';
 
         return redirect()->back()->with('success', $message);
+    }
+
+    public function edit(Foto $photo)
+    {
+        if (Auth::id() !== $photo->user_id) {
+            abort(403, 'Anda tidak memiliki izin.');
+        }
+
+        $categories = Category::all();
+        return view('photos.edit', [
+            "title" => "Edit Foto",
+            "photo" => $photo,
+            "categories" => $categories
+        ]);
+    }
+
+    public function update(Request $request, Foto $photo)
+    {
+        if (Auth::id() !== $photo->user_id) {
+            abort(403, 'Anda tidak memiliki izin.');
+        }
+
+        $request->validate([
+            'judul_foto' => 'required|string|max:255',
+            'deskripsi_foto' => 'required|string',
+            'category_id' => 'nullable|exists:categories,id',
+        ]);
+
+        $photo->judul_foto = $request->judul_foto;
+        $photo->deskripsi_foto = $request->deskripsi_foto;
+        
+        if ($request->filled('category_id')) {
+            $photo->category_id = $request->category_id;
+        }
+
+        // Tags Update
+        if ($request->filled('tags')) {
+            $tagNames = explode(',', $request->tags);
+            $tagIds = [];
+            foreach ($tagNames as $tagName) {
+                $name = trim($tagName);
+                if ($name) {
+                    $tag = Tag::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name]);
+                    $tagIds[] = $tag->id;
+                }
+            }
+            $photo->tags()->sync($tagIds);
+        }
+
+        $photo->save();
+
+        return redirect('/studio')->with('success', 'Foto berhasil diperbarui!');
     }
 
     public function destroy(Foto $photo)

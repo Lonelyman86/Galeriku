@@ -6,28 +6,21 @@ use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Foto;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use App\Http\Requests\StoreAlbumRequest;
+use App\Http\Requests\UpdateAlbumRequest;
 
 class AlbumController extends Controller
 {
     public function index()
     {
-        return view('pages.albumaction.createalbum', [
+        return view('albums.create', [
             'title' => 'Create Album'
         ]);
     }
 
-    public function store(Request $r)
+    public function store(StoreAlbumRequest $r)
     {
-        $v = $r->validate([
-            'nama_album' => [
-                'required',
-                Rule::unique('albums')->where(function ($query) {
-                    return $query->where('user_id', Auth::id());
-                })
-            ],
-            'deskripsi' => 'required',
-        ]);
+        $v = $r->validated();
 
         $v['user_id'] = Auth::id();
         Album::create($v);
@@ -38,29 +31,20 @@ class AlbumController extends Controller
     /**
      * Update nama & deskripsi album (fitur edit album).
      */
-    public function update(Request $request, Album $album)
+    public function update(UpdateAlbumRequest $request, Album $album)
     {
-        // Pastikan yang ngedit memang pemilik albumnya
+        // Authorization handled by UpdateAlbumRequest (authorize method)
         if (Auth::id() !== $album->user_id) {
-            abort(403, 'Anda tidak memiliki izin.');
+             abort(403, 'Anda tidak memiliki izin.');
         }
 
-        $data = $request->validate([
-            'nama_album' => [
-                'required',
-                Rule::unique('albums')->where(function ($query) {
-                    return $query->where('user_id', Auth::id());
-                })->ignore($album->id), // supaya nama lama sendiri nggak dianggap bentrok
-            ],
-            'deskripsi' => 'required',
-        ]);
-
+        $data = $request->validated();
         $album->update($data);
 
         return back()->with('success', 'Album berhasil diperbarui.');
     }
 
-    public function show(Album $album)
+    public function show(Request $request, Album $album)
     {
         // 1. Ambil foto yang SUDAH ada di album ini
         $foto = Foto::with([
@@ -71,6 +55,14 @@ class AlbumController extends Controller
             ->where('album_id', $album->id)
             ->latest()
             ->paginate(12);
+
+        if ($request->ajax()) {
+            $view = view('partials.album-grid', ['foto' => $foto, 'album' => $album])->render();
+            return response()->json([
+                'html' => $view,
+                'next_page_url' => $foto->nextPageUrl()
+            ]);
+        }
 
         // 2. Ambil foto milik user yang TIDAK berada di album ini (untuk "Ambil dari Galeri")
         $fotoTersedia = Foto::select('id', 'judul_foto', 'lokasi_file')
@@ -87,7 +79,7 @@ class AlbumController extends Controller
             ->where('user_id', Auth::id())
             ->get();
 
-        return view('ShowAlbum', [
+        return view('albums.show', [
             'title'        => 'Album / ' . $album->nama_album,
             'album'        => $album,
             'albumOption'  => $albumOption,

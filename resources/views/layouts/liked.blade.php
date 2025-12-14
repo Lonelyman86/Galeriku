@@ -1,22 +1,10 @@
 @extends('main')
 @section('content')
 
-<h1 class="page-title">Foto Yang Disukai</h1>
+<div class="container-fluid py-4">
+  <h1 class="fs-4 mb-4 fw-bold px-2">Foto Yang Disukai</h1>
 
-<style>
-  .page-title{ font-family: ui-sans-serif, system-ui; font-size: 22px; margin: 16px 8px; font-weight: 700; }
-  .masonry{ column-count: 5; column-gap: 16px; padding: 8px 16px 64px; }
-  @media (max-width:1200px){ .masonry{ column-count:4; } }
-  @media (max-width:992px){ .masonry{ column-count:3; } }
-  @media (max-width:768px){ .masonry{ column-count:2; } }
-  @media (max-width:480px){ .masonry{ column-count:1; } }
-
-  .pin{ display:inline-block; width:100%; margin:0 0 16px; position:relative; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 1px 0 rgba(0,0,0,.04); }
-  .pin img{ width:100%; height:auto; display:block; object-fit:cover; }
-  .pin-meta{ padding:10px; }
-</style>
-
-<div class="masonry">
+  <div class="masonry">
   @foreach ($foto as $item)
     <div class="pin">
       <a data-bs-toggle="modal" data-bs-target="#Detail{{$item->id}}">
@@ -57,6 +45,7 @@
 {{-- [BARU] Pagination Links --}}
 <div class="d-flex justify-content-center mt-4 mb-5">
     {{ $foto->withQueryString()->links() }}
+</div>
 </div>
 
 @endsection
