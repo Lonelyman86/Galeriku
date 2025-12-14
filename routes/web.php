@@ -31,28 +31,6 @@ use App\Http\Controllers\ReportController;
 
 
 
-// Route KHUSUS untuk memperbaiki Password Admin (Jalankan sekali lalu hapus)
-Route::get('/fix-account', function() {
-    $email = 'admin@galeriku.com'; // Ganti sesuai email yang error
-    $pass = 'password123';
-    
-    $user = \App\Models\User::where('email', $email)->first();
-    
-    if (!$user) {
-        // Kalau user tidak ada, kita buat baru
-        $user = new \App\Models\User();
-        $user->email = $email;
-        $user->username = 'admin';
-        $user->fullname = 'Admin Galeriku';
-        $user->role_id = 1; 
-    }
-    
-    // Kita set password ulang biar otomatis di-hash oleh Laravel
-    $user->password = $pass; 
-    $user->save();
-    
-    return "AKUN BERHASIL DIPERBAIKI! <br> Silahkan Login dengan: <br> Email: $email <br> Password: $pass";
-});
 
 // Halaman Utama & Search
 Route::get('/', [HomeController::class, 'index']);
