@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // Pagination
         Paginator::useBootstrapFive();
+
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
 
         // =====================================================
         //  NOTIFIKASI GLOBAL UNTUK SEMUA VIEW
