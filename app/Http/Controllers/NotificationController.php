@@ -9,7 +9,7 @@ use App\Models\Notification; // <--- WAJIB: Import Model Notification
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class NotificationController extends Controller
+class LikeController extends Controller
 {
     public function toggle($photoId)
     {
