@@ -2,7 +2,7 @@
   <div class="col-6 col-md-4 col-lg-3 mb-4 masonry-item">
       <div class="pin-wrapper">
           {{-- Gambar Utama --}}
-          <img src="{{ asset('storage/foto/'.$item->lokasi_file) }}" alt="{{ $item->judul_foto }}"
+          <img src="{{ Storage::url('foto/'.$item->lokasi_file) }}" alt="{{ $item->judul_foto }}"
                onclick="openSingleModal({{ $item->id }})">
 
           {{-- Tombol 3 Titik --}}
@@ -13,7 +13,7 @@
 
           {{-- Menu Dropdown --}}
           <div id="pin-menu-{{ $item->id }}" class="pin-menu">
-              <a href="{{ asset('storage/foto/'.$item->lokasi_file) }}" download class="pin-menu-item">
+              <a href="{{ Storage::url('foto/'.$item->lokasi_file) }}" download class="pin-menu-item">
                   <i class="bi bi-download"></i> <span>Unduh gambar</span>
               </a>
               @if($item->album_id)

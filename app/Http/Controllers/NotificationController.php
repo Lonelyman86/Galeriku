@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Like;
 use App\Models\Foto;
-use App\Models\Album; 
+use App\Models\Album;
 use App\Models\Notification; // <--- WAJIB: Import Model Notification
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class LikeController extends Controller
+class NotificationController extends Controller
 {
     public function toggle($photoId)
     {
         $user = Auth::user();
-        $photo = Foto::findOrFail($photoId); 
+        $photo = Foto::findOrFail($photoId);
 
         $existingLike = Like::where('user_id', $user->id)
                             ->where('foto_id', $photo->id)
@@ -60,11 +60,11 @@ class LikeController extends Controller
             })
             ->with([
                 'user:id,username,fullname,avatar', // Load data user lengkap
-                'album', 
+                'album',
                 'komentarfoto.user'
-            ]) 
-            ->withCount('like') 
-            ->paginate(12); 
+            ])
+            ->withCount('like')
+            ->paginate(12);
 
         $albums = Album::where('user_id', $user->id)->get();
 

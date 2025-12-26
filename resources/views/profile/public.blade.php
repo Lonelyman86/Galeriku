@@ -8,14 +8,14 @@
 
 <style>
   /* === STYLE FOLDER ALBUM === */
-  .folder-card { 
-      transition: transform 0.2s ease, box-shadow 0.2s ease; 
-      background: #fff; cursor: pointer; 
+  .folder-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: #fff; cursor: pointer;
   }
-  .folder-card:hover { 
-      transform: translateY(-5px); 
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; 
-      background: #fdfdfd; 
+  .folder-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+      background: #fdfdfd;
   }
 
   /* === STYLE GRID FOTO === */
@@ -70,15 +70,15 @@
     <div class="text-center mb-5">
         <div class="position-relative d-inline-block mb-3">
             @if($user->avatar)
-                <img src="{{ asset('storage/' . $user->avatar) }}" 
-                     class="rounded-circle border border-4 border-white shadow-sm" 
-                     width="120" height="120" 
+                <img src="{{ Storage::url($user->avatar) }}"
+                     class="rounded-circle border border-4 border-white shadow-sm"
+                     width="120" height="120"
                      style="object-fit: cover;">
             @else
                 <i class="bi bi-person-circle default-avatar-icon" style="font-size: 120px; line-height: 1;"></i>
             @endif
         </div>
-        
+
         <h2 class="fw-bold mb-1 section-title">{{ $user->fullname ?? $user->username }}</h2>
         <p class="text-muted mb-3">{{ '@' . $user->username }}</p>
 
@@ -132,7 +132,7 @@
 
     {{-- 3. BAGIAN FOTO --}}
     <h4 class="fw-bold mb-4 section-title">Semua Foto</h4>
-    
+
     <div class="row" id="masonry-grid-photos">
       @include('partials.public-profile-grid', ['foto' => $foto, 'user' => $user])
     </div>
@@ -186,12 +186,12 @@
     <div class="modal-content" style="border-radius: 20px; overflow: hidden; border:none;">
       <div class="modal-body p-0">
         <div class="row g-0" style="min-height: 500px;">
-          
+
           {{-- Kiri: Gambar Full --}}
           <div class="col-lg-8 bg-light d-flex align-items-center justify-content-center position-relative">
             <div class="modal-image-wrapper">
               <img id="modalImg" src="" alt="">
-              
+
               <button type="button" class="pin-menu-btn pin-menu-btn-modal" onclick="toggleMenu(event, 'pin-menu-modal-global')">
                 <i class="bi bi-three-dots"></i>
               </button>
@@ -303,15 +303,15 @@
 {{-- SCRIPT INIT MASONRY & MENU --}}
 <script>
     // 1. Data Backend
-    let photosData = @json($foto->items()); 
+    let photosData = @json($foto->items());
     let nextPageUrl = "{{ $foto->nextPageUrl() }}";
     let isLoading = false;
-    
+
     // 2. Static Strings
-    const baseUrlFoto = "{{ asset('storage/foto') }}";
-    const baseUrlAvatar = "{{ asset('storage') }}"; 
+    const baseUrlFoto = "{{ Storage::url('foto') }}";
+    const baseUrlAvatar = "{{ Storage::url('') }}";
     const defaultAvatar = "{{ asset('assets/img/default-profile.png') }}";
-    const baseUrlSearch = "{{ url('search') }}"; 
+    const baseUrlSearch = "{{ url('search') }}";
 
     const routes = {
        profile: "{{ route('profile.public', '000') }}",
@@ -349,10 +349,10 @@
             // Append HTML
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = data.html;
-            
+
             const newItems = Array.from(tempDiv.children);
             grid.append(...newItems);
-            
+
             // Append Data for Modals
             if(data.data && Array.isArray(data.data)) {
                 photosData.push(...data.data);
@@ -410,7 +410,7 @@
         // User Info
         const user = item.user || {};
         const profileUrl = routes.profile.replace('000', user.id);
-        
+
         const modalAvatarContainer = document.getElementById('modalAvatarContainer');
         if(user.avatar) {
              modalAvatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">`;
@@ -463,7 +463,7 @@
 
     // 6. Menu Logic
     function toggleMenu(event, menuId) {
-       event.stopPropagation(); 
+       event.stopPropagation();
        const menu = document.getElementById(menuId);
        document.querySelectorAll('.pin-menu').forEach(m => {
           if (m.id !== menuId) m.classList.remove('show');
@@ -482,7 +482,7 @@
     }
     const originalOpenModal = openSingleModal;
     openSingleModal = function(id) {
-       currentReportFotoId = id; 
+       currentReportFotoId = id;
        originalOpenModal(id);
     }
 

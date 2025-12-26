@@ -2,7 +2,7 @@
   <div class="col-6 col-md-4 col-lg-3 mb-4 masonry-item">
     <div class="pin">
     <a onclick="openSingleModal({{ $item->id }})" style="cursor: pointer;">
-      <img src="{{ asset('storage/foto/'.$item->lokasi_file)}}" alt="{{ $item->judul_foto }}">
+      <img src="{{ Storage::url('foto/'.$item->lokasi_file)}}" alt="{{ $item->judul_foto }}">
     </a>
 
     @if($item->status == 'pending')
@@ -45,5 +45,5 @@
       <div style="font-size:12px; color:#374151;"><b>{{ $item->user->username }}</b></div>
     </div>
   </div>
-  </div> 
+  </div>
 @endforeach

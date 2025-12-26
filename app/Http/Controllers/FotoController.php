@@ -32,11 +32,11 @@ class FotoController extends Controller
 
         $albums = Album::select('id', 'nama_album')
             ->where('user_id', Auth::id())
-            ->get(); 
+            ->get();
 
         return view('photos.index', [
             "title" => "foto",
-            "foto" => $foto, 
+            "foto" => $foto,
             "albums" => $albums
         ]);
     }
@@ -49,7 +49,7 @@ class FotoController extends Controller
             $file = $request->file('lokasi_file');
             $filename = time() . '_' . $file->hashName();
 
-            $file->storeAs('public/foto', $filename);
+            $file->storeAs('foto', $filename);
 
             $foto = new Foto();
             $foto->judul_foto = $request->judul_foto;
@@ -57,8 +57,8 @@ class FotoController extends Controller
             $foto->deskripsi_foto = $request->deskripsi_foto;
             $foto->lokasi_file = $filename;
             $foto->tanggal_unggah = now();
-            // $foto->album_id = $request->album_id; 
-            
+            // $foto->album_id = $request->album_id;
+
             // 1. Simpan Category
             if ($request->filled('category_id')) {
                 $foto->category_id = $request->category_id;
@@ -140,7 +140,7 @@ class FotoController extends Controller
 
         $photo->judul_foto = $request->judul_foto;
         $photo->deskripsi_foto = $request->deskripsi_foto;
-        
+
         if ($request->filled('category_id')) {
             $photo->category_id = $request->category_id;
         }
@@ -170,8 +170,8 @@ class FotoController extends Controller
             abort(403, 'Anda tidak memiliki izin.');
         }
 
-        if (Storage::disk('public')->exists('foto/' . $photo->lokasi_file)) {
-            Storage::disk('public')->delete('foto/' . $photo->lokasi_file);
+        if (Storage::exists('foto/' . $photo->lokasi_file)) {
+            Storage::delete('foto/' . $photo->lokasi_file);
         }
 
         $photo->like()->delete();
