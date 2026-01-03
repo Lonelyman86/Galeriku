@@ -73,8 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/albums/{photo}/check-like', [LikeController::class, 'checkLike'])->name('likes.check');
     Route::post('/photos/{photo}/komentar', [KomentarController::class, 'store'])->name('komentar.store');
     Route::get('/liked', [HomeController::class, 'likedPhotos'])->name('photo.liked');
-    // Opsional: Jika ada route duplicate untuk like, bisa disederhanakan
-    Route::post('/photos/{id}/like', [LikeController::class, 'toggle'])->name('photo.like');
+
 
     // --- Profil ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
@@ -82,12 +81,17 @@ Route::middleware('auth')->group(function () {
     
     // --- Follow System (BARU) ---
     Route::post('/user/{user}/follow', [FollowController::class, 'toggle'])->name('user.follow');
-    
+    Route::get('/following', [HomeController::class, 'followingFeed'])->name('feed.following'); // <--- BARU
+
     // --- Report System (BARU) ---
     Route::post('/report', [ReportController::class, 'store'])->name('report.store');
     
     // --- Notifikasi ---
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::get('/notifications/read-all', function() { return redirect('/studio'); });
+
+    // --- Discovery (BARU) ---
+    Route::get('/discovery', [\App\Http\Controllers\DiscoveryController::class, 'index'])->name('discovery');
 });
 
 // Route ini di luar 'auth' agar album bisa dilihat publik (jika diinginkan)
@@ -103,7 +107,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::delete('/foto/{id}', [FotoAdminController::class, 'destroy'])->name('admin.foto.destroy');
 
     // Admin Reports
-    // Route::get('/reports', [ReportAdminController::class, 'index'])->name('admin.reports.index'); // Digabung ke foto.index
+
     Route::patch('/reports/{id}/ban', [ReportAdminController::class, 'ban'])->name('admin.reports.ban');
     Route::patch('/reports/{id}/dismiss', [ReportAdminController::class, 'dismiss'])->name('admin.reports.dismiss');
 });

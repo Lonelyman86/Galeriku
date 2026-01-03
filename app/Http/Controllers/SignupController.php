@@ -26,7 +26,6 @@ class SignupController extends Controller
         $validatedData = $request->validate([
             'fullname' => 'required|string|max:100', // Sesuaikan max dengan ProfileController
             // 'name' => 'required|min:3|max:10', // HAPUS INI jika tidak ada kolom 'name' di DB
-            'address'  => 'required|string',
             'username' => ['required', 'min:3', 'max:30', 'unique:users'], // Disamakan dengan ProfileController
             'email'    => 'required|email:dns|unique:users',
             'password' => 'required|min:8' // Jangan pakai max untuk password!

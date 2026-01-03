@@ -313,21 +313,9 @@
     pointer-events: auto;
 }
 
-.btn-ghost,
-.btn-danger,
-.btn-primary {
-    border: 0;
-    border-radius: 999px;
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    background: rgba(255, 255, 255, .9);
-}
 
-.btn-danger {
-    background: #ef4444;
-    color: #fff;
-}
+
+
 
 .btn-primary {
     background: #2563eb;

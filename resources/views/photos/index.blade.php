@@ -7,7 +7,7 @@
 @foreach ($foto as $item)
     <div class="card-03">
         <div class="card-foto">
-            <img src="{{ Storage::url('foto/'.$item->lokasi_file)}}" style="width: 160px; height:150px">
+            <img src="{{ asset('storage/foto/'.$item->lokasi_file)}}" style="width: 160px; height:150px">
         </div>
         <div class="card-inform">
             {{-- OPTIMASI: Langsung pakai relasi user, tidak perlu query lagi --}}
@@ -51,7 +51,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-7">
-                            <img src="{{ Storage::url('foto/'.$item->lokasi_file)}}" class="detail-foto">
+                            <img src="{{ asset('storage/foto/'.$item->lokasi_file)}}" class="detail-foto">
                         </div>
                         <div class="col-md-5">
                             <div class="like-comment-container">
@@ -80,7 +80,7 @@
                                     @foreach ($item->komentarfoto as $comment)
                                         <div class="list-group-item">
                                             <h6 class="list-group-item-heading">
-                                                <strong>{{ $comment->user->fullname }}</strong>
+                                                <strong>{{ $comment->user->fullname }}</strong> 
                                                 <span class="text-muted ms-2">{{ $comment->created_at->diffForHumans() }}</span>
                                             </h6>
                                             <p class="list-group-item-text">{{ $comment->isi_komentar }}</p>

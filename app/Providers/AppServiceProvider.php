@@ -26,9 +26,7 @@ class AppServiceProvider extends ServiceProvider
         // Pagination
         Paginator::useBootstrapFive();
 
-        if ($this->app->environment('production')) {
-            URL::forceScheme('https');
-        }
+        //
 
         // =====================================================
         //  NOTIFIKASI GLOBAL UNTUK SEMUA VIEW

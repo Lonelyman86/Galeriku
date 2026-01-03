@@ -14,7 +14,7 @@ use App\Http\Requests\StoreFotoRequest;
 
 class FotoController extends Controller
 {
-    public function create ()
+    public function create()
     {
         $categories = Category::all();
         return view('photos.create', [
@@ -23,9 +23,9 @@ class FotoController extends Controller
         ]);
     }
 
-    public function index ()
+    public function index()
     {
-        // PERBAIKAN: Gunakan scopeWithCompleteDetails agar konsisten dan efisien
+        // Mengambil foto dengan detail lengkap (user, album, category, likes, comments)
         $foto = Foto::withCompleteDetails()
             ->latest()
             ->paginate(12);
@@ -49,7 +49,9 @@ class FotoController extends Controller
             $file = $request->file('lokasi_file');
             $filename = time() . '_' . $file->hashName();
 
-            $file->storeAs('foto', $filename);
+            // PENTING: Simpan ke disk 'public' di folder 'foto'.
+            // Hasilnya ada di: storage/app/public/foto/namafile.jpg
+            $file->storeAs('foto', $filename, 'public');
 
             $foto = new Foto();
             $foto->judul_foto = $request->judul_foto;
@@ -57,7 +59,7 @@ class FotoController extends Controller
             $foto->deskripsi_foto = $request->deskripsi_foto;
             $foto->lokasi_file = $filename;
             $foto->tanggal_unggah = now();
-            // $foto->album_id = $request->album_id;
+            // $foto->album_id = $request->album_id; 
 
             // 1. Simpan Category
             if ($request->filled('category_id')) {
@@ -66,24 +68,9 @@ class FotoController extends Controller
 
             $foto->save();
 
-            // 2. Simpan Tags (Format: "anime, waifu, sunset")
+            // 2. Simpan Tags
             if ($request->filled('tags')) {
-                $tagNames = explode(',', $request->tags); // Pisah berdasarkan koma
-                $tagIds = [];
-
-                foreach ($tagNames as $tagName) {
-                    $name = trim($tagName);
-                    if ($name) {
-                        // Cari atau Buat Tag baru
-                        $tag = Tag::firstOrCreate(
-                            ['slug' => Str::slug($name)],
-                            ['name' => $name]
-                        );
-                        $tagIds[] = $tag->id;
-                    }
-                }
-                // Sync (Hubungkan foto dengan tag)
-                $foto->tags()->sync($tagIds);
+                $this->syncTags($foto, $request->tags);
             }
 
             return redirect('studio')->with('success', 'Foto berhasil diunggah!');
@@ -147,16 +134,7 @@ class FotoController extends Controller
 
         // Tags Update
         if ($request->filled('tags')) {
-            $tagNames = explode(',', $request->tags);
-            $tagIds = [];
-            foreach ($tagNames as $tagName) {
-                $name = trim($tagName);
-                if ($name) {
-                    $tag = Tag::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name]);
-                    $tagIds[] = $tag->id;
-                }
-            }
-            $photo->tags()->sync($tagIds);
+            $this->syncTags($photo, $request->tags);
         }
 
         $photo->save();
@@ -170,14 +148,35 @@ class FotoController extends Controller
             abort(403, 'Anda tidak memiliki izin.');
         }
 
-        if (Storage::exists('foto/' . $photo->lokasi_file)) {
-            Storage::delete('foto/' . $photo->lokasi_file);
+        // HAPUS FILE FISIK DARI STORAGE
+        // Cek apakah file ada, lalu hapus
+        if ($photo->lokasi_file && Storage::disk('public')->exists('foto/' . $photo->lokasi_file)) {
+            Storage::disk('public')->delete('foto/' . $photo->lokasi_file);
         }
 
+        // Hapus data terkait di database
         $photo->like()->delete();
         $photo->komentarfoto()->delete();
+        $photo->tags()->detach(); // Lepas hubungan tag dulu
         $photo->delete();
 
         return redirect()->back()->with('success', 'Foto berhasil dihapus!');
+    }
+    private function syncTags(Foto $foto, string $tagsInput)
+    {
+        $tagNames = explode(',', $tagsInput);
+        $tagIds = [];
+
+        foreach ($tagNames as $tagName) {
+            $name = trim($tagName);
+            if ($name) {
+                $tag = Tag::firstOrCreate(
+                    ['slug' => Str::slug($name)],
+                    ['name' => $name]
+                );
+                $tagIds[] = $tag->id;
+            }
+        }
+        $foto->tags()->sync($tagIds);
     }
 }

@@ -8,8 +8,8 @@
     }
 
     /* === DARK MODE OVERRIDES FOR EDIT PAGE === */
-    body.dark-mode .create-title,
-    body.dark-mode .field-label,
+    body.dark-mode .create-title, 
+    body.dark-mode .field-label, 
     body.dark-mode .file-meta {
         color: #e0e0e0 !important;
     }
@@ -51,7 +51,7 @@
 <form class="create-pin" action="{{ route('photos.update', $photo->id) }}" method="POST" enctype="multipart/form-data">
   @csrf
   @method('PATCH')
-
+  
   {{-- Header match Studio Font --}}
   <h1 class="fs-4 mb-4 fw-bold">Edit Foto</h1>
 
@@ -61,7 +61,7 @@
       <label class="dropzone" id="dropzone" style="pointer-events: none; border-style: solid;">
         <div class="dz-inner" style="display: none;"></div>
         {{-- Preview existing image --}}
-        <img id="preview" src="{{ Storage::url('foto/'.$photo->lokasi_file) }}" alt="{{ $photo->judul_foto }}" style="display:block;" />
+        <img id="preview" src="{{ asset('storage/foto/'.$photo->lokasi_file) }}" alt="{{ $photo->judul_foto }}" style="display:block;" />
       </label>
       <div class="file-meta text-center mt-2 text-muted">File tidak dapat diubah saat edit</div>
     </div>
@@ -92,8 +92,8 @@
       {{-- Tags --}}
       <label class="field-label">Hashtags</label>
       <div class="pill-input">
-          <input type="text" name="tags"
-                 value="{{ old('tags', $photo->tags->pluck('name')->implode(', ')) }}"
+          <input type="text" name="tags" 
+                 value="{{ old('tags', $photo->tags->pluck('name')->implode(', ')) }}" 
                  placeholder="Contoh: anime, sunset, waifu (pisahkan koma)">
       </div>
 

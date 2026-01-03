@@ -20,7 +20,6 @@ class User extends Authenticatable
         'google_id',
         'role_id', // WAJIB: Tambahkan ini agar bisa diisi saat seeding admin
         'avatar',
-        'address',
         'bio', // Add bio
     ];
 

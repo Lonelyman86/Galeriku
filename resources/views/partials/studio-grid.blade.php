@@ -14,7 +14,7 @@
         ❌ Ditolak
       </div>
     @endif
-
+    
     <div class="pin-meta p-2">
       <div class="fw-bold small">{{ $item->judul_foto }}</div>
       <div class="text-muted small" style="font-size:11px;">
@@ -29,24 +29,24 @@
       <div class="modal-content" style="border-radius: 20px; overflow: hidden; border:none;">
         <div class="modal-body p-0">
           <div class="row g-0" style="min-height: 500px;">
-
+            
             {{-- Kiri: Gambar Full --}}
             <div class="col-lg-8 bg-light d-flex align-items-center justify-content-center">
               <div class="p-4" style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
-                 <img src="{{ Storage::url('foto/'.$item->lokasi_file)}}" style="max-height: 85vh; max-width:100%; object-fit: contain; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                 <img src="{{ asset('storage/foto/'.$item->lokasi_file)}}" style="max-height: 85vh; max-width:100%; object-fit: contain; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
               </div>
             </div>
 
             {{-- Kanan: Detail --}}
             <div class="col-lg-4 bg-white d-flex flex-column" style="max-height: 90vh;">
-
+              
               {{-- Header --}}
               <div class="p-3 border-bottom relative">
                  <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
-
+                 
                   <div class="d-flex align-items-center mb-3">
                     @if($item->user->avatar)
-                        <img src="{{ asset('storage/'.$item->user->avatar) }}"
+                        <img src="{{ asset('storage/'.$item->user->avatar) }}" 
                              class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
                     @else
                         <i class="bi bi-person-circle me-2 default-avatar-icon" style="font-size: 40px;"></i>
@@ -75,7 +75,7 @@
                     <a href="{{ route('photos.edit', $item->id) }}" class="btn btn-outline-dark btn-sm rounded-pill fw-bold d-block text-decoration-none text-center">
                         Edit Foto
                     </a>
-
+                    
                     {{-- Form Pindah Album (Clean Pill Style) --}}
                     <form action="{{ route('foto.update.album', ['photo' => $item->id]) }}" method="POST">
                         @csrf
@@ -108,11 +108,11 @@
                {{-- Komentar List --}}
                <div class="flex-grow-1 p-3 overflow-auto custom-scrollbar bg-white">
                   <h6 class="fw-bold small text-muted mb-3">Komentar Masuk ({{ $item->komentarfoto->count() }})</h6>
-
+                 
                   @forelse($item->komentarfoto as $komentar)
                      <div class="d-flex gap-2 mb-3">
                          @if($komentar->user->avatar)
-                             <img src="{{ Storage::url($komentar->user->avatar) }}"
+                             <img src="{{ asset('storage/'.$komentar->user->avatar) }}" 
                                   class="rounded-circle flex-shrink-0" width="32" height="32" style="object-fit:cover;">
                          @else
                              <i class="bi bi-person-circle flex-shrink-0 default-avatar-icon" style="font-size: 32px;"></i>

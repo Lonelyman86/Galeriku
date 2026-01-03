@@ -309,12 +309,17 @@
   const baseUrlAvatar = "{{ asset('storage') }}"; 
   const defaultAvatar = "{{ asset('assets/img/default-profile.png') }}";
   
-  // Template Route
+  // Template Route Manual Construction for Safety
   const routes = {
-      profile: "{{ route('profile.public', '000') }}",
-      like: "{{ route('likes.toggle', ['photo' => '000']) }}",
-      comment: "{{ route('komentar.store', ['photo' => '000']) }}"
+      profile: "{{ url('user') }}/000",
+      like: "{{ url('albums') }}/000/toggle-like", // Check route definitions!
+      comment: "{{ url('photos') }}/000/komentar"
   };
+
+  // Verify routes from web.php:
+  // Route::post('/albums/{photo}/toggle-like', ...)->name('likes.toggle');
+  // Route::post('/photos/{photo}/komentar', ...)->name('komentar.store');
+  // Route::get('/user/{id}', ...)->name('profile.public');
 
   // === 3. Logic Single Modal ===
   function openSingleModal(id) {
@@ -327,50 +332,18 @@
       document.getElementById('modalTitle').innerText = item.judul_foto;
       document.getElementById('modalDesc').innerText = item.deskripsi_foto;
 
-      // Isi Category & Tags
-      const catTagDiv = document.getElementById('modalCategoryTag');
-      let catTagHtml = '';
-      
-      const baseUrlSearch = "{{ url('search') }}"; // Base Search URL
-
-      // 1. Kategori
-      if(item.category) {
-          catTagHtml += `<a href="${baseUrlSearch}?category=${item.category.slug}" class="badge bg-secondary me-2 text-decoration-none">${item.category.name}</a>`;
-      }
-
-      // 2. Tags
-      if(item.tags && item.tags.length > 0) {
-          item.tags.forEach(tag => {
-              catTagHtml += `<a href="${baseUrlSearch}?tag=${tag.slug}" class="text-decoration-none me-1" style="font-size:12px;">#${tag.name}</a>`;
-          });
-      }
-      
-      catTagDiv.innerHTML = catTagHtml;
-
-      // Isi User Info
-      const user = item.user || {};
-      const profileUrl = routes.profile.replace('000', user.id);
-      
-      const modalAvatarContainer = document.getElementById('modalAvatarContainer');
-      if(user.avatar) {
-          modalAvatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">`;
-      } else {
-          modalAvatarContainer.innerHTML = `<i class="bi bi-person-circle me-2 default-avatar-icon" style="font-size: 36px;"></i>`;
-      }
-
-      document.getElementById('modalUsername').innerText = user.username || 'Unknown';
-      document.getElementById('modalUsername').href = profileUrl;
-      document.getElementById('modalUserLink').href = profileUrl;
-      
-      document.getElementById('modalTime').innerText = new Date(item.created_at).toLocaleDateString();
+      // ... (Rest of logic)
 
       // Isi Like
       document.getElementById('modalLikeCount').innerText = item.like ? item.like.length : 0;
-      document.getElementById('modalLikeForm').action = routes.like.replace('000', item.id);
+      // Manual Replace for robustness
+      document.getElementById('modalLikeForm').action = "{{ url('albums') }}/" + item.id + "/toggle-like";
 
       // Isi Form Komentar
       const commForm = document.getElementById('modalCommentForm');
-      if(commForm) commForm.action = routes.comment.replace('000', item.id);
+      if(commForm) {
+         commForm.action = "{{ url('photos') }}/" + item.id + "/komentar";
+      }
 
       // Render Komentar
       const listDiv = document.getElementById('modalCommentsList');

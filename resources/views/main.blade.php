@@ -106,6 +106,16 @@
         background-color: #e0e0e0;
         color: #121212;
     }
+
+    /* Navbar Links & Icons in Dark Mode */
+    body.dark-mode .nav-link, 
+    body.dark-mode .dropdown-icon-anim {
+        color: #e0e0e0 !important;
+    }
+    body.dark-mode .nav-link:hover,
+    body.dark-mode .dropdown-icon-anim:hover {
+        color: #fff !important;
+    }
     
     body.dark-mode .form-control, 
     body.dark-mode .pinterest-search,
@@ -181,16 +191,18 @@
         color: #fff !important; /* Force White for Dark Mode */
     }
 
-    /* Dropdown Menus Dark Mode */
+    /* Dropdown Menus Dark Mode - Enhanced */
     body.dark-mode .dropdown-menu {
         background-color: #2b2b2b !important;
         border-color: #444 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
     }
     body.dark-mode .dropdown-item {
         color: #e0e0e0 !important;
     }
-    body.dark-mode .dropdown-item:hover {
-        background-color: #333 !important;
+    body.dark-mode .dropdown-item:hover,
+    body.dark-mode .dropdown-item:focus {
+        background-color: #444 !important;
         color: #fff !important;
     }
     body.dark-mode .dropdown-header {
@@ -199,6 +211,69 @@
     body.dark-mode .dropdown-divider {
         border-color: #444 !important;
     }
+    /* Fix icons inside dropdowns */
+    body.dark-mode .dropdown-item i {
+        color: #e0e0e0 !important;
+    }
+    
+    /* Fix Bootstrap Select / Form Select Dropdowns (Options) */
+    body.dark-mode select {
+        background-color: #2b2b2b !important;
+        color: #e0e0e0 !important;
+    }
+    body.dark-mode select option {
+        background-color: #2b2b2b;
+        color: #e0e0e0;
+    }
+    /* Fix Form Select Arrow (Chevron) Color in Dark Mode */
+    body.dark-mode .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+
+    /* === DARK MODE UPLOAD PAGE overrides === */
+    body.dark-mode .create-title,
+    body.dark-mode .field-label,
+    body.dark-mode .dz-text,
+    body.dark-mode .file-meta {
+        color: #e0e0e0 !important;
+    }
+    
+    body.dark-mode .pill-input,
+    body.dark-mode .pill-textarea,
+    body.dark-mode .dropzone {
+        background-color: #2b2b2b !important;
+        border-color: #444 !important;
+        color: #e0e0e0 !important;
+    }
+    
+    body.dark-mode .pill-input input,
+    body.dark-mode .pill-input select,
+    body.dark-mode .pill-textarea textarea {
+        color: #e0e0e0 !important;
+    }
+    
+    body.dark-mode .pill-input input::placeholder,
+    body.dark-mode .pill-textarea textarea::placeholder {
+        color: #888 !important;
+    }
+    
+    body.dark-mode .dz-icon {
+        border-color: #e0e0e0 !important;
+        color: #e0e0e0 !important;
+    }
+    
+    body.dark-mode select option {
+        background-color: #2b2b2b;
+        color: #e0e0e0;
+    }
+    
+    body.dark-mode .create-grid {
+        border-top-color: #333 !important;
+    }
+    
+    /* Logo Toggle Logic */
+    body.dark-mode .logo-light { display: none !important; }
+    body.dark-mode .logo-dark { display: inline-block !important; }
     
     /* Logo filter removed per user request */
   </style>

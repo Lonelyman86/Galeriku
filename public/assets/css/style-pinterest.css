@@ -1,95 +1,219 @@
 /* Sidebar */
 .sidenav {
-    width: 80px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 1040;
-    background: #fff;
-    border-right: 1px solid #eee;
+  width: 80px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1040;
+  background: #fff;
+  border-right: 1px solid #eee;
+}
+
+/* Navbar */
+.pinterest-nav {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  position: fixed;
+  top: 0;
+  left: 80px;
+  right: 0;
+  height: 64px;
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+}
+
+.pinterest-search {
+  background: #efefef;
+  border: none;
+  border-radius: 25px;
+  height: 44px;
+  padding: 0 1.2em;
+  font-size: 15px;
+  width: 100%;
+}
+
+.pinterest-search:focus {
+  background: #fff;
+  box-shadow: 0 0 0 3px #ddd;
+  outline: none;
+}
+
+/* Main content */
+.main-content {
+  margin-left: 80px;
+  padding-top: 70px;
+}
+
+/* =========================================
+     MASONRY + PIN WRAPPER (Updated for JS Masonry) 
+     Original CSS Columns (.masonry) is deprecated/conflicts with JS.
+     Moved from home.blade.php styles.
+     ========================================= */
+
+.pin-wrapper {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f3f4f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.pin-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+.pin-wrapper img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
+}
+
+/* Tombol Menu 3 Titik */
+.pin-menu-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, .6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  opacity: 0;
+  transition: all .2s ease;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.pin-wrapper:hover .pin-menu-btn,
+.pin-menu-btn.active {
+  opacity: 1;
+}
+
+.pin-menu-btn:hover {
+  background: rgba(0, 0, 0, .8);
+  transform: scale(1.1);
+}
+
+/* Dropdown Menu */
+.pin-menu {
+  position: absolute;
+  top: 46px;
+  right: 10px;
+  min-width: 160px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
+  padding: 6px 0;
+  font-size: 13px;
+  z-index: 20;
+  display: none;
+}
+
+.pin-menu.show {
+  display: block;
+  animation: fadeInMenu 0.1s ease-out;
+}
+
+@keyframes fadeInMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
   }
-  
-  /* Navbar */
-  .pinterest-nav {
-    background: #fff;
-    border-bottom: 1px solid #eee;
-    position: fixed;
-    top: 0;
-    left: 80px;
-    right: 0;
-    height: 64px;
-    z-index: 1030;
-    display: flex;
-    align-items: center;
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .pinterest-search {
-    background: #efefef;
-    border: none;
-    border-radius: 25px;
-    height: 44px;
-    padding: 0 1.2em;
-    font-size: 15px;
-    width: 100%;
-  }
-  
-  .pinterest-search:focus {
-    background: #fff;
-    box-shadow: 0 0 0 3px #ddd;
-    outline: none;
-  }
-  
-  /* Main content */
-  .main-content {
-    margin-left: 80px;
-    padding-top: 70px;
-  }
-  
-  /* Masonry grid */
-  .masonry {
-    column-count: 5;
-    column-gap: 16px;
-    padding: 0 16px;
-  }
-  
-  .pin {
-    break-inside: avoid;
-    margin-bottom: 16px;
-    border-radius: 16px;
-    overflow: hidden;
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  
-  .pin img {
-    width: 100%;
-    border-radius: 16px;
-    object-fit: cover;
-    transition: transform .2s;
-  }
-  
-  .pin:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 20px rgba(0,0,0,.1);
-  }
-  
-  /* Responsif */
-  @media (max-width: 992px) {
-    .masonry { column-count: 3; }
-  }
-  @media (max-width: 768px) {
-    .masonry { column-count: 2; }
-  }
-  @media (max-width: 576px) {
-    .masonry { column-count: 1; }
-  }
+}
+
+.pin-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.1s;
+}
+
+.pin-menu-item:hover {
+  background: #f3f4f6;
+}
+
+/* === MODAL STYLE === */
+.modal-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 24px;
+}
+
+.modal-image-wrapper img {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.pin-menu-btn-modal {
+  top: 24px;
+  right: 24px;
+  opacity: 1;
+}
+
+.pin-menu-modal {
+  top: 60px;
+  right: 24px;
+}
+
+/* Scrollbar Custom */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
 
 .badge.bg-danger {
   font-size: 0.7rem;
 }
 
 .offcanvas-notif {
-  width: 320px;         /* lebar panel notif */
-  margin-left: 72px;    /* samakan dengan lebar sidebar kamu */
+  width: 320px;
+  margin-left: 72px;
   border-right: 1px solid #eee;
 }

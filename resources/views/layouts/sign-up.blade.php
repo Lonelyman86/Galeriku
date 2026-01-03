@@ -110,24 +110,7 @@
         </div>
       </div>
 
-      <div class="row-2">
-        <div>
-          <label class="field-label" for="name">Nickname</label>
-          <div class="pill">
-            <input type="text" id="name" name="name"
-                   value="{{ old('name') }}" placeholder="Nickname">
-          </div>
-          @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
-        <div>
-          <label class="field-label" for="address">Alamat</label>
-          <div class="pill">
-            <input type="text" id="address" name="address"
-                   value="{{ old('address') }}" placeholder="Alamat">
-          </div>
-          @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
-      </div>
+
 
       <button class="btn-red" type="submit">Lanjutkan</button>
 

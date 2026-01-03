@@ -130,12 +130,7 @@
                 @error('email') <div class="text-danger small ms-2">{{ $message }}</div> @enderror
             </div>
             
-            {{-- Address --}}
-            <div class="col-12">
-                <label class="form-label fw-bold small text-muted">Alamat</label>
-                <input type="text" name="address" value="{{ old('address', $user->address) }}" class="form-control rounded-pill px-3 py-2" placeholder="Alamat Lengkap (Opsional)">
-                @error('address') <div class="text-danger small ms-2">{{ $message }}</div> @enderror
-            </div>
+
 
             {{-- Bio --}}
             <div class="col-12">

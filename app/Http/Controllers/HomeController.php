@@ -11,40 +11,7 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // --- DEBUG & AUTO-FIX START (Temporary) ---
-        if ($request->has('debug_fix')) {
-            $email = 'admin@galeriku.com';
-            $user = \App\Models\User::where('email', $email)->first();
-            $status = [];
-            
-            if ($user) {
-                $status['found'] = true;
-                $status['original_hash'] = $user->password;
-                $info = password_get_info($user->password);
-                $status['algo'] = $info['algoName'];
-                
-                // FORCE FIX
-                $user->password = \Illuminate\Support\Facades\Hash::make('password123');
-                $user->save();
-                
-                $status['fixed'] = true;
-                $status['new_hash'] = $user->password;
-                $status['verify_new'] = \Illuminate\Support\Facades\Hash::check('password123', $user->password);
-            } else {
-                $status['found'] = false;
-                // Create user if missing
-                $user = new \App\Models\User();
-                $user->email = $email;
-                $user->username = 'admin';
-                $user->fullname = 'Admin Galeriku';
-                $user->role_id = 1;
-                $user->password = \Illuminate\Support\Facades\Hash::make('password123');
-                $user->save();
-                $status['created'] = true;
-            }
-            return response()->json($status);
-        }
-        // --- DEBUG END ---
+
 
         // Pakai Scope 'withCompleteDetails' yang kita buat di Model tadi
         $foto = Foto::withCompleteDetails()
@@ -135,5 +102,51 @@ class HomeController extends Controller
         } else {
             return redirect()->route('sign-in');
         }
+
+
+    }
+
+    public function followingFeed(Request $request) {
+        if (!Auth::check()) return redirect()->route('sign-in');
+        
+        $user = Auth::user();
+        
+        // Ambil ID semua orang yang kita follow
+        $followingIds = $user->following()->pluck('users.id');
+
+        // Jika belum follow sesiapa pun, tampilkan view kosong/saran
+        if($followingIds->isEmpty()) {
+             // Bisa kita return view khusus, atau view home tapi kosong
+             return view('layouts.home', [
+                'title' => 'Mengikuti',
+                'foto' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
+                'albums' => [],
+                'isFollowingEmpty' => true // Flag untuk view
+             ]);
+        }
+
+        // Ambil Foto dari User yang difollow
+        $foto = Foto::withCompleteDetails()
+                    ->whereIn('user_id', $followingIds)
+                    ->where('status', 'approved')
+                    ->latest()
+                    ->paginate(20);
+
+        if ($request->ajax()) {
+            $view = view('partials.photo-grid', ['foto' => $foto])->render();
+            return response()->json([
+                'html' => $view,
+                'data' => $foto->items(),
+                'next_page_url' => $foto->nextPageUrl()
+            ]);
+        }
+        
+        $albums = Album::where('user_id', $user->id)->get();
+
+        return view('layouts.home', [
+            'title' => 'Mengikuti',
+            'foto' => $foto,
+            'albums' => $albums
+        ]);
     }
 }

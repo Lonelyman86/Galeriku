@@ -44,7 +44,25 @@
           </a>
 
           {{-- 2. KLIK PANAH: Pemicu Dropdown Menu --}}
-          <a class="nav-link dropdown-toggle ms-1 px-2" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{-- 2. KLIK PANAH: Pemicu Dropdown Menu --}}
+          <style>
+              /* Hilangkan caret bawaan bootstrap */
+              .dropdown-toggle::after { display: none !important; }
+              
+              /* Animasi icon - WAJIB display: inline-block agar bisa di-rotate */
+              .dropdown-icon-anim { 
+                  transition: transform 0.3s ease; 
+                  display: inline-block; 
+              }
+              
+              /* Saat dropdown terbuka (menggunakan atribut aria-expanded untuk deteksi) */
+              .dropdown-toggle[aria-expanded="true"] .dropdown-icon-anim { 
+                  transform: rotate(180deg); 
+              }
+          </style>
+
+          <a class="nav-link dropdown-toggle ms-1 px-2 d-flex align-items-center gap-1" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-chevron-down dropdown-icon-anim" style="font-size: 12px;"></i>
             @if(Auth::user()->role_id == 1)
                <span class="badge bg-danger" style="font-size: 10px;">Admin</span>
             @endif
@@ -93,8 +111,20 @@
 
         </li>
       @else
-        <li class="nav-item me-2"><a class="btn btn-outline-dark rounded-pill px-4" href="/sign-in">Sign In</a></li>
-        <li class="nav-item"><a class="btn btn-danger rounded-pill px-4" href="/sign-up">Sign Up</a></li>
+        <li class="nav-item d-flex align-items-center gap-2">
+            <style>
+                .btn-auth-custom {
+                    height: 40px; 
+                    display: inline-flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 14px; 
+                    padding: 0 24px;
+                }
+            </style>
+          <a class="btn btn-outline-dark rounded-pill fw-bold btn-auth-custom" href="/sign-in">Sign In</a>
+          <a class="btn btn-danger rounded-pill fw-bold btn-auth-custom" href="/sign-up">Sign Up</a>
+        </li>
       @endauth
     </ul>
 

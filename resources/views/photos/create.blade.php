@@ -5,7 +5,7 @@
   @csrf
   <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
 
-  <h1 class="create-title">Upload Foto</h1>
+  <h1 class="fs-4 mb-4 fw-bold px-2">Upload Foto</h1>
 
   <div class="create-grid">
     {{-- LEFT: Upload area --}}
@@ -72,7 +72,7 @@
   const dzInner   = document.getElementById('dz-inner');
   const fileMeta  = document.getElementById('file-meta');
 
-  dropzone.addEventListener('click', () => fileInput.click());
+
 
   // Drag & drop
   ['dragenter','dragover'].forEach(evt =>

@@ -1,7 +1,10 @@
 <aside class="sidenav bg-white border-end shadow-sm vh-100 position-fixed top-0 start-0 d-flex flex-column">
   <div class="text-center py-3">
     <a href="/" class="text-danger fs-3 text-decoration-none">
-      <img src="{{ asset('assets/img/galeriku-icon.png') }}" alt="Logo" class="logo" style="width: 45px; margin-bottom: 8px;">
+      {{-- Logo Light Mode --}}
+      <img src="{{ asset('assets/img/galeriku-icon.png') }}" alt="Logo" class="logo logo-light" style="width: 45px; margin-bottom: 8px;">
+      {{-- Logo Dark Mode --}}
+      <img src="{{ asset('assets/img/galeriku-icon-dark.png') }}" alt="Logo" class="logo logo-dark" style="width: 45px; margin-bottom: 8px; display: none;">
     </a>
   </div>
 
@@ -16,19 +19,7 @@
 
     @auth
       {{-- Admin Menu --}}
-      @if(Auth::user()->role_id == 1)
-        <li class="nav-item my-1">
-          <a class="nav-link text-danger py-3 rounded-3" href="/admin/dashboard" title="Admin Dashboard">
-            <i class="bi bi-speedometer2 fs-4"></i>
-          </a>
-        </li>
 
-        <li class="nav-item my-1">
-          <a class="nav-link text-danger py-3 rounded-3" href="/admin/foto" title="Kelola Foto">
-            <i class="bi bi-images fs-4"></i>
-          </a>
-        </li>
-      @endif
 
       {{-- Studio --}}
       <li class="nav-item my-1">
@@ -41,6 +32,20 @@
       <li class="nav-item my-1">
         <a class="nav-link text-dark py-3 rounded-3" href="/liked" title="Liked">
           <i class="bi bi-heart fs-4"></i>
+        </a>
+      </li>
+
+      {{-- Following Feed --}}
+      <li class="nav-item my-1">
+        <a class="nav-link text-dark py-3 rounded-3" href="/following" title="Mengikuti">
+          <i class="bi bi-people fs-4"></i>
+        </a>
+      </li>
+
+      {{-- Discovery --}}
+      <li class="nav-item my-1">
+        <a class="nav-link text-dark py-3 rounded-3" href="/discovery" title="Jelajahi Topik">
+          <i class="bi bi-compass fs-4"></i>
         </a>
       </li>
 

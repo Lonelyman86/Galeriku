@@ -26,7 +26,6 @@ class ProfileController extends Controller
             'fullname' => ['required','string','max:100'],
             'username' => ['required','string','min:3','max:30', Rule::unique('users','username')->ignore($user->id)],
             'email'    => ['required','email','max:120', Rule::unique('users','email')->ignore($user->id)],
-            'address'  => ['nullable','string','max:500'],
             'bio'      => ['nullable','string','max:1000'], // Add bio
             'avatar'   => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
             'password' => ['nullable','confirmed','min:8'],
@@ -34,11 +33,11 @@ class ProfileController extends Controller
 
         if ($request->hasFile('avatar')) {
             // Hapus avatar lama jika ada
-            if ($user->avatar && Storage::exists($user->avatar)) {
-                Storage::delete($user->avatar);
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
             }
             // Simpan avatar baru
-            $validated['avatar'] = $request->file('avatar')->store('avatars');
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
         if (!empty($validated['password'])) {

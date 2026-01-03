@@ -50,11 +50,9 @@ class Notification extends Model
             case 'comment':
                 return $displayName . ' mengomentari postinganmu';
 
-            // [BARU] Notifikasi Follow
             case 'follow':
                 return $displayName . ' mulai mengikuti Anda';
 
-            // [BARU] Notifikasi Postingan Baru
             case 'new_post':
                 return $displayName . ' baru saja memposting foto baru';
             
