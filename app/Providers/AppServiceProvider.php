@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         // Pagination
         Paginator::useBootstrapFive();
 
@@ -34,12 +38,14 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             if (Auth::check()) {
                 $user = Auth::user();
-        
-                $view->with('unreadNotificationsCount',
+
+                $view->with(
+                    'unreadNotificationsCount',
                     $user->notifications()->whereNull('read_at')->count()
                 );
-        
-                $view->with('recentNotifications',
+
+                $view->with(
+                    'recentNotifications',
                     $user->notifications()->latest()->take(10)->get()
                 );
             }
