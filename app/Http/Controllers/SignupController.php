@@ -22,7 +22,7 @@ class SignupController extends Controller
         // 1. Hapus 'name' jika di database Anda menggunakan 'fullname'.
         // 2. Hapus 'max:15' pada password agar user bisa bikin password panjang (lebih aman).
         // 3. Ubah password min:7 jadi min:8 (standar minimal saat ini).
-        
+
         $validatedData = $request->validate([
             'fullname' => 'required|string|max:100', // Sesuaikan max dengan ProfileController
             // 'name' => 'required|min:3|max:10', // HAPUS INI jika tidak ada kolom 'name' di DB
@@ -38,7 +38,12 @@ class SignupController extends Controller
         // Tapi jika form HTML masih mengirim input 'name' dan Anda ingin mengabaikannya saat save ke DB:
         // unset($validatedData['name']); 
 
-        User::create($validatedData);
+        // User::create($validatedData);
+
+        // Fix for "Field 'address' doesn't have a default value" error
+        $user = new User($validatedData);
+        $user->address = '-'; // Dummy value since column exists but is unused
+        $user->save();
 
         return redirect('/sign-in')->with('success', 'Registration successful! Welcome to the club!');
     }
