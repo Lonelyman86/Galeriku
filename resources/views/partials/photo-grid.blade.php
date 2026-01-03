@@ -4,7 +4,7 @@
         {{-- WRAPPER FOTO --}}
         <div class="pin-wrapper">
             {{-- Gambar Utama (Klik Trigger Modal JS) --}}
-            <img src="{{ Str::startsWith($item->lokasi_file, 'http') ? $item->lokasi_file : asset('storage/foto/' . $item->lokasi_file) }}"
+            <img src="{{ Str::startsWith($item->lokasi_file, 'http') || Str::startsWith($item->lokasi_file, 'data:') ? $item->lokasi_file : asset('storage/foto/' . $item->lokasi_file) }}"
                 alt="{{ $item->judul_foto }}" onclick="openSingleModal({{ $item->id }})">
 
             {{-- Tombol 3 Titik (Grid) --}}
@@ -15,7 +15,7 @@
 
             {{-- Menu Dropdown (Grid) --}}
             <div id="pin-menu-{{ $item->id }}" class="pin-menu">
-                <a href="{{ Str::startsWith($item->lokasi_file, 'http') ? $item->lokasi_file : asset('storage/foto/' . $item->lokasi_file) }}"
+                <a href="{{ Str::startsWith($item->lokasi_file, 'http') || Str::startsWith($item->lokasi_file, 'data:') ? $item->lokasi_file : asset('storage/foto/' . $item->lokasi_file) }}"
                     download class="pin-menu-item">
                     <i class="bi bi-download"></i> <span>Unduh gambar</span>
                 </a>

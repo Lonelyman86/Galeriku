@@ -417,10 +417,14 @@
             }
 
             // === 3. Data Static ===
-            // Helper: Jika lokasi_file contain 'http', pakai itu. Jika tidak, gabung dengan asset.
+            // Helper: Handle http (Cloudinary), data: (Base64 Database), or relative path (Local)
             const storageBaseUrl = "{{ asset('storage/foto') }}";
             const baseUrlFoto = (filename) => {
-                return (filename && filename.startsWith('http')) ? filename : storageBaseUrl + '/' + filename;
+                if (!filename) return '';
+                if (filename.startsWith('http') || filename.startsWith('data:')) {
+                    return filename;
+                }
+                return storageBaseUrl + '/' + filename;
             };
             // Fix URL Avatar (Menghapus 'avatars' ganda)
             const baseUrlAvatar = "{{ asset('storage') }}";

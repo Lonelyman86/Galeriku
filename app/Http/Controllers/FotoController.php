@@ -47,18 +47,15 @@ class FotoController extends Controller
 
         if ($request->hasFile('lokasi_file')) {
             $file = $request->file('lokasi_file');
-            $filename = time() . '_' . $file->hashName();
 
-            // DETERMINE DISK & SAVE FILE
-            if (app()->environment('production')) {
-                // Use Cloudinary in Production
-                $result = $file->storeOnCloudinary('foto');
-                $filename = $result->getSecurePath(); // Save FULL URL
-            } else {
-                // Use Local Storage (Public) in Dev
-                $filename = time() . '_' . $file->hashName();
-                $file->storeAs('foto', $filename, 'public');
-            }
+            // CONVERT IMAGE TO BASE64 FOR DATABASE STORAGE (Aiven MySQL)
+            $path = $file->getRealPath();
+            $type = $file->getClientOriginalExtension();
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+            // Override filename with Base64 String
+            $filename = $base64;
 
             $foto = new Foto();
             $foto->judul_foto = $request->judul_foto;
