@@ -49,10 +49,45 @@ class FotoController extends Controller
             $file = $request->file('lokasi_file');
 
             // CONVERT IMAGE TO BASE64 FOR DATABASE STORAGE (Aiven MySQL)
+            // Resize to max 800px width to keep payload small
+            $sourceImage = null;
             $path = $file->getRealPath();
             $type = $file->getClientOriginalExtension();
-            $data = file_get_contents($path);
-            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+            if (in_array(strtolower($type), ['jpg', 'jpeg'])) {
+                $sourceImage = imagecreatefromjpeg($path);
+            } elseif (strtolower($type) == 'png') {
+                $sourceImage = imagecreatefrompng($path);
+            }
+
+            if ($sourceImage) {
+                $width = imagesx($sourceImage);
+                $height = imagesy($sourceImage);
+                $maxWidth = 800; // Limit width
+
+                if ($width > $maxWidth) {
+                    $newWidth = $maxWidth;
+                    $newHeight = floor($height * ($maxWidth / $width));
+                    $tempImage = imagecreatetruecolor($newWidth, $newHeight);
+                    imagecopyresampled($tempImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+                    // Capture resized buffer
+                    ob_start();
+                    imagejpeg($tempImage, null, 75); // 75% Quality
+                    $data = ob_get_clean();
+                    $base64 = 'data:image/jpeg;base64,' . base64_encode($data);
+
+                    imagedestroy($tempImage);
+                } else {
+                    $data = file_get_contents($path);
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                }
+                imagedestroy($sourceImage);
+            } else {
+                // Fallback if not standard image
+                $data = file_get_contents($path);
+                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
 
             // Override filename with Base64 String
             $filename = $base64;
