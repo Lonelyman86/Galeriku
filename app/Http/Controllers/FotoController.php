@@ -49,48 +49,22 @@ class FotoController extends Controller
             $file = $request->file('lokasi_file');
 
             // CONVERT IMAGE TO BASE64 FOR DATABASE STORAGE (Aiven MySQL)
-            // Resize to max 800px width to keep payload small
-            $sourceImage = null;
-            $path = $file->getRealPath();
-            $type = $file->getClientOriginalExtension();
 
-            if (in_array(strtolower($type), ['jpg', 'jpeg'])) {
-                $sourceImage = imagecreatefromjpeg($path);
-            } elseif (strtolower($type) == 'png') {
-                $sourceImage = imagecreatefrompng($path);
-            }
+            // CONVERT IMAGE TO BASE64 FOR DATABASE STORAGE (Aiven MySQL)
+            // Prioritize client-side resized image (processed_image) if available
 
-            if ($sourceImage) {
-                $width = imagesx($sourceImage);
-                $height = imagesy($sourceImage);
-                $maxWidth = 800; // Limit width
-
-                if ($width > $maxWidth) {
-                    $newWidth = $maxWidth;
-                    $newHeight = floor($height * ($maxWidth / $width));
-                    $tempImage = imagecreatetruecolor($newWidth, $newHeight);
-                    imagecopyresampled($tempImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-
-                    // Capture resized buffer
-                    ob_start();
-                    imagejpeg($tempImage, null, 75); // 75% Quality
-                    $data = ob_get_clean();
-                    $base64 = 'data:image/jpeg;base64,' . base64_encode($data);
-
-                    imagedestroy($tempImage);
-                } else {
-                    $data = file_get_contents($path);
-                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                }
-                imagedestroy($sourceImage);
+            if ($request->filled('processed_image')) {
+                $filename = $request->input('processed_image');
             } else {
-                // Fallback if not standard image
+                // Fallback: simple server-side conversion (no resize to avoid GD errors)
+                $path = $file->getRealPath();
+                $type = $file->getClientOriginalExtension();
                 $data = file_get_contents($path);
-                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                $filename = 'data:image/' . $type . ';base64,' . base64_encode($data);
             }
 
             // Override filename with Base64 String
-            $filename = $base64;
+            // $filename is already set above
 
             $foto = new Foto();
             $foto->judul_foto = $request->judul_foto;
