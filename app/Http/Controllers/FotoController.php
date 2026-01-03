@@ -49,9 +49,16 @@ class FotoController extends Controller
             $file = $request->file('lokasi_file');
             $filename = time() . '_' . $file->hashName();
 
-            // PENTING: Simpan ke disk 'public' di folder 'foto'.
-            // Hasilnya ada di: storage/app/public/foto/namafile.jpg
-            $file->storeAs('foto', $filename, 'public');
+            // DETERMINE DISK & SAVE FILE
+            if (app()->environment('production')) {
+                // Use Cloudinary in Production
+                $result = $file->storeOnCloudinary('foto');
+                $filename = $result->getSecurePath(); // Save FULL URL
+            } else {
+                // Use Local Storage (Public) in Dev
+                $filename = time() . '_' . $file->hashName();
+                $file->storeAs('foto', $filename, 'public');
+            }
 
             $foto = new Foto();
             $foto->judul_foto = $request->judul_foto;
