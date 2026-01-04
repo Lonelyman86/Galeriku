@@ -72,7 +72,7 @@ class FotoController extends Controller
             $foto->deskripsi_foto = $request->deskripsi_foto;
             $foto->lokasi_file = $filename;
             $foto->tanggal_unggah = now();
-            // $foto->album_id = $request->album_id; 
+            // $foto->album_id = $request->album_id;
 
             // 1. Simpan Category
             if ($request->filled('category_id')) {
@@ -163,8 +163,8 @@ class FotoController extends Controller
 
         // HAPUS FILE FISIK DARI STORAGE
         // Cek apakah file ada, lalu hapus
-        if ($photo->lokasi_file && Storage::disk('public')->exists('foto/' . $photo->lokasi_file)) {
-            Storage::disk('public')->delete('foto/' . $photo->lokasi_file);
+        if ($photo->lokasi_file && Storage::exists('foto/' . $photo->lokasi_file)) {
+            Storage::delete('foto/' . $photo->lokasi_file);
         }
 
         // Hapus data terkait di database

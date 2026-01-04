@@ -15,8 +15,8 @@ class FotoAdminController extends Controller
         // Photos Pagination (default 'page')
         $fotos = Foto::with(['user', 'album'])
                      ->latest()
-                     ->paginate(100, ['*'], 'page'); 
-        
+                     ->paginate(100, ['*'], 'page');
+
         // Reports Pagination (custom 'reports_page' to avoid conflict)
         $reports = Report::with(['user', 'foto'])
                          ->where('status', 'pending')
@@ -54,8 +54,8 @@ class FotoAdminController extends Controller
 
         // OPTIMASI STORAGE: Hapus file fisik gambar dari folder 'public/foto'
         // Jika tidak dihapus, lama-lama harddisk server akan penuh dengan sampah.
-        if ($foto->lokasi_file && Storage::disk('public')->exists('foto/' . $foto->lokasi_file)) {
-            Storage::disk('public')->delete('foto/' . $foto->lokasi_file);
+        if ($foto->lokasi_file && Storage::exists('foto/' . $foto->lokasi_file)) {
+            Storage::delete('foto/' . $foto->lokasi_file);
         }
 
         // Opsional: Hapus relasi (Like & Komentar) biar bersih total
@@ -64,7 +64,7 @@ class FotoAdminController extends Controller
         $foto->komentarfoto()->delete();
 
         $foto->delete();
-        
+
         return back()->with('danger', 'Foto dan filenya berhasil dihapus permanen!');
     }
 }

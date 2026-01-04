@@ -23,4 +23,16 @@ class Album extends Model
     {
         return $this->hasMany(Foto::class);
     }
+    public function getCoverImageUrlAttribute()
+    {
+        if (!$this->cover_image) {
+            return asset('assets/img/album-placeholder.jpg'); // Pastikan ada placeholder
+        }
+
+        if (str_starts_with($this->cover_image, 'data:') || str_starts_with($this->cover_image, 'http')) {
+            return $this->cover_image;
+        }
+
+        return asset('storage/' . $this->cover_image);
+    }
 }

@@ -41,11 +41,13 @@ class AlbumController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('cover_image')) {
-             if ($album->cover_image && \Illuminate\Support\Facades\Storage::exists('public/' . $album->cover_image)) {
-                \Illuminate\Support\Facades\Storage::delete('public/' . $album->cover_image);
-             }
-             $path = $request->file('cover_image')->store('album_covers', 'public');
-             $data['cover_image'] = $path;
+             $file = $request->file('cover_image');
+             $path = $file->getRealPath();
+             $type = $file->getClientOriginalExtension();
+             $data = file_get_contents($path);
+             $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+             $data['cover_image'] = $base64;
         }
 
         $album->update($data);

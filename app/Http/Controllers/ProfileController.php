@@ -32,12 +32,13 @@ class ProfileController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
-            // Hapus avatar lama jika ada
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-            // Simpan avatar baru
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $file = $request->file('avatar');
+            $path = $file->getRealPath();
+            $type = $file->getClientOriginalExtension();
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+            $validated['avatar'] = $base64;
         }
 
         if (!empty($validated['password'])) {

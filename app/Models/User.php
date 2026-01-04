@@ -49,9 +49,17 @@ class User extends Authenticatable
     // Accessor untuk URL Avatar
     public function getAvatarUrlAttribute(): string
     {
-        return $this->avatar
-            ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->avatar)
-            : asset('assets/img/default-profile.png'); // SESUAIKAN path default image
+        if (!$this->avatar) {
+            return asset('assets/img/default-profile.png');
+        }
+
+        // If it looks like a Base64 string or a URL, return it directly
+        if (str_starts_with($this->avatar, 'data:') || str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
+        // Legacy fallback for old file paths
+        return asset('storage/' . $this->avatar);
     }
 
     public function notifications()
