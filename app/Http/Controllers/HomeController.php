@@ -42,6 +42,7 @@ class HomeController extends Controller
     public function StudioIndex(Request $request)
     {
         if (Auth::check()) {
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             // Pakai Scope juga disini
@@ -86,6 +87,7 @@ class HomeController extends Controller
     public function likedPhotos()
     {
         if (Auth::check()) {
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             // Scope juga bisa dipakai lewat relasi
@@ -110,6 +112,7 @@ class HomeController extends Controller
     public function followingFeed(Request $request) {
         if (!Auth::check()) return redirect()->route('sign-in');
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         // Ambil ID semua orang yang kita follow
