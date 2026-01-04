@@ -16,7 +16,10 @@ return new class extends Migration
                 $table->text('deskripsi_foto')->nullable();
                 $table->date('tanggal_unggah');
                 $table->longText('lokasi_file');
+                $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+                $table->string('note')->nullable(); // Alasan reject
                 $table->foreignId('album_id')->nullable()->constrained('albums')->onDelete('set null');
+                $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
                 $table->foreignId('user_id')->constrained('users');
                 $table->timestamps();
             });

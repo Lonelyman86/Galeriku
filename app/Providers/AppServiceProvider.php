@@ -39,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         // =====================================================
         View::composer('*', function ($view) {
             if (Auth::check()) {
+                /** @var \App\Models\User $user */
                 $user = Auth::user();
 
                 $view->with(

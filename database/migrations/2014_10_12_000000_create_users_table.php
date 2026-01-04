@@ -14,10 +14,12 @@ return new class extends Migration
         if (!Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
+                $table->foreignId('role_id')->default(2)->constrained('roles'); // 2 = User Biasa
                 $table->string('username');
                 $table->string('password');
                 $table->string('email')->unique();
                 $table->string('fullname');
+                $table->longText('avatar')->nullable();
                 $table->text('bio')->nullable();
                 // $table->text('address'); // Removed as per request
                 $table->rememberToken();
