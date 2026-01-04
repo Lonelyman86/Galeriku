@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            // Menambahkan kolom role_id bertipe integer
-            // Kita beri nilai default '2' (User Biasa)
-            // '1' nantinya akan kita gunakan untuk Admin
-            // Diletakkan setelah kolom 'avatar' agar struktur tabel rapi
-            $table->integer('role_id')->default(2)->after('avatar');
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (!Schema::hasColumn('users', 'role_id')) {
+                    // Menambahkan kolom role_id bertipe integer
+                    // Kita beri nilai default '2' (User Biasa)
+                    // '1' nantinya akan kita gunakan untuk Admin
+                    // Diletakkan setelah kolom 'avatar' agar struktur tabel rapi
+                    $table->integer('role_id')->default(2)->after('avatar');
+                }
+            });
+        }
     }
 
     /**

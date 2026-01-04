@@ -15,7 +15,7 @@ class KomentarController extends Controller
             'isi_komentar' => 'required|string|max:500',
         ]);
 
-        // Cukup Create saja. 
+        // Cukup Create saja.
         // Notifikasi akan dibuat otomatis oleh Model Komentar (fungsi booted)
         Komentar::create([
             'user_id' => Auth::id(),
@@ -24,5 +24,16 @@ class KomentarController extends Controller
         ]);
 
         return back()->with('success', 'Komentar terkirim!');
+    }
+    public function destroy(Komentar $komentar)
+    {
+        // Pastikan yang menghapus adalah pemilik komentar
+        if (Auth::id() !== $komentar->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $komentar->delete();
+
+        return response()->json(['message' => 'Komentar berhasil dihapus']);
     }
 }

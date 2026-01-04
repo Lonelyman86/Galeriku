@@ -33,6 +33,7 @@ class HomeController extends Controller
 
         return view('layouts.home', [
             'title' => 'Home',
+            'headerTitle' => 'Jelajahi',
             'foto' => $foto,
             'albums' => $albums
         ]);
@@ -42,7 +43,7 @@ class HomeController extends Controller
     {
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Pakai Scope juga disini
             $foto = Foto::withCompleteDetails()
                         ->where('user_id', $user->id)
@@ -57,12 +58,12 @@ class HomeController extends Controller
                     'next_page_url' => $foto->nextPageUrl()
                 ]);
             }
-            
+
             $albums = Album::where('user_id', $user->id)->get();
-            
+
             // --- ANALYTICS ---
             $totalPhotos = $foto->total(); // Karena pakai paginate, total() ambil jumlah semua record
-            
+
             // Hitung Total Like (Semua foto user ini dapat berapa like)
             $totalLikes = $user->fotos()->withCount('like')->get()->sum('like_count');
 
@@ -86,7 +87,7 @@ class HomeController extends Controller
     {
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Scope juga bisa dipakai lewat relasi
             $likedPhotos = $user->likedPhotos()
                 ->withCompleteDetails()
@@ -108,9 +109,9 @@ class HomeController extends Controller
 
     public function followingFeed(Request $request) {
         if (!Auth::check()) return redirect()->route('sign-in');
-        
+
         $user = Auth::user();
-        
+
         // Ambil ID semua orang yang kita follow
         $followingIds = $user->following()->pluck('users.id');
 
@@ -140,11 +141,12 @@ class HomeController extends Controller
                 'next_page_url' => $foto->nextPageUrl()
             ]);
         }
-        
+
         $albums = Album::where('user_id', $user->id)->get();
 
         return view('layouts.home', [
             'title' => 'Mengikuti',
+            'headerTitle' => 'Mengikuti',
             'foto' => $foto,
             'albums' => $albums
         ]);

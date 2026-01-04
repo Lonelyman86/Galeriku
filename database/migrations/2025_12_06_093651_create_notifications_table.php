@@ -11,28 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
-            // penerima notif
-            $table->unsignedBigInteger('user_id');
-            // pelaku (yang like / follow)
-            $table->unsignedBigInteger('actor_id');
+        if (!Schema::hasTable('notifications')) {
+            Schema::create('notifications', function (Blueprint $table) {
+                $table->id();
+                // penerima notif
+                $table->unsignedBigInteger('user_id');
+                // pelaku (yang like / follow)
+                $table->unsignedBigInteger('actor_id');
 
-            $table->string('type');          // 'like', 'follow', dll
-            $table->json('data')->nullable();
-            $table->timestamp('read_at')->nullable();
-            $table->timestamps();
+                $table->string('type');          // 'like', 'follow', dll
+                $table->json('data')->nullable();
+                $table->timestamp('read_at')->nullable();
+                $table->timestamps();
 
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
+                $table->foreign('user_id')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
 
-            $table->foreign('actor_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
-        });
+                $table->foreign('actor_id')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
+            });
+        }
     }
 
     /**

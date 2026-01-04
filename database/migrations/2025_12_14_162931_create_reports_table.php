@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reports', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // Pelapor
-            $table->foreignId('foto_id')->constrained('foto')->cascadeOnDelete(); // Foto yang dilaporkan
-            $table->text('reason'); // Alasan pelaporan
-            $table->enum('status', ['pending', 'resolved', 'dismissed'])->default('pending'); // Status laporan
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('reports')) {
+            Schema::create('reports', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // Pelapor
+                $table->foreignId('foto_id')->constrained('foto')->cascadeOnDelete(); // Foto yang dilaporkan
+                $table->text('reason'); // Alasan pelaporan
+                $table->enum('status', ['pending', 'resolved', 'dismissed'])->default('pending'); // Status laporan
+                $table->timestamps();
+            });
+        }
     }
 
     /**

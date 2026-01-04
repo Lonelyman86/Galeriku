@@ -166,10 +166,28 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #bbb;
         }
+        /* Comment Styles */
+        .comment-item { transition: background-color 0.2s; }
+        .comment-delete-btn {
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+        .comment-item:hover .comment-delete-btn {
+            opacity: 1;
+        }
+        .comment-delete-btn:hover {
+            transform: scale(1.1);
+            color: #dc3545 !important;
+        }
+        .comment-bubble {
+            border-radius: 12px;
+            background-color: #f8f9fa; /* Light gray by default */
+        }
     </style>
 
     <div class="container-fluid py-4">
-        <h1 class="fs-4 mb-4 fw-bold px-2">Jelajahi</h1>
+        <h1 class="fs-4 mb-4 fw-bold px-2">{{ $headerTitle ?? 'Jelajahi' }}</h1>
 
         {{-- CONTAINER UTAMA --}}
         <div class="row" id="masonry-grid">
@@ -227,8 +245,8 @@
                             <div class="p-3 border-bottom">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div class="d-flex align-items-center">
-                                        <a id="modalUserLink" href="#">
-                                            <div id="modalAvatarContainer"></div>
+                                        <a id="modalUserLink" href="#" class="text-decoration-none">
+                                            <div id="modalAvatarContainer" class="me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"></div>
                                         </a>
                                         <div>
                                             <a id="modalUsername" href="#"
@@ -272,7 +290,7 @@
                                             <input type="text" name="isi_komentar"
                                                 class="form-control rounded-start-pill ps-3 bg-light border-0"
                                                 placeholder="Tulis komentar..." required>
-                                            <button class="btn btn-primary rounded-end-pill px-3">Kirim</button>
+                                            <button class="btn btn-secondary rounded-end-pill px-3">Kirim</button>
                                         </div>
                                     </form>
                                 </div>
@@ -430,21 +448,17 @@
             const baseUrlAvatar = "{{ asset('storage') }}";
             const defaultAvatar = "{{ asset('assets/img/default-profile.png') }}";
 
-            // Template Route Manual Construction for Safety
+            /*
             const routes = {
-                profile: "{{ url('user') }}/000",
-                like: "{{ url('albums') }}/000/toggle-like", // Check route definitions!
-                comment: "{{ url('photos') }}/000/komentar"
+                profile: "{{ route('profile.public', '000', false) }}",
+                like: "{{ route('likes.toggle', ['photo' => '000'], false) }}",
+                comment: "{{ route('komentar.store', ['photo' => '000'], false) }}"
             };
-
-            // Verify routes from web.php:
-            // Route::post('/albums/{photo}/toggle-like', ...)->name('likes.toggle');
-            // Route::post('/photos/{photo}/komentar', ...)->name('komentar.store');
-            // Route::get('/user/{id}', ...)->name('profile.public');
+            */
 
             // === 3. Logic Single Modal ===
             function openSingleModal(id) {
-                const item = photosData.find(p => p.id === id);
+                const item = photosData.find(p => p.id == id);
                 if (!item) return;
 
                 // Isi Gambar & Judul
@@ -453,17 +467,45 @@
                 document.getElementById('modalTitle').innerText = item.judul_foto;
                 document.getElementById('modalDesc').innerText = item.deskripsi_foto;
 
-                // ... (Rest of logic)
+                // --- NEW: Populate User Info (Header) ---
+                const user = item.user || {};
+
+                // 1. Avatar
+                const avatarContainer = document.getElementById('modalAvatarContainer');
+                if(avatarContainer) {
+                    if(user.avatar) {
+                        avatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle border" width="40" height="40" style="object-fit: cover;">`;
+                    } else {
+                        avatarContainer.innerHTML = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 40px; color: #6c757d;"></i>`;
+                    }
+                }
+
+                // 2. Username & Link
+                const profileUrl = "/user/" + (user.id || 0);
+                const userLinkEl = document.getElementById('modalUserLink');
+                if(userLinkEl) userLinkEl.href = profileUrl;
+
+                const usernameEl = document.getElementById('modalUsername');
+                if(usernameEl) {
+                    usernameEl.innerText = user.username || 'Anonim';
+                    usernameEl.href = profileUrl;
+                }
+
+                // 3. Time
+                const timeEl = document.getElementById('modalTime');
+                if(timeEl && item.created_at) {
+                    const d = new Date(item.created_at);
+                    timeEl.innerText = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
 
                 // Isi Like
                 document.getElementById('modalLikeCount').innerText = item.like ? item.like.length : 0;
-                // Manual Replace for robustness
-                document.getElementById('modalLikeForm').action = "{{ url('albums') }}/" + item.id + "/toggle-like";
+                document.getElementById('modalLikeForm').action = "/albums/" + item.id + "/toggle-like";
 
                 // Isi Form Komentar
                 const commForm = document.getElementById('modalCommentForm');
                 if (commForm) {
-                    commForm.action = "{{ url('photos') }}/" + item.id + "/komentar";
+                    commForm.action = "/photos/" + item.id + "/komentar";
                 }
 
                 // Render Komentar
@@ -483,14 +525,28 @@
                                 `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
                         }
 
+                        // Delete Button Logic
+                        let deleteBtn = '';
+                        // userId injected from Blade
+                        if (c.user_id == {{ Auth::id() ?? 'null' }}) {
+                           deleteBtn = `
+                             <button onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                               <i class="bi bi-trash-fill"></i>
+                             </button>
+                           `;
+                        }
+
                         const html = `
-                <div class="mb-2 d-flex gap-2">
+                <div class="mb-3 d-flex gap-2 comment-item">
                     <div class="flex-shrink-0">
                         ${avatarHtml}
                     </div>
-                    <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble">
-                        <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
-                        <p class="mb-0 small text-dark lh-sm mt-1 comment-text">${c.isi_komentar}</p>
+                    <div class="bg-light px-3 py-2 shadow-sm border w-100 comment-bubble position-relative">
+                        <div class="d-flex justify-content-between align-items-start">
+                             <a href="/user/${cUser.id}" class="fw-bold small d-block text-dark text-decoration-none">${cUser.username || 'Anonim'}</a>
+                             ${deleteBtn}
+                        </div>
+                        <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
                     </div>
                 </div>`;
                         listDiv.innerHTML += html;
@@ -503,6 +559,29 @@
                 // Tampilkan Modal
                 const myModal = new bootstrap.Modal(document.getElementById('globalDetailModal'));
                 myModal.show();
+            }
+
+            // === Delete Comment Function ===
+            function deleteComment(id, btn) {
+                if(!confirm('Hapus komentar ini?')) return;
+
+                fetch(`/komentar/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => {
+                    if(res.ok) {
+                        // Remove element
+                        const bubble = btn.closest('.d-flex.gap-2');
+                        if(bubble) bubble.remove();
+                    } else {
+                        alert('Gagal menghapus komentar');
+                    }
+                })
+                .catch(err => console.error(err));
             }
 
             // === 4. Logic Menu Dropdown ===
@@ -520,7 +599,7 @@
 
             function openReportModal() {
                 // Ambil ID dari modal yg sedang terbuka (globalDetailModal)
-                // Kita butuh ID foto yang sedang dilihat. 
+                // Kita butuh ID foto yang sedang dilihat.
                 // Trik: Kita simpan ID saat openSingleModal dipanggil
                 if (currentReportFotoId) {
                     document.getElementById('reportFotoId').value = currentReportFotoId;

@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('foto', function (Blueprint $table) {
-            $table->foreignId('category_id')->nullable()->after('album_id')->constrained('categories')->onDelete('set null');
-        });
+        if (Schema::hasTable('foto')) {
+            Schema::table('foto', function (Blueprint $table) {
+                if (!Schema::hasColumn('foto', 'category_id')) {
+                    $table->foreignId('category_id')->nullable()->after('album_id')->constrained('categories')->onDelete('set null');
+                }
+            });
+        }
     }
 
     /**

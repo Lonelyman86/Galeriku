@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('username');
-            $table->string('password');
-            $table->string('email')->unique();
-            $table->string('fullname');
-            // $table->text('address'); // Removed as per request
-            $table->rememberToken();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
+                $table->id();
+                $table->string('username');
+                $table->string('password');
+                $table->string('email')->unique();
+                $table->string('fullname');
+                $table->text('bio')->nullable();
+                // $table->text('address'); // Removed as per request
+                $table->rememberToken();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

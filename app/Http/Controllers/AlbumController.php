@@ -39,6 +39,15 @@ class AlbumController extends Controller
         }
 
         $data = $request->validated();
+
+        if ($request->hasFile('cover_image')) {
+             if ($album->cover_image && \Illuminate\Support\Facades\Storage::exists('public/' . $album->cover_image)) {
+                \Illuminate\Support\Facades\Storage::delete('public/' . $album->cover_image);
+             }
+             $path = $request->file('cover_image')->store('album_covers', 'public');
+             $data['cover_image'] = $path;
+        }
+
         $album->update($data);
 
         return back()->with('success', 'Album berhasil diperbarui.');

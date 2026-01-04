@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('likefoto', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('foto_id');
-            $table->unsignedBigInteger('user_id');
-            $table->timestamps();
+        if (!Schema::hasTable('likefoto')) {
+            Schema::create('likefoto', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('foto_id');
+                $table->unsignedBigInteger('user_id');
+                $table->timestamps();
 
-            $table->foreign('foto_id')->references('id')->on('foto')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('foto_id')->references('id')->on('foto')->onDelete('cascade');
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            // ⬇️ Tambahkan ini agar user tidak bisa like foto yang sama dua kali
-            $table->unique(['user_id', 'foto_id']);
-        });
+                // ⬇️ Tambahkan ini agar user tidak bisa like foto yang sama dua kali
+                $table->unique(['user_id', 'foto_id']);
+            });
+        }
     }
 
     /**

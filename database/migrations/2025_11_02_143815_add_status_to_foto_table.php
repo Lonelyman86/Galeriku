@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('foto', function (Blueprint $table) {
+        if (Schema::hasTable('foto')) {
+            Schema::table('foto', function (Blueprint $table) {
+                if (!Schema::hasColumn('foto', 'status')) {
                     $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-
-        });
+                }
+            });
+        }
     }
 
     /**

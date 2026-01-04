@@ -3,16 +3,26 @@
 
 <style>
   /* Status Overlay */
-  .status-overlay{ position:absolute; inset:0; display:flex; justify-content:center; align-items:center; 
+  .status-overlay{ position:absolute; inset:0; display:flex; justify-content:center; align-items:center;
                    color:#fff; background:rgba(0,0,0,0.5); opacity:0; transition:0.3s; border-radius:16px; font-weight:bold;}
   .pin:hover .status-overlay { opacity:1; }
   .status-rejected { background:rgba(220,53,69,0.8); }
+  /* Comment Styles */
+  .comment-item { transition: background-color 0.2s; }
+  .comment-delete-btn {
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+  }
+  .comment-item:hover .comment-delete-btn { opacity: 1; }
+  .comment-delete-btn:hover { transform: scale(1.1); color: #dc3545 !important; }
+  .comment-bubble { border-radius: 12px; background-color: #f8f9fa; }
 </style>
 
 {{-- Tombol Tambah (FAB) --}}
 <div class="fab-container" style="position: fixed; right: 24px; bottom: 24px; z-index: 99;">
-  <button class="btn btn-danger rounded-circle shadow d-flex align-items-center justify-content-center" 
-          type="button" data-bs-toggle="dropdown" aria-expanded="false" 
+  <button class="btn btn-danger rounded-circle shadow d-flex align-items-center justify-content-center"
+          type="button" data-bs-toggle="dropdown" aria-expanded="false"
           style="width: 56px; height: 56px;">
     <i class="bi bi-plus-lg fs-4"></i>
   </button>
@@ -23,85 +33,80 @@
 </div>
 
 <div class="container-fluid py-4">
-  <h1 class="fs-4 mb-4 fw-bold px-2">Studio Saya</h1>
+  {{-- HERO STATS SECTION (Modern & Minimalist) --}}
+  <div class="row g-4 mb-5">
+      <div class="col-12">
+          <div class="bg-white rounded-5 p-4 p-md-5 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-center position-relative overflow-hidden">
+              {{-- Decorative BG --}}
+              <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary opacity-10" style="background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); z-index:0;"></div>
 
-  {{-- ANALYTICS CARDS --}}
-  <div class="row g-3 px-2 mb-5">
-      <div class="col-md-4">
-          <div class="p-4 rounded-4 bg-white shadow-sm border h-100 d-flex align-items-center">
-              <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
-                  <i class="bi bi-images fs-4"></i>
+              <div class="position-relative z-1 text-center text-md-start mb-4 mb-md-0">
+                  <h1 class="fw-bold mb-1">Studio Kreatif Saya</h1>
+                  <p class="text-muted mb-0">Kelola karya dan album Anda di sini.</p>
               </div>
-              <div>
-                  <h3 class="fw-bold mb-0">{{ $totalPhotos }}</h3>
-                  <small class="text-secondary">Total Foto</small>
-              </div>
-          </div>
-      </div>
-      <div class="col-md-4">
-          <div class="p-4 rounded-4 bg-white shadow-sm border h-100 d-flex align-items-center">
-              <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle me-3">
-                  <i class="bi bi-heart-fill fs-4"></i>
-              </div>
-              <div>
-                  <h3 class="fw-bold mb-0">{{ $totalLikes }}</h3>
-                  <small class="text-secondary">Total Suka Diterima</small>
-              </div>
-          </div>
-      </div>
-      <div class="col-md-4">
-          <div class="p-4 rounded-4 bg-white shadow-sm border h-100 d-flex align-items-center">
-               <div class="bg-info bg-opacity-10 text-info p-3 rounded-circle me-3">
-                  <i class="bi bi-chat-dots-fill fs-4"></i>
-              </div>
-              <div>
-                  <h3 class="fw-bold mb-0">{{ $totalComments }}</h3>
-                  <small class="text-secondary">Total Komentar Diterima</small>
+
+              <div class="position-relative z-1 d-flex gap-4 gap-md-5">
+                  <div class="text-center">
+                       <h2 class="fw-bold mb-0 text-primary">{{ $totalPhotos }}</h2>
+                       <small class="text-muted fw-bold text-uppercase" style="font-size:11px; letter-spacing:1px;">Foto</small>
+                  </div>
+                  <div class="text-center">
+                       <h2 class="fw-bold mb-0 text-danger">{{ $totalLikes }}</h2>
+                       <small class="text-muted fw-bold text-uppercase" style="font-size:11px; letter-spacing:1px;">Suka</small>
+                  </div>
+                  <div class="text-center">
+                       <h2 class="fw-bold mb-0 text-info">{{ $totalComments }}</h2>
+                       <small class="text-muted fw-bold text-uppercase" style="font-size:11px; letter-spacing:1px;">Komentar</small>
+                  </div>
               </div>
           </div>
       </div>
   </div>
 
-<div class="masonry" id="studio-masonry-grid">
-  @include('partials.studio-grid', ['foto' => $foto])
-</div>
+  {{-- ALBUM SECTION (Horizontal Scroll - "Stories" Style) --}}
+  <div class="mb-5">
+     <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <h5 class="fw-bold mb-0"><i class="bi bi-journal-album me-2 text-warning"></i>Album Saya</h5>
+        <a href="/createalbum" class="btn btn-sm btn-outline-dark rounded-pill fw-bold">+ Buat Album</a>
+     </div>
 
-{{-- Pagination --}}
-{{-- Loading Spinner --}}
-<div id="loading-spinner" class="spinner-border text-primary d-none mx-auto mt-4 mb-5" role="status">
-    <span class="visually-hidden">Loading...</span>
-</div>
+     <div class="d-flex gap-3 overflow-auto pb-3 custom-scrollbar px-2" style="white-space: nowrap;">
+        @if ($albums->count() > 0)
+            @foreach ($albums as $album)
+            <div class="card border-0 shadow-sm flex-shrink-0" style="width: 200px; border-radius: 16px; transition: transform .2s;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between" style="height: 140px;">
+                    <div>
+                        <h6 class="fw-bold text-truncate mb-1" title="{{ $album->nama_album }}">{{ $album->nama_album }}</h6>
+                        <small class="text-muted d-block text-truncate" style="font-size:11px;">{{ $album->deskripsi ?? 'Tanpa deskripsi' }}</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end mt-3">
+                        <a href="{{ route('album.show', $album->id) }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1" style="font-size:11px;">Lihat</a>
+                        <form action="{{ route('albums.destroy', $album->id) }}" method="POST" onsubmit="return confirm('Hapus album ini?')">
+                            @csrf @method('DELETE')
+                            <button class="btn btn-link text-danger p-0 m-0" style="font-size:14px;"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        @else
+            <div class="text-center w-100 py-4 border rounded-4 border-dashed">
+                <p class="text-muted small mb-2">Belum ada album.</p>
+                <a href="/createalbum" class="btn btn-sm btn-primary rounded-pill">Buat Sekarang</a>
+            </div>
+        @endif
+     </div>
+  </div>
 
-{{-- End of Content Message --}}
-<div id="end-of-content" class="text-muted small d-none text-center mt-4 mb-5">
+  <h5 class="fw-bold mb-3 px-2">Galeri Foto</h5>
+  <div class="masonry" id="studio-masonry-grid">
+    @include('partials.studio-grid', ['foto' => $foto])
+  </div>
+
+  {{-- End Content Marker --}}
+  <div id="end-of-content" class="text-muted small d-none text-center mt-4 mb-5">
     Sudah sampai bawah
-</div>
-
-{{-- List Album --}}
-@if ($albums->count() > 0)
-  <hr class="my-5">
-  <h1 class="page-title">Album Saya</h1>
-  <div class="row px-3">
-    @foreach ($albums as $album)
-      <div class="col-6 col-md-3 mb-3">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="card-title fw-bold">{{ $album->nama_album }}</h6>
-                <p class="card-text small text-muted">{{ $album->deskripsi }}</p>
-                <a href="{{ route('album.show', $album->id) }}" class="stretched-link"></a>
-            </div>
-             <div class="card-footer bg-white border-0 text-end">
-                <form action="{{ route('albums.destroy', $album->id) }}" method="POST" onsubmit="return confirm('Hapus album ini?');" style="z-index: 2; position: relative;">
-                    @csrf @method('DELETE')
-                    <button class="btn btn-sm btn-link text-danger text-decoration-none p-0">Hapus</button>
-                </form>
-            </div>
-        </div>
-      </div>
-    @endforeach
   </div>
-  </div>
-@endif
 </div>
 
 {{-- ===============================================
@@ -112,7 +117,7 @@
     <div class="modal-content" style="border-radius: 20px; overflow: hidden; border:none;">
       <div class="modal-body p-0">
         <div class="row g-0" style="min-height: 500px;">
-          
+
           {{-- Kiri: Gambar Full --}}
           <div class="col-lg-8 bg-light d-flex align-items-center justify-content-center position-relative">
             <div class="modal-image-wrapper">
@@ -154,7 +159,7 @@
                         @csrf @method('delete')
                         <button class="btn btn-outline-danger btn-sm w-100 rounded-pill">Hapus Foto</button>
                     </form>
-                    
+
                     <button class="btn btn-outline-primary btn-sm rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAlbum">
                         Pindahkan Album
                     </button>
@@ -201,7 +206,7 @@
     let studioPhotos = @json($foto->items());
     let nextPageUrl = "{{ $foto->nextPageUrl() }}";
     let isLoading = false;
-    
+
     // Init Masonry Global
     const grid = document.querySelector('#studio-masonry-grid');
     let msnry;
@@ -232,15 +237,15 @@
             // 1. Append HTML
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = data.html;
-            
+
             const newItems = Array.from(tempDiv.children);
             grid.append(...newItems);
-            
+
             // 2. Update Data for Modals
             if(data.data && Array.isArray(data.data)) {
                 studioPhotos.push(...data.data);
             }
-            
+
             // 3. Update Next URL
             nextPageUrl = data.next_page_url;
             if(!nextPageUrl) {
@@ -268,23 +273,23 @@
     }
 
     const baseUrl = "{{ asset('storage/foto') }}";
-    const baseUrlAvatar = "{{ asset('storage') }}"; 
+    const baseUrlAvatar = "{{ asset('storage') }}";
     const defaultAvatar = "{{ asset('assets/img/default-profile.png') }}";
-    
+
     // Route Templates
-    const routeDelete = "{{ route('photos.destroy', '000') }}";
-    const routeAlbum = "{{ route('foto.update.album', ['photo' => '000']) }}";
+    // const routeDelete = "{{ route('photos.destroy', '000', false) }}";
+    // const routeAlbum = "{{ route('foto.update.album', ['photo' => '000'], false) }}";
 
     // Expose to window to ensure global access
     window.openStudioModal = function(id) {
         // Use loose equality (==) to handle string/number differences
         const photo = studioPhotos.find(p => p.id == id);
-        
+
         if(!photo) {
             console.error('Photo not found:', id);
             return;
         }
-        
+
         // Ensure Bootstrap is loaded
         if (typeof bootstrap === 'undefined') {
             console.error('Bootstrap JS not loaded');
@@ -295,12 +300,16 @@
         // 1. Populate Data Dasar (Gambar, Judul, Deskripsi)
         const imgEl = document.getElementById('studioImg');
         if(imgEl) {
-            imgEl.src = baseUrl + '/' + photo.lokasi_file;
+            if (photo.lokasi_file.startsWith('http') || photo.lokasi_file.startsWith('data:')) {
+                imgEl.src = photo.lokasi_file;
+            } else {
+                imgEl.src = baseUrl + '/' + photo.lokasi_file;
+            }
         }
-        
+
         document.getElementById('studioTitle').innerText = photo.judul_foto || '';
         document.getElementById('studioDesc').innerText = photo.deskripsi_foto || '';
-        
+
         const dateEl = document.getElementById('studioTime');
         if(dateEl && photo.created_at) {
             dateEl.innerText = new Date(photo.created_at).toLocaleDateString();
@@ -309,7 +318,7 @@
         // 2. User Info (Diri Sendiri)
         const user = photo.user || {};
         const avatarContainer = document.getElementById('studioAvatarContainer');
-        
+
         if(avatarContainer) {
             if(user.avatar) {
                 avatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle border" width="40" height="40" style="object-fit: cover;">`;
@@ -317,16 +326,16 @@
                 avatarContainer.innerHTML = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 40px;"></i>`;
             }
         }
-        
-        const usernameEl = document.getElementById('studioUsername');
-        if(usernameEl) usernameEl.innerText = user.fullname || user.username || 'Saya';
-        
+
         const usernameEl = document.getElementById('studioUsername');
         if(usernameEl) usernameEl.innerText = user.fullname || user.username || 'Saya';
 
+        const usernameEl = document.getElementById('studioUsername');
+        if(usernameEl) usernameEl.innerText = user.username || 'Saya';
+
         // 3. Category & Tags
         let catTagHtml = '';
-        const baseUrlSearch = "{{ url('search') }}"; 
+        const baseUrlSearch = "{{ url('search') }}";
 
         if(photo.category) {
             catTagHtml += `<a href="${baseUrlSearch}?category=${photo.category.slug}" class="badge bg-secondary me-2 text-decoration-none">${photo.category.name}</a>`;
@@ -352,11 +361,11 @@
 
         // 5. Update Form Actions (Delete & Album)
         const formDelete = document.getElementById('formDelete');
-        if(formDelete) formDelete.action = routeDelete.replace('000', id);
-        
+        if(formDelete) formDelete.action = "/photos/" + id;
+
         const formAlbum = document.getElementById('formAlbum');
-        if(formAlbum) formAlbum.action = routeAlbum.replace('000', id);
-        
+        if(formAlbum) formAlbum.action = "/foto/" + id + "/update-album";
+
         // 6. Set Selected Album
         const selectAlb = document.getElementById('selectAlbum');
         if(selectAlb) selectAlb.value = photo.album_id || "";
@@ -371,8 +380,8 @@
             commDiv.innerHTML = '';
             if(photo.komentarfoto && photo.komentarfoto.length > 0){
                 photo.komentarfoto.forEach(c => {
-                     const u = c.user ? (c.user.fullname || c.user.username) : 'Anonim';
-                     
+                     const u = c.user ? c.user.username : 'Anonim';
+
                      let avatarHtml = '';
                      if(c.user && c.user.avatar) {
                         avatarHtml = `<img src="${baseUrlAvatar}/${c.user.avatar}" class="rounded-circle border" width="32" height="32" style="object-fit: cover;">`;
@@ -380,14 +389,27 @@
                         avatarHtml = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 32px;"></i>`;
                      }
 
+                     // Delete Button Logic
+                    let deleteBtn = '';
+                    if (c.user_id == {{ Auth::id() ?? 'null' }}) {
+                       deleteBtn = `
+                         <button onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                           <i class="bi bi-trash-fill"></i>
+                         </button>
+                       `;
+                    }
+
                      commDiv.innerHTML += `
-                        <div class="mb-3 d-flex gap-2">
+                        <div class="mb-3 d-flex gap-2 comment-item">
                             <div class="flex-shrink-0">
                                 ${avatarHtml}
                             </div>
-                            <div class="bg-light px-3 py-2 rounded-3 w-100">
-                                <span class="fw-bold small d-block text-dark">${u}</span>
-                                <p class="mb-0 small text-secondary lh-sm mt-1">${c.isi_komentar}</p>
+                            <div class="bg-light px-3 py-2 shadow-sm border w-100 comment-bubble position-relative">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <span class="fw-bold small d-block text-dark">${u}</span>
+                                    ${deleteBtn}
+                                </div>
+                                <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
                             </div>
                         </div>`;
                 });

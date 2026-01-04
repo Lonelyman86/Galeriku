@@ -18,7 +18,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link bg-white text-secondary border" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab" aria-controls="reports" aria-selected="false">
-                <i class="bi bi-flag-fill me-2"></i>Laporan Masuk 
+                <i class="bi bi-flag-fill me-2"></i>Laporan Masuk
                 @if($reports->total() > 0)
                 <span class="badge bg-danger ms-2">{{ $reports->total() }}</span>
                 @endif
@@ -27,7 +27,7 @@
     </ul>
 
     <div class="tab-content" id="adminTabsContent">
-        
+
         {{-- TAB 1: SEMUA FOTO --}}
         <div class="tab-pane fade show active" id="photos" role="tabpanel" aria-labelledby="photos-tab">
             <div class="card border-0 shadow-sm">
@@ -49,8 +49,8 @@
                                 <tr class="table-row-hover">
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <img src="{{ $foto->user->avatar ? asset('storage/' . $foto->user->avatar) : asset('assets/img/default-profile.png') }}"
-                                                 class="rounded-circle border" width="32" height="32">
+                                            <img src="{{ Str::startsWith($foto->user->avatar, ['http', 'data:']) ? $foto->user->avatar : ($foto->user->avatar ? asset('storage/' . $foto->user->avatar) : asset('assets/img/default-profile.png')) }}"
+                                                 class="rounded-circle border" width="32" height="32" style="object-fit: cover;">
                                             <span class="fw-semibold">{{ $foto->user->username }}</span>
                                         </div>
                                     </td>
@@ -119,8 +119,8 @@
                                     <td>
                                         @if($report->foto)
                                             <div class="d-flex align-items-center gap-2">
-                                                <a href="{{ asset('storage/foto/'.$report->foto->lokasi_file) }}" target="_blank">
-                                                    <img src="{{ asset('storage/foto/'.$report->foto->lokasi_file) }}" width="60" class="rounded">
+                                                <a href="{{ Str::startsWith($report->foto->lokasi_file, ['http', 'data:']) ? $report->foto->lokasi_file : asset('storage/foto/'.$report->foto->lokasi_file) }}" target="_blank">
+                                                    <img src="{{ Str::startsWith($report->foto->lokasi_file, ['http', 'data:']) ? $report->foto->lokasi_file : asset('storage/foto/'.$report->foto->lokasi_file) }}" width="60" class="rounded" style="object-fit:cover;">
                                                 </a>
                                                 <div class="small lh-sm">
                                                     <strong>{{Str::limit($report->foto->judul_foto, 20)}}</strong><br>
@@ -171,7 +171,7 @@
 
         <div class="modal-body">
           <p class="mb-3 text-muted">Pilih salah satu alasan kenapa foto ini ditolak:</p>
-          
+
           {{-- Hapus name="note" di sini agar tidak bentrok, kita handle via JS --}}
           <select id="noteSelect" class="form-select mb-3" required>
             <option value="">-- Pilih Alasan --</option>
@@ -189,7 +189,7 @@
 
           {{-- Input alasan custom --}}
           <input type="text" id="customNote" class="form-control d-none" placeholder="Tulis alasan lainnya...">
-          
+
           {{-- Input Hidden untuk menampung nilai final yang dikirim ke controller --}}
           <input type="hidden" name="note" id="finalNote">
         </div>
@@ -214,10 +214,10 @@ document.addEventListener('DOMContentLoaded', function () {
         triggerEl.addEventListener('click', function (event) {
             event.preventDefault()
             tabTrigger.show()
-            
+
             // Save state
             localStorage.setItem('activeAdminTab', event.target.id);
-            
+
             // Update Styling
             updateTabStyles(triggerEl);
         })
@@ -244,9 +244,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    
+
     // -------------------------------------------------------------------
-    
+
     const rejectModal = document.getElementById('rejectModal');
     const rejectForm = document.getElementById('rejectForm');
     const noteSelect = document.getElementById('noteSelect');
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const button = event.relatedTarget;
         const action = button.getAttribute('data-action');
         rejectForm.setAttribute('action', action);
-        
+
         // Reset form saat modal dibuka
         noteSelect.value = "";
         customNote.value = "";
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             finalNote.value = noteSelect.value; // Pakai pilihan dropdown
         }
-        
+
         // Cek validasi sederhana
         if (!finalNote.value.trim()) {
             e.preventDefault();

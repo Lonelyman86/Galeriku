@@ -60,7 +60,7 @@ class ProfileController extends Controller
         // 2. Ambil Foto Milik User (Hanya yang Approved)
         $foto = Foto::where('user_id', $id)
                     ->where('status', 'approved') // WAJIB: Jangan tampilkan foto pending/rejected
-                    ->with(['like', 'komentarfoto.user', 'album']) // Eager loading biar cepat
+                    ->with(['user', 'like', 'komentarfoto.user', 'album']) // Eager loading biar cepat
                     ->latest()
                     ->paginate(12); // Pagination biar halaman gak berat kalau fotonya ribuan
 

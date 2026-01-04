@@ -5,6 +5,17 @@
 {{-- LIBRARIES --}}
 <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
 <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<style>
+    .comment-item { transition: background-color 0.2s; }
+    .comment-delete-btn {
+        opacity: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        cursor: pointer;
+    }
+    .comment-item:hover .comment-delete-btn { opacity: 1; }
+    .comment-delete-btn:hover { transform: scale(1.1); color: #dc3545 !important; }
+    .comment-bubble { border-radius: 12px; background-color: #f8f9fa; }
+</style>
 
 
 
@@ -21,20 +32,62 @@
 @endif
 
 <div class="container-fluid py-4">
-  <div class="album-header px-2 mb-4">
-    <div class="d-flex justify-content-between align-items-center">
-        <h1 class="fs-4 fw-bold mb-0">{{ $album->nama_album }}</h1>
-        @if($album->user_id == Auth::id())
-          <button class="btn btn-outline-secondary btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#editAlbumModal">
-            Edit Album
-          </button>
-        @endif
-    </div>
-    @if($album->deskripsi)
-        <p class="text-muted small mt-2 mb-0">{{ $album->deskripsi }}</p>
+  @php
+    $bgStyle = "background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);";
+    $hasImage = false;
+    if($album->cover_image) {
+        $bgStyle = "background: url('" . asset('storage/' . $album->cover_image) . "') center/cover no-repeat;";
+        $hasImage = true;
+    }
+  @endphp
+
+  <div class="album-hero rounded-4 p-4 p-md-5 mb-5 text-white position-relative overflow-hidden shadow-sm"
+       style="{{ $bgStyle }}">
+
+    @if($hasImage)
+      <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50"></div>
+    @else
+      {{-- Decorative Circle (Only for gradient) --}}
+      <div class="position-absolute top-0 end-0 bg-white opacity-10 rounded-circle"
+           style="width: 200px; height: 200px; transform: translate(50%, -50%);"></div>
+      <div class="position-absolute bottom-0 start-0 bg-black opacity-10 rounded-circle"
+           style="width: 150px; height: 150px; transform: translate(-30%, 30%);"></div>
     @endif
+
+    <div class="position-relative z-1">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="badge bg-white text-danger mb-2 px-3 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-journal-album me-1"></i> Album Koleksi
+                </span>
+                <h1 class="display-5 fw-bold mb-2">{{ $album->nama_album }}</h1>
+                <p class="fs-5 opacity-75 mb-4" style="max-width: 600px;">
+                    {{ $album->deskripsi ?? 'Tidak ada deskripsi untuk album ini.' }}
+                </p>
+
+                <div class="d-flex align-items-center gap-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-images fs-4 me-2"></i>
+                        <span class="fw-bold">{{ $foto->total() }}</span> <span class="ms-1 opacity-75">Foto</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-calendar-event fs-4 me-2"></i>
+                        <span class="opacity-75">Dibuat {{ $album->created_at->format('d M Y') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            @if($album->user_id == Auth::id())
+            <div>
+                <button class="btn btn-light text-danger fw-bold shadow-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editAlbumModal">
+                    <i class="bi bi-pencil-fill me-2"></i> Edit Album
+                </button>
+            </div>
+            @endif
+        </div>
+    </div>
   </div>
 
 <div class="row" id="album-masonry-grid">
@@ -69,7 +122,7 @@
               <div class="col-6 col-sm-4 col-md-3">
                 <label class="img-checkbox-container w-100">
                   <input type="checkbox" name="foto_ids[]" value="{{ $fotoItem->id }}">
-                  <img src="{{ asset('storage/foto/'.$fotoItem->lokasi_file) }}"
+                  <img src="{{ Str::startsWith($fotoItem->lokasi_file, ['http', 'data:']) ? $fotoItem->lokasi_file : asset('storage/foto/'.$fotoItem->lokasi_file) }}"
                        alt="{{ $fotoItem->judul_foto }}"
                        loading="lazy">
                 </label>
@@ -99,7 +152,7 @@
 @if($album->user_id == Auth::id())
 <div class="modal fade" id="editAlbumModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form method="POST" action="{{ route('albums.update', $album->id) }}" class="modal-content rounded-5 border-0 shadow-lg p-3">
+    <form method="POST" action="{{ route('albums.update', $album->id) }}" class="modal-content rounded-5 border-0 shadow-lg p-3" enctype="multipart/form-data">
       @csrf
       @method('PATCH')
 
@@ -134,6 +187,12 @@
             <div class="invalid-feedback d-block ms-1">{{ $message }}</div>
           @enderror
         </div>
+
+        <div class="mb-2">
+           <label class="form-label fw-bold small ms-1">Cover Image (Opsional)</label>
+           <input type="file" name="cover_image" class="form-control rounded-pill bg-light border-0" onchange="previewCover(this)">
+           <small class="text-muted ms-2" style="font-size:11px;">Maks: 2MB</small>
+        </div>
       </div>
 
       <div class="modal-footer border-0 pt-0 justify-content-end">
@@ -153,12 +212,12 @@
     <div class="modal-content" style="border-radius: 20px; overflow: hidden; border:none;">
       <div class="modal-body p-0">
         <div class="row g-0" style="min-height: 500px;">
-          
+
           {{-- Kiri: Gambar Full --}}
           <div class="col-lg-8 bg-light d-flex align-items-center justify-content-center position-relative">
             <div class="modal-image-wrapper">
               <img id="modalImg" src="" alt="">
-              
+
               <button type="button" class="pin-menu-btn pin-menu-btn-modal" onclick="toggleMenu(event, 'pin-menu-modal-global')">
                 <i class="bi bi-three-dots"></i>
               </button>
@@ -176,7 +235,7 @@
           {{-- Kanan: Detail --}}
           <div class="col-lg-4 bg-white d-flex flex-column modal-right-col" style="max-height: 90vh;">
             <div class="p-3 border-bottom">
-                
+
                 {{-- Status Alert (Shown via JS) --}}
                 <div id="modalStatusAlert"></div>
 
@@ -273,20 +332,19 @@
 
 @push('scripts')
 <script>
-    let photosData = @json($foto->items()); 
+    let photosData = @json($foto->items());
     let nextPageUrl = "{{ $foto->nextPageUrl() }}";
     let isLoading = false;
-    
+
     // Static Strings
     const baseUrlFoto = "{{ asset('storage/foto') }}";
-    const baseUrlAvatar = "{{ asset('storage') }}"; 
+    const baseUrlAvatar = "{{ asset('storage') }}";
     const defaultAvatar = "{{ asset('assets/img/default-profile.png') }}";
-    const baseUrlSearch = "{{ url('search') }}"; 
+    const baseUrlSearch = "{{ url('search') }}";
 
     const routes = {
-       profile: "{{ route('profile.public', '000') }}",
-       like: "{{ route('likes.toggle', ['photo' => '000']) }}",
-       comment: "{{ route('komentar.store', ['photo' => '000']) }}"
+       profile: "{{ url('user') }}/000",
+       // like & comment handled manually below
     };
 
     // Init Masonry Global
@@ -318,10 +376,10 @@
         .then(data => {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = data.html;
-            
+
             const newItems = Array.from(tempDiv.children);
             grid.append(...newItems);
-            
+
             if(data.data && Array.isArray(data.data)) {
                 photosData.push(...data.data);
             }
@@ -352,13 +410,13 @@
 
     // Logic Single Modal
     function openSingleModal(id) {
-        const item = photosData.find(p => p.id === id);
+        const item = photosData.find(p => p.id == id);
         if(!item) return;
 
         // Status Alert Logic
         const statusDiv = document.getElementById('modalStatusAlert');
         statusDiv.innerHTML = ''; // Reset
-        
+
         if (item.status == 'pending') {
             statusDiv.innerHTML = `<div class="alert alert-warning p-2 small mb-3"><strong>Status:</strong> Menunggu Persetujuan Admin</div>`;
         } else if (item.status == 'rejected') {
@@ -366,8 +424,14 @@
         }
 
         // Gambar & Teks
-        document.getElementById('modalImg').src = baseUrlFoto + '/' + item.lokasi_file;
-        document.getElementById('modalDownloadBtn').href = baseUrlFoto + '/' + item.lokasi_file;
+        let imgSrc = '';
+        if (item.lokasi_file.startsWith('http') || item.lokasi_file.startsWith('data:')) {
+            imgSrc = item.lokasi_file;
+        } else {
+            imgSrc = baseUrlFoto + '/' + item.lokasi_file;
+        }
+        document.getElementById('modalImg').src = imgSrc;
+        document.getElementById('modalDownloadBtn').href = imgSrc;
         document.getElementById('modalTitle').innerText = item.judul_foto;
         document.getElementById('modalDesc').innerText = item.deskripsi_foto;
 
@@ -385,10 +449,9 @@
         catTagDiv.innerHTML = catTagHtml;
 
         // User Info
-        const user = item.user || {};
-        const profileUrl = routes.profile.replace('000', user.id);
-        
-        const modalAvatarContainer = document.getElementById('modalAvatarContainer');
+        // Profile Link
+        const profileUrl = "/user/" + (user.id || 0);
+        document.getElementById('modalUserLink').href = profileUrl;
         if(user.avatar) {
              modalAvatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">`;
         } else {
@@ -401,12 +464,12 @@
         document.getElementById('modalTime').innerText = new Date(item.created_at).toLocaleDateString();
 
         // Like & Comment Logic (Enable only if approved, or disable if desired)
-        // Usually, pending photos shouldn't be liked/commented? 
+        // Usually, pending photos shouldn't be liked/commented?
         // Logic in album-grid was: if != approved, disable buttons.
         const likeBtn = document.querySelector('#modalLikeForm button');
         const commentInput = document.querySelector('input[name="isi_komentar"]');
         const commentBtn = document.querySelector('#modalCommentForm button');
-        
+
         if(item.status !== 'approved') {
             if(likeBtn) likeBtn.disabled = true;
             if(commentInput) { commentInput.disabled = true; commentInput.placeholder = 'Komentar nonaktif (Status Pending/Rejected)'; }
@@ -417,11 +480,13 @@
              if(commentBtn) commentBtn.disabled = false;
         }
 
+        // Like Logic
         document.getElementById('modalLikeCount').innerText = item.like ? item.like.length : 0;
-        document.getElementById('modalLikeForm').action = routes.like.replace('000', item.id);
-        
+        document.getElementById('modalLikeForm').action = "/albums/" + item.id + "/toggle-like";
+
+        // Comment Logic
         const commForm = document.getElementById('modalCommentForm');
-        if(commForm) commForm.action = routes.comment.replace('000', item.id);
+        if(commForm) commForm.action = "/photos/" + item.id + "/komentar";
 
         // List Comments
         const listDiv = document.getElementById('modalCommentsList');
@@ -437,12 +502,25 @@
                    avatarHtml = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
                }
 
+               // Delete Button
+               let deleteBtn = '';
+               if (c.user_id == {{ Auth::id() ?? 'null' }}) {
+                   deleteBtn = `
+                     <button onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                       <i class="bi bi-trash-fill"></i>
+                     </button>
+                   `;
+               }
+
                const html = `
-                 <div class="mb-2 d-flex gap-2">
+                 <div class="mb-3 d-flex gap-2 comment-item">
                      <div class="flex-shrink-0">${avatarHtml}</div>
-                     <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble">
-                        <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
-                        <p class="mb-0 small text-dark lh-sm mt-1 comment-text">${c.isi_komentar}</p>
+                     <div class="bg-light px-3 py-2 shadow-sm border w-100 comment-bubble position-relative">
+                        <div class="d-flex justify-content-between align-items-start">
+                             <a href="/user/${cUser.id}" class="fw-bold small d-block text-dark text-decoration-none">${cUser.username || 'Anonim'}</a>
+                             ${deleteBtn}
+                        </div>
+                        <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
                      </div>
                  </div>`;
                listDiv.innerHTML += html;
@@ -455,8 +533,30 @@
         myModal.show();
     }
 
+    // === Delete Comment Function ===
+    function deleteComment(id, btn) {
+        if(!confirm('Hapus komentar ini?')) return;
+
+        fetch(`/komentar/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            if(res.ok) {
+                const bubble = btn.closest('.d-flex.gap-2');
+                if(bubble) bubble.remove();
+            } else {
+                alert('Gagal menghapus komentar');
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
     function toggleMenu(event, menuId) {
-        event.stopPropagation(); 
+        event.stopPropagation();
         const menu = document.getElementById(menuId);
         document.querySelectorAll('.pin-menu').forEach(m => {
           if (m.id !== menuId) m.classList.remove('show');
@@ -474,7 +574,7 @@
     }
     const originalOpenModal = openSingleModal;
     openSingleModal = function(id) {
-       currentReportFotoId = id; 
+       currentReportFotoId = id;
        originalOpenModal(id);
     }
 

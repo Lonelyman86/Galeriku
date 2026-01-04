@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('follows', function (Blueprint $table) {
-            $table->id();
-            
-            // 1. Orang yang melakukan follow (Pengikut)
-            $table->foreignId('follower_id')->constrained('users')->onDelete('cascade');
-            
-            // 2. Orang yang di-follow (Target)
-            $table->foreignId('followed_id')->constrained('users')->onDelete('cascade');
-            
-            $table->timestamps();
+        if (!Schema::hasTable('follows')) {
+            Schema::create('follows', function (Blueprint $table) {
+                $table->id();
 
-            // 3. Mencegah user follow orang yang sama berkali-kali
-            $table->unique(['follower_id', 'followed_id']);
-        });
+                // 1. Orang yang melakukan follow (Pengikut)
+                $table->foreignId('follower_id')->constrained('users')->onDelete('cascade');
+
+                // 2. Orang yang di-follow (Target)
+                $table->foreignId('followed_id')->constrained('users')->onDelete('cascade');
+
+                $table->timestamps();
+
+                // 3. Mencegah user follow orang yang sama berkali-kali
+                $table->unique(['follower_id', 'followed_id']);
+            });
+        }
     }
 
     /**

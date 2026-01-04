@@ -9,16 +9,18 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::create('foto', function (Blueprint $table) {
-            $table->id();
-            $table->string('judul_foto');
-            $table->text('deskripsi_foto')->nullable();
-            $table->date('tanggal_unggah');
-            $table->string('lokasi_file');
-            $table->foreignId('album_id')->nullable()->constrained('albums')->onDelete('set null');                        
-            $table->foreignId('user_id')->constrained('users');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('foto')) {
+            Schema::create('foto', function (Blueprint $table) {
+                $table->id();
+                $table->string('judul_foto');
+                $table->text('deskripsi_foto')->nullable();
+                $table->date('tanggal_unggah');
+                $table->longText('lokasi_file');
+                $table->foreignId('album_id')->nullable()->constrained('albums')->onDelete('set null');
+                $table->foreignId('user_id')->constrained('users');
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void

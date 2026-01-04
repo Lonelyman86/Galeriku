@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
     // --- Album Routes ---
     Route::get('/createalbum', [AlbumController::class, 'index']);
     Route::post('/album/new', [AlbumController::class, 'store'])->name('album.new');
-    
+
     // Route untuk fitur "Ambil dari Galeri" (Mass Add Photos)
     Route::post('/album/{album}/add-existing', [AlbumController::class, 'addExistingPhotos'])->name('album.add_existing');
     Route::patch('/albums/{album}', [AlbumController::class, 'update'])->name('albums.update');
@@ -72,20 +72,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/albums/{photo}/toggle-like', [LikeController::class, 'toggle'])->name('likes.toggle');
     Route::get('/albums/{photo}/check-like', [LikeController::class, 'checkLike'])->name('likes.check');
     Route::post('/photos/{photo}/komentar', [KomentarController::class, 'store'])->name('komentar.store');
+    Route::delete('/komentar/{komentar}', [KomentarController::class, 'destroy'])->name('komentar.destroy');
     Route::get('/liked', [HomeController::class, 'likedPhotos'])->name('photo.liked');
 
 
     // --- Profil ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    
+
     // --- Follow System (BARU) ---
     Route::post('/user/{user}/follow', [FollowController::class, 'toggle'])->name('user.follow');
     Route::get('/following', [HomeController::class, 'followingFeed'])->name('feed.following'); // <--- BARU
 
     // --- Report System (BARU) ---
     Route::post('/report', [ReportController::class, 'store'])->name('report.store');
-    
+
     // --- Notifikasi ---
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::get('/notifications/read-all', function() { return redirect('/studio'); });

@@ -25,7 +25,7 @@ class UpdateAlbumRequest extends FormRequest
     public function rules(): array
     {
         $albumId = $this->route('album')->id;
-        
+
         return [
             'nama_album' => [
                 'required',
@@ -34,6 +34,7 @@ class UpdateAlbumRequest extends FormRequest
                 })->ignore($albumId),
             ],
             'deskripsi' => 'required',
+            'cover_image' => 'nullable|image|max:2048',
         ];
     }
 }

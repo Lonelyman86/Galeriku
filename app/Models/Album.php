@@ -10,7 +10,7 @@ class Album extends Model
     use HasFactory;
 
     // Gunakan hanya salah satu: ini lebih aman
-    protected $fillable = ['nama_album', 'deskripsi', 'user_id'];
+    protected $fillable = ['nama_album', 'deskripsi', 'user_id', 'cover_image'];
 
     protected $table = 'albums';
 

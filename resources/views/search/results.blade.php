@@ -56,14 +56,25 @@
     position: relative; width: 100%; height: 100%; background: #f8f9fa;
     display: flex; justify-content: center; align-items: center; min-height: 400px; padding: 24px;
   }
-  .modal-image-wrapper img { 
-      max-width: 100%; max-height: 85vh; object-fit: contain; 
+  .modal-image-wrapper img {
+      max-width: 100%; max-height: 85vh; object-fit: contain;
       border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
   }
   .pin-menu-btn-modal { top: 24px; right: 24px; opacity: 1; }
   .pin-menu-modal { top: 60px; right: 24px; }
   .custom-scrollbar::-webkit-scrollbar { width: 6px; }
   .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+  /* Comment Styles */
+  .comment-item { transition: background-color 0.2s; }
+  .comment-delete-btn {
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+  }
+  .comment-item:hover .comment-delete-btn { opacity: 1; }
+  .comment-delete-btn:hover { transform: scale(1.1); color: #dc3545 !important; }
+  .comment-bubble { border-radius: 12px; background-color: #f8f9fa; }
 </style>
 
 <div class="container py-4">
@@ -80,8 +91,8 @@
                 <div class="result-card">
                     <a href="{{ route('profile.public', $user->id) }}" class="text-decoration-none text-center">
                         @if($user->avatar)
-                            <img src="{{ asset('storage/'.$user->avatar) }}" 
-                                 class="rounded-circle mb-3 border shadow-sm" 
+                            <img src="{{ Str::startsWith($user->avatar, ['http', 'data:']) ? $user->avatar : asset('storage/'.$user->avatar) }}"
+                                 class="rounded-circle mb-3 border shadow-sm"
                                  style="width: 80px; height: 80px; object-fit: cover;">
                         @else
                             <i class="bi bi-person-circle default-avatar-icon mb-3 d-inline-block" style="font-size: 80px;"></i>
@@ -132,15 +143,15 @@
          ========================================== --}}
     @if(!$fotos->isEmpty())
         <h5 class="fw-bold mb-3 px-2"><i class="bi bi-images me-2"></i>Foto</h5>
-        
+
         <div class="row" id="masonry-grid-search">
             @foreach ($fotos as $item)
             <div class="col-6 col-md-4 col-lg-3 mb-4 masonry-item">
-                
+
                 {{-- PIN WRAPPER (Style Home) --}}
                 <div class="pin-wrapper">
                     {{-- Gambar --}}
-                    <img src="{{ asset('storage/foto/'.$item->lokasi_file) }}" 
+                    <img src="{{ Str::startsWith($item->lokasi_file, ['http', 'data:']) ? $item->lokasi_file : asset('storage/foto/'.$item->lokasi_file) }}"
                          alt="{{ $item->judul_foto }}"
                          onclick="openSingleModal({{ $item->id }})">
 
@@ -151,12 +162,12 @@
 
                     {{-- Menu Dropdown --}}
                     <div id="pin-menu-{{ $item->id }}" class="pin-menu">
-                        <a href="{{ asset('storage/foto/'.$item->lokasi_file) }}" download class="pin-menu-item">
+                        <a href="{{ Str::startsWith($item->lokasi_file, ['http', 'data:']) ? $item->lokasi_file : asset('storage/foto/'.$item->lokasi_file) }}" download class="pin-menu-item">
                             <i class="bi bi-download"></i> <span>Unduh gambar</span>
                         </a>
                         <a href="{{ route('profile.public', $item->user->id ?? 0) }}" class="pin-menu-item">
                             <i class="bi bi-person"></i> Lihat Profil
-                        </a> 
+                        </a>
                     </div>
                 </div>
 
@@ -182,7 +193,7 @@
     <div class="modal-content" style="border-radius: 20px; overflow: hidden; border:none;">
       <div class="modal-body p-0">
         <div class="row g-0" style="min-height: 500px;">
-          
+
           {{-- Kiri: Gambar --}}
           <div class="col-lg-8 bg-light d-flex align-items-center justify-content-center position-relative">
             <div class="modal-image-wrapper">
@@ -308,22 +319,30 @@
   // 2. Data Backend
   const photosData = @json($fotos); // <-- Variabel dari SearchController
   const baseUrlFoto = "{{ asset('storage/foto') }}";
-  const baseUrlAvatar = "{{ asset('storage') }}"; 
+  const baseUrlAvatar = "{{ asset('storage') }}";
   const defaultAvatar = "{{ asset('assets/img/default-profile.png') }}";
-  
+
+  /*
   const routes = {
       profile: "{{ route('profile.public', '000') }}",
       like: "{{ route('likes.toggle', ['photo' => '000']) }}",
       comment: "{{ route('komentar.store', ['photo' => '000']) }}"
   };
+  */
 
   // 3. Logic Single Modal
   function openSingleModal(id) {
       const item = photosData.find(p => p.id === id);
       if(!item) return;
 
-      document.getElementById('modalImg').src = baseUrlFoto + '/' + item.lokasi_file;
-      document.getElementById('modalDownloadBtn').href = baseUrlFoto + '/' + item.lokasi_file;
+      let imgSrc = '';
+      if (item.lokasi_file.startsWith('http') || item.lokasi_file.startsWith('data:')) {
+          imgSrc = item.lokasi_file;
+      } else {
+          imgSrc = baseUrlFoto + '/' + item.lokasi_file;
+      }
+      document.getElementById('modalImg').src = imgSrc;
+      document.getElementById('modalDownloadBtn').href = imgSrc;
       document.getElementById('modalTitle').innerText = item.judul_foto;
       document.getElementById('modalDesc').innerText = item.deskripsi_foto;
 
@@ -343,12 +362,12 @@
               catTagHtml += `<a href="${baseUrlSearch}?tag=${tag.slug}" class="text-decoration-none me-1" style="font-size:12px;">#${tag.name}</a>`;
           });
       }
-      
+
       catTagDiv.innerHTML = catTagHtml;
 
       const user = item.user || {};
-      const profileUrl = routes.profile.replace('000', user.id);
-      
+      const profileUrl = "/user/" + (user.id || 0);
+
       const modalAvatarContainer = document.getElementById('modalAvatarContainer');
       if(user.avatar) {
           modalAvatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">`;
@@ -362,10 +381,10 @@
       document.getElementById('modalTime').innerText = new Date(item.created_at).toLocaleDateString();
 
       document.getElementById('modalLikeCount').innerText = item.like ? item.like.length : 0;
-      document.getElementById('modalLikeForm').action = routes.like.replace('000', item.id);
+      document.getElementById('modalLikeForm').action = "/albums/" + item.id + "/toggle-like";
 
       const commForm = document.getElementById('modalCommentForm');
-      if(commForm) commForm.action = routes.comment.replace('000', item.id);
+      if(commForm) commForm.action = "/photos/" + item.id + "/komentar";
 
       const listDiv = document.getElementById('modalCommentsList');
       listDiv.innerHTML = '';
@@ -381,12 +400,25 @@
                   avatarHtml = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
               }
 
+              // Delete Button Logic
+              let deleteBtn = '';
+              if (c.user_id == {{ Auth::id() ?? 'null' }}) {
+                 deleteBtn = `
+                   <button onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                     <i class="bi bi-trash-fill"></i>
+                   </button>
+                 `;
+              }
+
               const html = `
-                <div class="mb-2 d-flex gap-2">
+                <div class="mb-3 d-flex gap-2 comment-item">
                     <div class="flex-shrink-0">${avatarHtml}</div>
-                    <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble">
-                        <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
-                        <p class="mb-0 small text-dark lh-sm mt-1 comment-text">${c.isi_komentar}</p>
+                    <div class="bg-light px-3 py-2 shadow-sm border w-100 comment-bubble position-relative">
+                        <div class="d-flex justify-content-between align-items-start">
+                             <a href="/user/${cUser.id}" class="fw-bold small d-block text-dark text-decoration-none">${cUser.username || 'Anonim'}</a>
+                             ${deleteBtn}
+                        </div>
+                        <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
                     </div>
                 </div>`;
               listDiv.innerHTML += html;
@@ -399,9 +431,31 @@
       myModal.show();
   }
 
+  // === Delete Comment Function ===
+  function deleteComment(id, btn) {
+      if(!confirm('Hapus komentar ini?')) return;
+
+      fetch(`/komentar/${id}`, {
+          method: 'DELETE',
+          headers: {
+              'X-CSRF-TOKEN': '{{ csrf_token() }}',
+              'Content-Type': 'application/json'
+          }
+      })
+      .then(res => {
+          if(res.ok) {
+              const bubble = btn.closest('.d-flex.gap-2');
+              if(bubble) bubble.remove();
+          } else {
+              alert('Gagal menghapus komentar');
+          }
+      })
+      .catch(err => console.error(err));
+  }
+
   // 4. Logic Menu
   function toggleMenu(event, menuId) {
-    event.stopPropagation(); 
+    event.stopPropagation();
     const menu = document.getElementById(menuId);
     document.querySelectorAll('.pin-menu').forEach(m => {
       if (m.id !== menuId) m.classList.remove('show');

@@ -36,14 +36,11 @@ class SignupController extends Controller
 
         // Jika Anda menghapus validasi 'name' di atas, baris ini aman.
         // Tapi jika form HTML masih mengirim input 'name' dan Anda ingin mengabaikannya saat save ke DB:
-        // unset($validatedData['name']); 
+        // unset($validatedData['name']);
 
         // User::create($validatedData);
 
-        // Fix for "Field 'address' doesn't have a default value" error
-        $user = new User($validatedData);
-        $user->address = '-'; // Dummy value since column exists but is unused
-        $user->save();
+        User::create($validatedData);
 
         return redirect('/sign-in')->with('success', 'Registration successful! Welcome to the club!');
     }

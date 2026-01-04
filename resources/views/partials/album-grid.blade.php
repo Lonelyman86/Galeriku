@@ -1,49 +1,46 @@
 @foreach ($foto as $item)
   <div class="col-6 col-md-4 col-lg-3 mb-4 masonry-item">
-    <div class="pin">
-    <a onclick="openSingleModal({{ $item->id }})" style="cursor: pointer;">
-      <img src="{{ asset('storage/foto/'.$item->lokasi_file)}}" alt="{{ $item->judul_foto }}">
-    </a>
+    <div class="pin-wrapper">
+        {{-- Gambar Utama --}}
+        <img src="{{ Str::startsWith($item->lokasi_file, ['http', 'data:']) ? $item->lokasi_file : asset('storage/foto/'.$item->lokasi_file) }}"
+             alt="{{ $item->judul_foto }}"
+             onclick="openSingleModal({{ $item->id }})">
 
-    @if($item->status == 'pending')
-      <div class="status-overlay status-pending">⏳ Menunggu Persetujuan Admin</div>
-    @elseif($item->status == 'rejected')
-      <div class="status-overlay status-rejected">
-        ❌ Foto Ditolak<br><small>{{ $item->note ?? 'Tanpa alasan' }}</small>
-      </div>
-    @endif
+        {{-- Tombol 3 Titik --}}
+        <button type="button" class="pin-menu-btn" data-menu-target="pin-menu-{{ $item->id }}"
+                onclick="toggleMenu(event, 'pin-menu-{{ $item->id }}')">
+            <i class="bi bi-three-dots"></i>
+        </button>
 
-    <div class="pin-overlay">
-      <div class="pin-actions">
-        @if($item->status === 'approved')
-          <form method="POST" action="{{ route('likes.toggle', ['photo' => $item->id]) }}">
-            @csrf
-            <button type="submit" class="btn-ghost">❤ {{ $item->like->count() }}</button>
-          </form>
-        @else
-          <button class="btn-ghost" disabled style="opacity:.5;">❤ {{ $item->like->count() }}</button>
+        {{-- Menu Dropdown --}}
+        <div id="pin-menu-{{ $item->id }}" class="pin-menu">
+            {{-- Download --}}
+            <a href="{{ Str::startsWith($item->lokasi_file, ['http', 'data:']) ? $item->lokasi_file : asset('storage/foto/'.$item->lokasi_file) }}" download class="pin-menu-item">
+                <i class="bi bi-download"></i> <span>Unduh gambar</span>
+            </a>
+
+            {{-- Remove From Album (Owner Only) --}}
+            @if(isset($album) && $album->user_id === Auth::id())
+              <form action="{{ route('foto.update.album', $item->id) }}" method="POST" onsubmit="return confirm('Keluarkan foto ini dari album?')">
+                @csrf
+                <input type="hidden" name="album_id" value="">
+                <button type="submit" class="pin-menu-item text-danger w-100 text-start">
+                    <i class="bi bi-x-circle"></i> <span>Hapus dari Album</span>
+                </button>
+              </form>
+            @endif
+        </div>
+
+        {{-- Status Overlay (Optional, for Pending/Rejected) --}}
+        @if($item->status == 'pending')
+             <div class="position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 text-white small text-center">
+                ⏳ Menunggu Persetujuan
+             </div>
+        @elseif($item->status == 'rejected')
+             <div class="position-absolute bottom-0 start-0 w-100 p-2 bg-danger bg-opacity-75 text-white small text-center">
+                ❌ Ditolak
+             </div>
         @endif
-
-        @if($album->user_id === Auth::id())
-          <form action="{{ route('foto.update.album', $item->id) }}"
-                method="POST"
-                onsubmit="return confirm('Keluarkan foto ini dari album?')">
-            @csrf
-            <input type="hidden" name="album_id" value="">
-            <button class="btn-primary" style="background: rgba(0,0,0,0.5); color:white;">✕</button>
-          </form>
-        @endif
-      </div>
-    </div>
-
-    <div class="pin-meta">
-      <div class="pin-title">{{ $item->judul_foto }}</div>
-      @if(!empty($item->deskripsi_foto))
-        <div class="pin-desc">{{ $item->deskripsi_foto }}</div>
-      @endif
-      <div class="pin-sub">{{ optional($item->album)->nama_album ?? 'Tidak Ada Album' }}</div>
-      <div style="font-size:12px; color:#374151;"><b>{{ $item->user->username }}</b></div>
     </div>
   </div>
-  </div> 
 @endforeach

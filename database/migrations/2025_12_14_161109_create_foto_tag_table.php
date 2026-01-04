@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('foto_tag', function (Blueprint $table) {
-            $table->foreignId('foto_id')->constrained('foto')->onDelete('cascade');
-            $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
-            $table->primary(['foto_id', 'tag_id']);
-        });
+        if (!Schema::hasTable('foto_tag')) {
+            Schema::create('foto_tag', function (Blueprint $table) {
+                $table->foreignId('foto_id')->constrained('foto')->onDelete('cascade');
+                $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
+                $table->primary(['foto_id', 'tag_id']);
+            });
+        }
     }
 
     /**
