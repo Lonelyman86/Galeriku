@@ -112,3 +112,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::patch('/reports/{id}/ban', [ReportAdminController::class, 'ban'])->name('admin.reports.ban');
     Route::patch('/reports/{id}/dismiss', [ReportAdminController::class, 'dismiss'])->name('admin.reports.dismiss');
 });
+
+// Temporary Debug Routes
+Route::get('/debug-schema', function() {
+    try {
+        $result = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM users WHERE Field = 'avatar'");
+        return response()->json($result);
+    } catch (\Exception $e) {
+        return $e->getMessage();
+    }
+});
+
+Route::get('/debug-migrate', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return nl2br('Migration output:<br>' . \Illuminate\Support\Facades\Artisan::output());
+    } catch (\Exception $e) {
+        return 'Migration failed: ' . $e->getMessage();
+    }
+});
