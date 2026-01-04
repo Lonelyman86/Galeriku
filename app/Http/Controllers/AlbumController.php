@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Foto;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreAlbumRequest;
 use App\Http\Requests\UpdateAlbumRequest;
@@ -41,13 +42,10 @@ class AlbumController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('cover_image')) {
-             $file = $request->file('cover_image');
-             $path = $file->getRealPath();
-             $type = $file->getClientOriginalExtension();
-             $data = file_get_contents($path);
-             $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-
-             $data['cover_image'] = $base64;
+             if ($album->cover_image) {
+                 Storage::disk('public')->delete($album->cover_image);
+             }
+             $data['cover_image'] = $request->file('cover_image')->store('album-covers', 'public');
         }
 
         $album->update($data);

@@ -114,28 +114,37 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 });
 
 // Temporary Fix Route (Run once on Vercel)
+// Temporary Fix & Diagnostic Route
 Route::get('/fix-db', function() {
     try {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
 
-        // Double check the result
         $result = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM users WHERE Field = 'avatar'");
         $type = $result[0]->Type ?? 'Unknown';
 
+        // Check current user's avatar data
+        $user = auth()->user();
+        $avatarInfo = "Not logged in";
+        if ($user) {
+            $len = strlen($user->avatar ?? '');
+            $prefix = substr($user->avatar ?? '', 0, 50);
+            $avatarInfo = "Length: $len chars<br>Start: <code>" . htmlspecialchars($prefix) . "...</code>";
+        }
+
         return "
         <div style='font-family: sans-serif; text-align: center; padding: 50px;'>
-            <h1 style='color: green;'>✅ Database Successfully Updated!</h1>
-            <p>The avatar column is now: <strong>$type</strong> (Should be 'longtext')</p>
-            <p>You can now go back and upload your profile picture.</p>
+            <h1 style='color: green;'>✅ Diagnostic Run Complete</h1>
+            <p>Column Type: <strong>$type</strong> (Target: longtext)</p>
+            <div style='background: #f3f4f6; padding: 20px; border-radius: 8px; display: inline-block; text-align: left;'>
+                <h3>Current User Avatar Data:</h3>
+                <p>$avatarInfo</p>
+            </div>
+            <p>If Length is ~255, it is STILL truncated.</p>
+            <p>If Length is > 10,000, it is good.</p>
             <a href='/profile' style='display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;'>Go to Profile</a>
         </div>
         ";
     } catch (\Exception $e) {
-        return "
-        <div style='font-family: sans-serif; text-align: center; padding: 50px;'>
-            <h1 style='color: red;'>❌ Fix Failed</h1>
-            <p>Error: " . $e->getMessage() . "</p>
-        </div>
-        ";
+        return "<h1>Error</h1>" . $e->getMessage();
     }
 });

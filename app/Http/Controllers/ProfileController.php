@@ -32,13 +32,11 @@ class ProfileController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
-            $file = $request->file('avatar');
-            $path = $file->getRealPath();
-            $mime = $file->getMimeType();
-            $data = file_get_contents($path);
-            $base64 = 'data:' . $mime . ';base64,' . base64_encode($data);
-
-            $validated['avatar'] = $base64;
+            // Revert to filesystem storage (Localhost mode)
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
         if (!empty($validated['password'])) {
