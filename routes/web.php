@@ -113,21 +113,29 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::patch('/reports/{id}/dismiss', [ReportAdminController::class, 'dismiss'])->name('admin.reports.dismiss');
 });
 
-// Temporary Debug Routes
-Route::get('/debug-schema', function() {
-    try {
-        $result = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM users WHERE Field = 'avatar'");
-        return response()->json($result);
-    } catch (\Exception $e) {
-        return $e->getMessage();
-    }
-});
-
-Route::get('/debug-migrate', function() {
+// Temporary Fix Route (Run once on Vercel)
+Route::get('/fix-db', function() {
     try {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        return nl2br('Migration output:<br>' . \Illuminate\Support\Facades\Artisan::output());
+
+        // Double check the result
+        $result = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM users WHERE Field = 'avatar'");
+        $type = $result[0]->Type ?? 'Unknown';
+
+        return "
+        <div style='font-family: sans-serif; text-align: center; padding: 50px;'>
+            <h1 style='color: green;'>✅ Database Successfully Updated!</h1>
+            <p>The avatar column is now: <strong>$type</strong> (Should be 'longtext')</p>
+            <p>You can now go back and upload your profile picture.</p>
+            <a href='/profile' style='display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;'>Go to Profile</a>
+        </div>
+        ";
     } catch (\Exception $e) {
-        return 'Migration failed: ' . $e->getMessage();
+        return "
+        <div style='font-family: sans-serif; text-align: center; padding: 50px;'>
+            <h1 style='color: red;'>❌ Fix Failed</h1>
+            <p>Error: " . $e->getMessage() . "</p>
+        </div>
+        ";
     }
 });
