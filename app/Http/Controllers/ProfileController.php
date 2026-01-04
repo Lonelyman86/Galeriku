@@ -34,9 +34,9 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
             $path = $file->getRealPath();
-            $type = $file->getClientOriginalExtension();
+            $mime = $file->getMimeType();
             $data = file_get_contents($path);
-            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            $base64 = 'data:' . $mime . ';base64,' . base64_encode($data);
 
             $validated['avatar'] = $base64;
         }
