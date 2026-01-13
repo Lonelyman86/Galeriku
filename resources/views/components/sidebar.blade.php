@@ -1,4 +1,4 @@
-<aside class="sidenav bg-white border-end shadow-sm vh-100 position-fixed top-0 start-0 d-flex flex-column">
+<aside class="sidenav bg-white border-end shadow-sm vh-100 position-fixed top-0 start-0 d-none d-lg-flex flex-column">
   <div class="text-center py-3">
     <a href="/" class="text-danger fs-3 text-decoration-none">
       {{-- Logo Light Mode --}}
@@ -9,7 +9,7 @@
   </div>
 
   <ul class="nav flex-column text-center flex-grow-1">
-    
+
     {{-- Home --}}
     <li class="nav-item my-1">
       <a class="nav-link text-dark py-3 rounded-3" href="/" title="Home">

@@ -11,6 +11,11 @@ class DiscoveryController extends Controller
         // 1. Ambil Kategori
         $categories = \App\Models\Category::withCount('fotos')->get();
 
+        // 1b. Load 3 preview photos per category manually
+        foreach($categories as $cat) {
+            $cat->setRelation('preview_photos', $cat->fotos()->where('status', 'approved')->latest()->take(3)->get());
+        }
+
         // 2. Ambil Foto Acak (Random) untuk inspirasi
         $randomPhotos = \App\Models\Foto::withCompleteDetails()
                             ->where('status', 'approved')

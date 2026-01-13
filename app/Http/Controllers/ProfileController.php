@@ -50,14 +50,15 @@ class ProfileController extends Controller
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
 
-    // Function ini yang dipanggil oleh Route::get('/user/{id}', ...)
-    public function showPublicProfile(Request $request, $id)
+    // Function ini yang dipanggil oleh Route::get('/user/{username}', ...)
+    public function showPublicProfile(Request $request, $username)
     {
-        // 1. Cari User (Jika tidak ketemu, otomatis 404)
-        $user = User::findOrFail($id);
+        // 1. Cari User berdasarkan Username
+        $user = User::where('username', $username)->firstOrFail();
 
         // 2. Ambil Foto Milik User (Hanya yang Approved)
-        $foto = Foto::where('user_id', $id)
+        // Gunakan $user->id setelah user ditemukan
+        $foto = Foto::where('user_id', $user->id)
                     ->where('status', 'approved') // WAJIB: Jangan tampilkan foto pending/rejected
                     ->with(['user', 'like', 'komentarfoto.user', 'album']) // Eager loading biar cepat
                     ->latest()
@@ -72,7 +73,7 @@ class ProfileController extends Controller
         }
 
         // 3. Ambil Album Milik User
-        $albums = Album::where('user_id', $id)->get();
+        $albums = Album::where('user_id', $user->id)->get();
 
         // 4. Return ke View
         // Pastikan nama file kamu di folder: resources/views/profile/show.blade.php

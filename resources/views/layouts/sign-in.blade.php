@@ -72,17 +72,7 @@
       background-color: #cc001f;
     }
 
-    .forgot {
-      font-size: 13px;
-      text-decoration: none;
-      color: #0066cc;
-      display: block;
-      margin-top: 8px;
-    }
 
-    .forgot:hover {
-      text-decoration: underline;
-    }
 
     .divider {
       text-align: center;
@@ -156,7 +146,7 @@
         <input type="password" name="password" id="password" placeholder="Kata sandi" class="form-control" required>
       </div>
 
-      <a href="#" class="forgot">Lupa kata sandi?</a>
+
       <button type="submit" class="btn-login">Masuk</button>
     </form>
 

@@ -10,7 +10,7 @@ class CategorySeeder extends Seeder
 {
     public function run()
     {
-        $categories = ['Wallpaper', 'Anime', 'Nature', 'Meme', 'Gaming', 'Art', 'Photography'];
+        $categories = ['Wallpaper', 'Anime', 'Nature', 'Meme', 'Gaming', 'Art', 'Photography', 'Racing'];
 
         foreach ($categories as $cat) {
             Category::create([

@@ -33,31 +33,38 @@
 </div>
 
 <div class="container-fluid py-4">
-  {{-- HERO STATS SECTION (Modern & Minimalist) --}}
+  {{-- HERO STATS SECTION (Pinned Style - Studio) --}}
   <div class="row g-4 mb-5">
       <div class="col-12">
-          <div class="bg-white rounded-5 p-4 p-md-5 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-center position-relative overflow-hidden">
-              {{-- Decorative BG --}}
-              <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary opacity-10" style="background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); z-index:0;"></div>
+          <div class="bg-white rounded-5 p-4 shadow-sm d-flex flex-column flex-md-row align-items-center justify-content-between position-relative overflow-hidden">
+              {{-- Decorative BG (Blue Gradient) --}}
+              <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25"
+                   style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); z-index:0;"></div>
 
-              <div class="position-relative z-1 text-center text-md-start mb-4 mb-md-0">
-                  <h1 class="fw-bold mb-1">Studio Kreatif Saya</h1>
-                  <p class="text-muted mb-0">Kelola karya dan album Anda di sini.</p>
+              <div class="position-relative z-1 d-flex align-items-center gap-3 mb-3 mb-md-0">
+                  <div class="bg-white p-3 rounded-circle shadow-sm text-primary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                      <i class="bi bi-palette-fill fs-3"></i>
+                  </div>
+                  <div class="text-center text-md-start">
+                      <h1 class="fw-bold mb-0 fs-4 text-dark">Studio Saya</h1>
+                      <p class="text-muted mb-0 small">Kelola karya dan album Anda.</p>
+                  </div>
               </div>
 
-              <div class="position-relative z-1 d-flex gap-4 gap-md-5">
-                  <div class="text-center">
-                       <h2 class="fw-bold mb-0 text-primary">{{ $totalPhotos }}</h2>
-                       <small class="text-muted fw-bold text-uppercase" style="font-size:11px; letter-spacing:1px;">Foto</small>
-                  </div>
-                  <div class="text-center">
-                       <h2 class="fw-bold mb-0 text-danger">{{ $totalLikes }}</h2>
-                       <small class="text-muted fw-bold text-uppercase" style="font-size:11px; letter-spacing:1px;">Suka</small>
-                  </div>
-                  <div class="text-center">
-                       <h2 class="fw-bold mb-0 text-info">{{ $totalComments }}</h2>
-                       <small class="text-muted fw-bold text-uppercase" style="font-size:11px; letter-spacing:1px;">Komentar</small>
-                  </div>
+              <div class="position-relative z-1 d-flex gap-2">
+                   {{-- Stats Pills --}}
+                   <div class="bg-primary text-white px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                      <span class="fs-5 fw-bold lh-1">{{ $totalPhotos }}</span>
+                      <span class="small text-uppercase opacity-75" style="letter-spacing:1px; font-size: 9px;">Foto</span>
+                   </div>
+                   <div class="bg-danger text-white px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                      <span class="fs-5 fw-bold lh-1">{{ $totalLikes }}</span>
+                      <span class="small text-uppercase opacity-75" style="letter-spacing:1px; font-size: 9px;">Suka</span>
+                   </div>
+                   <div class="bg-info text-white px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                      <span class="fs-5 fw-bold lh-1">{{ $totalComments }}</span>
+                      <span class="small text-uppercase opacity-75" style="letter-spacing:1px; font-size: 9px;">Komen</span>
+                   </div>
               </div>
           </div>
       </div>

@@ -38,7 +38,8 @@ class SignupController extends Controller
         // Tapi jika form HTML masih mengirim input 'name' dan Anda ingin mengabaikannya saat save ke DB:
         // unset($validatedData['name']);
 
-        // User::create($validatedData);
+        // Tetapkan role default (User Biasa = 2)
+        $validatedData['role_id'] = 2;
 
         User::create($validatedData);
 

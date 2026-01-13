@@ -1,18 +1,18 @@
 <nav class="navbar navbar-expand-lg pinterest-nav px-3">
-  <div class="container-fluid align-items-center">
+  <div class="container-fluid align-items-center flex-nowrap">
 
-    <div class="flex-grow-1 d-flex align-items-center position-relative">
-      
+    <div class="flex-grow-1 d-flex align-items-center position-relative" style="min-width: 0;">
+
       {{-- Form Search --}}
       <form id="searchForm" class="w-100" action="{{ route('search') }}" method="GET">
-        <input 
+        <input
             id="searchInput"
-            class="form-control pinterest-search" 
-            type="search" 
+            class="form-control pinterest-search"
+            type="search"
             name="q"
-            placeholder="Cari foto atau album..." 
+            placeholder="Cari foto atau album..."
             aria-label="Search"
-            autocomplete="off" 
+            autocomplete="off"
             value="{{ request('q') }}"
         >
       </form>
@@ -24,15 +24,15 @@
 
     </div>
 
-    <ul class="navbar-nav ms-3">
+    <ul class="navbar-nav ms-3 flex-shrink-0">
       @auth
         {{-- Container Flex untuk Avatar & Panah --}}
         <li class="nav-item dropdown d-flex align-items-center">
-          
+
           {{-- 1. KLIK AVATAR: Langsung ke Halaman Public Profile --}}
-          <a href="{{ route('profile.public', Auth::user()->id) }}" class="d-block p-1 text-decoration-none" title="Lihat Galeri Saya">
+          <a href="{{ route('profile.public', Auth::user()->username) }}" class="d-block p-1 text-decoration-none" title="Lihat Galeri Saya">
             @if(Auth::user()->avatar)
-              <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+              <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
                    alt="Profile"
                    class="rounded-circle border"
                    style="object-fit: cover;"
@@ -48,16 +48,16 @@
           <style>
               /* Hilangkan caret bawaan bootstrap */
               .dropdown-toggle::after { display: none !important; }
-              
+
               /* Animasi icon - WAJIB display: inline-block agar bisa di-rotate */
-              .dropdown-icon-anim { 
-                  transition: transform 0.3s ease; 
-                  display: inline-block; 
+              .dropdown-icon-anim {
+                  transition: transform 0.3s ease;
+                  display: inline-block;
               }
-              
+
               /* Saat dropdown terbuka (menggunakan atribut aria-expanded untuk deteksi) */
-              .dropdown-toggle[aria-expanded="true"] .dropdown-icon-anim { 
-                  transform: rotate(180deg); 
+              .dropdown-toggle[aria-expanded="true"] .dropdown-icon-anim {
+                  transform: rotate(180deg);
               }
           </style>
 
@@ -76,7 +76,7 @@
               </a>
             </li>
             <li>
-                <a class="dropdown-item py-2" href="{{ route('profile.public', Auth::user()->id) }}">
+                <a class="dropdown-item py-2" href="{{ route('profile.public', Auth::user()->username) }}">
                   <i class="bi bi-person me-2 text-secondary"></i> Lihat Galeri Saya
                 </a>
             </li>
@@ -98,7 +98,7 @@
             @endif
 
             <li><hr class="dropdown-divider"></li>
-            
+
             <li>
               <form action="{{ route('logout') }}" method="POST">
                 @csrf
@@ -114,11 +114,11 @@
         <li class="nav-item d-flex align-items-center gap-2">
             <style>
                 .btn-auth-custom {
-                    height: 40px; 
-                    display: inline-flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    font-size: 14px; 
+                    height: 40px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
                     padding: 0 24px;
                 }
             </style>
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // 4. Event Listeners
     if(searchInput) {
         searchInput.addEventListener('focus', renderHistory);
-        
+
         // Klik di luar -> Tutup dropdown
         document.addEventListener('click', function(e) {
             if (!searchInput.contains(e.target) && !historyDropdown.contains(e.target)) {

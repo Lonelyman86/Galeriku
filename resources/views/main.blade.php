@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="{{ asset('assets/css/style-pinterest.css') }}">
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-  
+
   {{-- Tambahan CSS Global untuk Modal Loading --}}
   <style>
     /* GLOBAL FONT STACK - Premium Feel */
@@ -38,7 +38,7 @@
         background-color: #121212 !important;
         color: #e0e0e0;
     }
-    body.dark-mode .bg-light, 
+    body.dark-mode .bg-light,
     body.dark-mode .bg-white,
     body.dark-mode .pinterest-nav,
     body.dark-mode .sidenav,
@@ -57,7 +57,7 @@
     /* Cards specifically lighter to stand out */
     body.dark-mode .card,
     body.dark-mode .folder-card,
-    body.dark-mode .pin, 
+    body.dark-mode .pin,
     body.dark-mode .pin-wrapper,
     body.dark-mode .pin-meta,
     body.dark-mode .modal-image-wrapper { /* Added wrapper */
@@ -83,11 +83,11 @@
     body.dark-mode .table-hover > tbody > tr:hover > * {
         background-color: #3a3a3a !important;
     }
-    
+
     body.dark-mode .text-dark { color: #e0e0e0 !important; }
     body.dark-mode .text-muted { color: #aaa !important; }
     body.dark-mode .text-secondary { color: #ccc !important; }
-    
+
     body.dark-mode .btn-outline-secondary {
         color: #ccc;
         border-color: #666;
@@ -108,7 +108,7 @@
     }
 
     /* Navbar Links & Icons in Dark Mode */
-    body.dark-mode .nav-link, 
+    body.dark-mode .nav-link,
     body.dark-mode .dropdown-icon-anim {
         color: #e0e0e0 !important;
     }
@@ -116,8 +116,8 @@
     body.dark-mode .dropdown-icon-anim:hover {
         color: #fff !important;
     }
-    
-    body.dark-mode .form-control, 
+
+    body.dark-mode .form-control,
     body.dark-mode .pinterest-search,
     body.dark-mode .form-select {
         background-color: #2c2c2c !important;
@@ -181,7 +181,7 @@
     body.dark-mode .modal-right-col .border-top {
         border-color: #444 !important;
     }
-    
+
     /* Default Avatar Icon Colors */
     .default-avatar-icon {
         color: #888 !important; /* Force Gray for Light Mode */
@@ -215,7 +215,7 @@
     body.dark-mode .dropdown-item i {
         color: #e0e0e0 !important;
     }
-    
+
     /* Fix Bootstrap Select / Form Select Dropdowns (Options) */
     body.dark-mode select {
         background-color: #2b2b2b !important;
@@ -237,7 +237,7 @@
     body.dark-mode .file-meta {
         color: #e0e0e0 !important;
     }
-    
+
     body.dark-mode .pill-input,
     body.dark-mode .pill-textarea,
     body.dark-mode .dropzone {
@@ -245,36 +245,36 @@
         border-color: #444 !important;
         color: #e0e0e0 !important;
     }
-    
+
     body.dark-mode .pill-input input,
     body.dark-mode .pill-input select,
     body.dark-mode .pill-textarea textarea {
         color: #e0e0e0 !important;
     }
-    
+
     body.dark-mode .pill-input input::placeholder,
     body.dark-mode .pill-textarea textarea::placeholder {
         color: #888 !important;
     }
-    
+
     body.dark-mode .dz-icon {
         border-color: #e0e0e0 !important;
         color: #e0e0e0 !important;
     }
-    
+
     body.dark-mode select option {
         background-color: #2b2b2b;
         color: #e0e0e0;
     }
-    
+
     body.dark-mode .create-grid {
         border-top-color: #333 !important;
     }
-    
+
     /* Logo Toggle Logic */
     body.dark-mode .logo-light { display: none !important; }
     body.dark-mode .logo-dark { display: inline-block !important; }
-    
+
     /* Logo filter removed per user request */
   </style>
 </head>
@@ -287,6 +287,9 @@
   {{-- Navbar --}}
   @include('components.navbar')
 
+  {{-- Bottom Nav (Mobile) --}}
+  @include('components.bottom-nav')
+
   <main class="main-content">
     @yield('content')
   </main>
@@ -295,10 +298,10 @@
      OFFCANVAS NOTIFIKASI
    ========================================= --}}
   @auth
-  <div class="offcanvas offcanvas-start offcanvas-notif" tabindex="-1" id="notifDrawer" data-bs-backdrop="false">
+  <div class="offcanvas offcanvas-start offcanvas-notif" tabindex="-1" id="notifDrawer" data-bs-scroll="true" data-bs-backdrop="false">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title">Pemberitahuan</h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
       @if(isset($recentNotifications) && $recentNotifications->isNotEmpty())
@@ -324,14 +327,15 @@
   @endauth
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
+
   {{-- DARK MODE SCRIPT --}}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- Dark Mode Logic ---
         const toggleBtn = document.getElementById('darkModeToggle');
         const icon = document.getElementById('darkModeIcon');
         const body = document.body;
-        
+
         // 1. Check LocalStorage
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme === 'dark') {
@@ -370,10 +374,164 @@
             }
             localStorage.setItem('theme', 'light');
         }
+
+        // --- Notification Drawer Push Effect ---
+        const notifDrawer = document.getElementById('notifDrawer');
+        if (notifDrawer) {
+            notifDrawer.addEventListener('show.bs.offcanvas', () => {
+                document.body.classList.add('notif-drawer-open');
+            });
+
+            notifDrawer.addEventListener('hide.bs.offcanvas', () => {
+                document.body.classList.remove('notif-drawer-open');
+            });
+
+            // Re-layout Masonry efficiently using ResizeObserver
+            function forceMasonryLayout() {
+                if (window.masonryInstance) {
+                    window.masonryInstance.layout();
+                }
+                // Juga cek jika ada masonry instance lokal di halaman lain (msnry)
+                if (typeof msnry !== 'undefined' && msnry) {
+                    msnry.layout();
+                }
+            }
+
+            // Modern "ResizeObserver" untuk deteksi perubahan lebar grid
+            // Ini berjalan otomatis saat div berubah ukuran (misal karena sidebar)
+            const gridEl = document.querySelector('#masonry-grid') || document.querySelector('#discovery-masonry-grid');
+            if(gridEl) {
+                const resizeObserver = new ResizeObserver(() => {
+                     // Panggil layout saat resize terdeteksi
+                     // Karena masonry transition sudah di-disable, ini akan snappy/smooth
+                     requestAnimationFrame(() => forceMasonryLayout());
+                });
+                resizeObserver.observe(gridEl);
+            }
+
+            // Fallback: Trigger sekali saat animasi sidebar selesai (untuk safety)
+            notifDrawer.addEventListener('shown.bs.offcanvas', forceMasonryLayout);
+            notifDrawer.addEventListener('hidden.bs.offcanvas', forceMasonryLayout);
+        }
     });
+
+    // === Global Image Helpers ===
+    const baseUrlFotoVal = "{{ asset('storage/foto') }}";
+    const baseUrlAvatarVal = "{{ asset('storage/avatar') }}";
+
+    window.baseUrlFoto = function(path) {
+        if (!path) return '';
+        if (path.startsWith('http') || path.startsWith('data:')) {
+            return path;
+        }
+        return baseUrlFotoVal + '/' + path;
+    };
+
+    window.baseUrlAvatar = baseUrlAvatarVal;
+
+
+    // === Global Delete Comment Logic (Custom Modal) ===
+    let pendingDeleteId = null;
+    let pendingDeleteBtn = null;
+    let deleteModalInstance = null;
+
+    // ... deleteComment ...
+
+    window.deleteComment = function(id, btn) {
+        pendingDeleteId = id;
+        pendingDeleteBtn = btn;
+
+        const modalEl = document.getElementById('deleteConfirmModal');
+        if (modalEl) {
+            if (!deleteModalInstance) {
+                deleteModalInstance = new bootstrap.Modal(modalEl);
+            }
+            deleteModalInstance.show();
+        } else {
+            // Fallback if modal missing
+            if(confirm('Hapus komentar ini?')) {
+                performDelete(id, btn);
+            }
+        }
+    };
+
+    // Initialize Confirm Button Listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function() {
+                if (pendingDeleteId) {
+                    performDelete(pendingDeleteId, pendingDeleteBtn);
+                }
+                if (deleteModalInstance) deleteModalInstance.hide();
+            });
+        }
+    });
+
+    function performDelete(id, btn) {
+        console.log('Deleting ID:', id);
+
+        // Visual feedback
+        if(btn) {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.5';
+        }
+
+        fetch(`{{ url('komentar') }}/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            if (res.ok) {
+                // Remove element
+                if(btn) {
+                    const bubble = btn.closest('.comment-item');
+                    if (bubble) {
+                        bubble.style.transition = 'opacity 0.3s ease';
+                        bubble.style.opacity = '0';
+                        setTimeout(() => bubble.remove(), 300);
+                    }
+                }
+            } else {
+                 return res.text().then(text => {
+                    console.error('Delete failed:', text);
+                    alert('Gagal menghapus komentar: ' + res.status);
+                    if(btn) {
+                        btn.style.pointerEvents = 'auto';
+                        btn.style.opacity = '1';
+                    }
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Network error:', err);
+            alert('Terjadi kesalahan koneksi.');
+            if(btn) {
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+            }
+        });
+    }
   </script>
 
-  {{-- Stack untuk script khusus per halaman --}}
-  @stack('scripts')
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body text-center p-4">
+            <h6 class="mb-3">Hapus komentar ini?</h6>
+            <div class="d-flex justify-content-center gap-2">
+              <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Batal</button>
+              <button type="button" id="confirmDeleteBtn" class="btn btn-danger btn-sm px-3">Hapus</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @stack('scripts')
 </body>
 </html>

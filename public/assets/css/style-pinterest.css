@@ -5,7 +5,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-  z-index: 1040;
+  z-index: 1060;
   background: #fff;
   border-right: 1px solid #eee;
 }
@@ -22,6 +22,7 @@
   z-index: 1030;
   display: flex;
   align-items: center;
+  transition: left 0.3s ease-in-out;
 }
 
 .pinterest-search {
@@ -41,13 +42,28 @@
 }
 
 /* Main content */
+/* Main content */
 .main-content {
   margin-left: 80px;
   padding-top: 70px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+@media (min-width: 992px) {
+  /* Push content by increasing margin (responsive) */
+  body.notif-drawer-open .main-content {
+    margin-left: 400px;
+  }
+
+  /* Adjust navbar left position so it shrinks instead of moving off-screen */
+  body.notif-drawer-open .pinterest-nav {
+    left: 400px;
+    transform: none;
+  }
 }
 
 /* =========================================
-     MASONRY + PIN WRAPPER (Updated for JS Masonry) 
+     MASONRY + PIN WRAPPER (Updated for JS Masonry)
      Original CSS Columns (.masonry) is deprecated/conflicts with JS.
      Moved from home.blade.php styles.
      ========================================= */
@@ -213,7 +229,44 @@
 }
 
 .offcanvas-notif {
-  width: 320px;
-  margin-left: 72px;
+  width: 320px !important;
+  margin-left: 80px;
   border-right: 1px solid #eee;
+}
+
+/* Ensure container allows full width and establishes container context */
+#masonry-grid, #discovery-masonry-grid {
+    margin: 0;
+    width: 100%;
+    container-type: inline-size;
+}
+
+/* Responsive Grid Column - CONTAINER QUERIES for Robust Resizing */
+.custom-col {
+  width: 50%; /* Default Mobile (2 columns) */
+  max-width: 100%;
+  flex-grow: 1;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-bottom: 24px;
+}
+
+/* Tablet / Small (3 columns) > ~840px */
+@container (min-width: 840px) {
+    .custom-col { width: 33.333%; }
+}
+
+/* Medium (4 columns) > ~1120px */
+@container (min-width: 1120px) {
+    .custom-col { width: 25%; }
+}
+
+/* Large (5 columns) > ~1400px */
+@container (min-width: 1400px) {
+    .custom-col { width: 20%; }
+}
+
+/* Extra Large (6 columns) > ~1680px */
+@container (min-width: 1680px) {
+    .custom-col { width: 16.666%; }
 }

@@ -431,9 +431,10 @@
 
         // Like & Comment Form
         document.getElementById('modalLikeCount').innerText = item.like ? item.like.length : 0;
-        document.getElementById('modalLikeForm').action = routes.like.replace('000', item.id);
+        document.getElementById('modalLikeForm').action = "{{ url('albums') }}/" + item.id + "/toggle-like";
+
         const commForm = document.getElementById('modalCommentForm');
-        if(commForm) commForm.action = routes.comment.replace('000', item.id);
+        if(commForm) commForm.action = "{{ url('photos') }}/" + item.id + "/komentar";
 
         // List Comments
         const listDiv = document.getElementById('modalCommentsList');
@@ -449,11 +450,26 @@
                    avatarHtml = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
                }
 
+
+               // Delete Button Logic
+               let deleteBtn = '';
+               const currentUserId = {{ Auth::id() ?? 'null' }};
+               if (c.user_id == currentUserId) {
+                   deleteBtn = `
+                     <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                       <i class="bi bi-trash-fill"></i>
+                     </button>
+                   `;
+               }
+
                const html = `
-                 <div class="mb-2 d-flex gap-2">
+                 <div class="mb-2 d-flex gap-2 comment-item">
                      <div class="flex-shrink-0">${avatarHtml}</div>
-                     <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble">
-                        <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
+                     <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble position-relative">
+                        <div class="d-flex justify-content-between align-items-start">
+                             <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
+                             ${deleteBtn}
+                        </div>
                         <p class="mb-0 small text-dark lh-sm mt-1 comment-text">${c.isi_komentar}</p>
                      </div>
                  </div>`;

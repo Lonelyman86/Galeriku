@@ -97,7 +97,7 @@ Route::middleware('auth')->group(function () {
 
 // Route ini di luar 'auth' agar album bisa dilihat publik (jika diinginkan)
 Route::get('/albums/{album}', [AlbumController::class, 'show'])->name('album.show');
-Route::get('/user/{id}', [ProfileController::class, 'showPublicProfile'])->name('profile.public');
+Route::get('/user/{username}', [ProfileController::class, 'showPublicProfile'])->name('profile.public');
 
 // --- Admin Routes ---
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
@@ -113,38 +113,4 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::patch('/reports/{id}/dismiss', [ReportAdminController::class, 'dismiss'])->name('admin.reports.dismiss');
 });
 
-// Temporary Fix Route (Run once on Vercel)
-// Temporary Fix & Diagnostic Route
-Route::get('/fix-db', function() {
-    try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
 
-        $result = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM users WHERE Field = 'avatar'");
-        $type = $result[0]->Type ?? 'Unknown';
-
-        // Check current user's avatar data
-        $user = auth()->user();
-        $avatarInfo = "Not logged in";
-        if ($user) {
-            $len = strlen($user->avatar ?? '');
-            $prefix = substr($user->avatar ?? '', 0, 50);
-            $avatarInfo = "Length: $len chars<br>Start: <code>" . htmlspecialchars($prefix) . "...</code>";
-        }
-
-        return "
-        <div style='font-family: sans-serif; text-align: center; padding: 50px;'>
-            <h1 style='color: green;'>✅ Diagnostic Run Complete</h1>
-            <p>Column Type: <strong>$type</strong> (Target: longtext)</p>
-            <div style='background: #f3f4f6; padding: 20px; border-radius: 8px; display: inline-block; text-align: left;'>
-                <h3>Current User Avatar Data:</h3>
-                <p>$avatarInfo</p>
-            </div>
-            <p>If Length is ~255, it is STILL truncated.</p>
-            <p>If Length is > 10,000, it is good.</p>
-            <a href='/profile' style='display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;'>Go to Profile</a>
-        </div>
-        ";
-    } catch (\Exception $e) {
-        return "<h1>Error</h1>" . $e->getMessage();
-    }
-});

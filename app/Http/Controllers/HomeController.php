@@ -95,12 +95,15 @@ class HomeController extends Controller
                 ->withCompleteDetails()
                 ->paginate(20);
 
+            $totalLiked = $likedPhotos->total();
+
             $albums = Album::where('user_id', $user->id)->get();
 
             return view('layouts.liked', [
                 'title' => 'Liked Photos',
                 'foto' => $likedPhotos,
-                'albums' => $albums
+                'albums' => $albums,
+                'totalLiked' => $totalLiked
             ]);
         } else {
             return redirect()->route('sign-in');
@@ -118,14 +121,19 @@ class HomeController extends Controller
         // Ambil ID semua orang yang kita follow
         $followingIds = $user->following()->pluck('users.id');
 
+        // Ambil detail orang yang difollow (untuk banner atas)
+        $followingList = $user->following()->get();
+
         // Jika belum follow sesiapa pun, tampilkan view kosong/saran
         if($followingIds->isEmpty()) {
              // Bisa kita return view khusus, atau view home tapi kosong
-             return view('layouts.home', [
+             return view('layouts.following', [
                 'title' => 'Mengikuti',
+                'headerTitle' => 'Mengikuti',
                 'foto' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
                 'albums' => [],
-                'isFollowingEmpty' => true // Flag untuk view
+                'isFollowingEmpty' => true,
+                'followingList' => []
              ]);
         }
 
@@ -147,11 +155,12 @@ class HomeController extends Controller
 
         $albums = Album::where('user_id', $user->id)->get();
 
-        return view('layouts.home', [
+        return view('layouts.following', [
             'title' => 'Mengikuti',
             'headerTitle' => 'Mengikuti',
             'foto' => $foto,
-            'albums' => $albums
+            'albums' => $albums,
+            'followingList' => $followingList
         ]);
     }
 }

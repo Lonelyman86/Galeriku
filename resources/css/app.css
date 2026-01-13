@@ -3,6 +3,38 @@
 @tailwind utilities;
 
 /* --- Global / Shared --- */
+/* PC Layout (Default) */
+.sidenav {
+    width: 80px;
+    z-index: 1030;
+}
+
+.main-content {
+    margin-left: 80px;
+    transition: margin-left 0.3s ease;
+}
+
+/* Mobile Layout */
+@media (max-width: 991.98px) {
+    .sidenav {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        margin-bottom: 70px; /* Space for bottom nav */
+        padding-top: 10px !important;
+    }
+
+    .pinterest-nav {
+        display: none !important;
+    }
+
+    .offcanvas-notif {
+        margin-left: 0 !important;
+    }
+}
+
 .detail-foto {
     max-width: 100%;
     height: auto;
@@ -20,7 +52,7 @@
     grid-template: auto / 12rem 12rem 12rem 12rem;
     grid-gap: 13px;
     grid-column: auto;
-    grid-template-areas: 'myArea myArea . . .';
+    grid-template-areas: "myArea myArea . . .";
     align-items: start;
 }
 
@@ -30,7 +62,8 @@
 }
 
 .create-title {
-    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto,
+        "Helvetica Neue", Arial;
     font-size: 22px;
     font-weight: 800;
     margin: 8px 0 16px 8px;
@@ -188,7 +221,8 @@
 
 /* --- Albums Show --- */
 .page-title {
-    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto,
+        "Helvetica Neue", Arial, "Noto Sans";
     font-size: 22px;
     margin: 16px 8px 8px 16px;
     font-weight: 700;
@@ -220,7 +254,7 @@
     border-radius: 999px;
     border: 0;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, .2);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     background: #ef4444;
     color: #fff;
     font-size: 24px;
@@ -237,25 +271,25 @@
     padding: 8px 16px 64px;
 }
 
-@media (max-width:1200px) {
+@media (max-width: 1200px) {
     .masonry {
         column-count: 4;
     }
 }
 
-@media (max-width:992px) {
+@media (max-width: 992px) {
     .masonry {
         column-count: 3;
     }
 }
 
-@media (max-width:768px) {
+@media (max-width: 768px) {
     .masonry {
         column-count: 2;
     }
 }
 
-@media (max-width:480px) {
+@media (max-width: 480px) {
     .masonry {
         column-count: 1;
     }
@@ -270,8 +304,8 @@
     border-radius: 16px;
     overflow: hidden;
     background: #fff;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, .04);
-    transition: transform .2s ease;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease;
 }
 
 .pin:hover {
@@ -293,9 +327,13 @@
     justify-content: space-between;
     padding: 8px;
     opacity: 0;
-    transition: opacity .15s ease;
+    transition: opacity 0.15s ease;
     pointer-events: none;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, .08), rgba(0, 0, 0, .35));
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.08),
+        rgba(0, 0, 0, 0.35)
+    );
 }
 
 .pin:hover .pin-overlay {
@@ -313,17 +351,13 @@
     pointer-events: auto;
 }
 
-
-
-
-
 .btn-primary {
     background: #2563eb;
     color: #fff;
 }
 
 .btn-ghost {
-    background: rgba(255, 255, 255, .85);
+    background: rgba(255, 255, 255, 0.85);
 }
 
 .btn-ghost:hover {
@@ -332,7 +366,7 @@
 
 .btn-danger:hover,
 .btn-primary:hover {
-    filter: brightness(.95);
+    filter: brightness(0.95);
 }
 
 .pin-meta {
@@ -374,7 +408,7 @@
     color: #fff;
     opacity: 0;
     border-radius: 16px;
-    transition: opacity .3s ease;
+    transition: opacity 0.3s ease;
     padding: 10px;
 }
 
@@ -415,7 +449,7 @@
     object-fit: cover;
 }
 
-.img-checkbox-container input:checked+img {
+.img-checkbox-container input:checked + img {
     border-color: #2563eb;
     opacity: 0.8;
     transform: scale(0.95);

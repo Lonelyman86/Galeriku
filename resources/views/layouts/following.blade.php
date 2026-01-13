@@ -166,7 +166,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #bbb;
         }
-
         /* Comment Styles */
         .comment-item { transition: background-color 0.2s; }
         .comment-delete-btn {
@@ -174,56 +173,99 @@
             transition: opacity 0.2s ease, transform 0.2s ease;
             cursor: pointer;
         }
-        .comment-item:hover .comment-delete-btn { opacity: 1; }
-        .comment-delete-btn:hover { transform: scale(1.1); color: #dc3545 !important; }
-        .comment-bubble { border-radius: 12px; background-color: #f8f9fa; }
+        .comment-item:hover .comment-delete-btn {
+            opacity: 1;
+        }
+        .comment-delete-btn:hover {
+            transform: scale(1.1);
+            color: #dc3545 !important;
+        }
+        .comment-bubble {
+            border-radius: 12px;
+            background-color: #f8f9fa; /* Light gray by default */
+        }
     </style>
 
     <div class="container-fluid py-4">
-        {{-- HERO SECTION (Pinned Style) --}}
+
+        {{-- HERO SECTION (Pinned Style - Following) --}}
         <div class="row g-4 mb-4">
             <div class="col-12">
                 <div class="bg-white rounded-5 p-4 shadow-sm d-flex align-items-center justify-content-between position-relative overflow-hidden">
-                    {{-- Decorative BG --}}
+                    {{-- Decorative BG (Green Gradient) --}}
                     <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25"
-                         style="background: linear-gradient(135deg, #ff9a9e 0%, #fa709a 100%); z-index:0;"></div>
+                         style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); z-index:0;"></div>
 
                     <div class="position-relative z-1 d-flex align-items-center gap-3">
-                        <div class="bg-white p-3 rounded-circle shadow-sm text-danger d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                            <i class="bi bi-heart-fill fs-3"></i>
+                        <div class="bg-white p-3 rounded-circle shadow-sm text-success d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-people-fill fs-3"></i>
                         </div>
                         <div>
-                            <h1 class="fw-bold mb-0 fs-4 text-dark">Koleksi Favorit</h1>
-                            <p class="text-muted mb-0 small">Inspirasi yang Anda simpan.</p>
+                            <h1 class="fw-bold mb-0 fs-4 text-dark">Mengikuti</h1>
+                            <p class="text-muted mb-0 small">Karya terbaru dari kreator favorit.</p>
                         </div>
                     </div>
 
                     <div class="position-relative z-1">
-                         <div class="bg-danger text-white px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2">
-                            <span class="fs-4 fw-bold lh-1">{{ $totalLiked ?? 0 }}</span>
-                            <span class="small text-uppercase opacity-75" style="letter-spacing:1px; font-size: 10px;">Disukai</span>
+                         <div class="bg-success text-white px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                            <span class="fs-4 fw-bold lh-1">{{ isset($followingList) ? count($followingList) : 0 }}</span>
+                            <span class="small text-uppercase opacity-75" style="letter-spacing:1px; font-size: 10px;">Mengikuti</span>
                          </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- CONTAINER UTAMA --}}
-        <div class="row" id="masonry-grid">
-            @include('partials.photo-grid', ['foto' => $foto])
+        {{-- USER SCROLL SECTION (CREATORS) --}}
+        <h6 class="fw-bold mb-3 px-2 text-uppercase text-muted" style="font-size: 11px; letter-spacing: 1px;">Kreator Anda</h6>
+        <div class="mb-5 px-2">
+            @if(isset($followingList) && count($followingList) > 0)
+                <div class="d-flex gap-4 overflow-auto pb-4 custom-scrollbar" style="white-space: nowrap;">
+                    @foreach($followingList as $fUser)
+                        <a href="{{ route('profile.public', $fUser->username) }}" class="text-decoration-none text-dark d-inline-block text-center group" style="width: 72px;">
+                            <div class="position-relative d-inline-block mb-2 transform transition hover:scale-105">
+                                @if($fUser->avatar)
+                                    <img src="{{ asset('storage/' . $fUser->avatar) }}" class="rounded-circle border border-2 border-white shadow-sm" style="width: 64px; height: 64px; object-fit: cover;">
+                                @else
+                                    <div class="rounded-circle bg-white d-flex align-items-center justify-content-center border border-2 border-light shadow-sm text-secondary" style="width: 64px; height: 64px;">
+                                        <i class="bi bi-person-fill fs-3 text-muted"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            <small class="d-block text-truncate fw-bold small text-dark" style="font-size: 12px;">{{ $fUser->username }}</small>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <div class="p-4 bg-light rounded-4 text-center border border-dashed">
+                    <p class="text-muted small mb-0">Anda belum mengikuti siapapun.</p>
+                    <a href="/discovery" class="btn btn-sm btn-outline-primary rounded-pill mt-2">Mulai Jelajahi</a>
+                </div>
+            @endif
         </div>
 
-        <div class="d-flex justify-content-center mt-5 mb-5">
-            {{-- Loading Spinner --}}
-            <div id="loading-spinner" class="spinner-border text-primary d-none" role="status">
-                <span class="visually-hidden">Loading...</span>
+
+        {{-- CONTAINER UTAMA (PHOTO GRID) --}}
+        @if(isset($isFollowingEmpty) && $isFollowingEmpty)
+             {{-- Do nothing, empty message handled above --}}
+        @else
+            <h6 class="fw-bold mb-3 px-2 text-uppercase text-muted" style="font-size: 11px; letter-spacing: 1px;">Terbaru dari mereka</h6>
+            <div class="row" id="masonry-grid">
+                @include('partials.photo-grid', ['foto' => $foto])
             </div>
 
-            {{-- End of Content Message --}}
-            <div id="end-of-content" class="text-muted small d-none">
-                Sudah sampai bawah
+            <div class="d-flex justify-content-center mt-5 mb-5">
+                {{-- Loading Spinner --}}
+                <div id="loading-spinner" class="spinner-border text-primary d-none" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+
+                {{-- End of Content Message --}}
+                <div id="end-of-content" class="text-muted small d-none">
+                    Sudah sampai bawah
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 
     {{-- ===============================================
@@ -381,13 +423,15 @@
                     msnry = new Masonry(grid, {
                         itemSelector: '.masonry-item',
                         percentPosition: true,
-                        transitionDuration: '0.25s'
+                        transitionDuration: '0.25s' // Restore smooth animation but keep it snappy
                     });
                 });
             }
 
             // === 2. Infinite Scroll Logic ===
             // Gunakan 'let' agar bisa diupdate
+            // Disini perlu cek apakah $foto objek pagination atau bukan (kalau kosong array)
+            // Di Controller kita pass LengthAwarePaginator meskipun kosong, jadi aman.
             let photosData = @json($foto->items());
             let nextPageUrl = "{{ $foto->nextPageUrl() }}";
             let isLoading = false;
@@ -547,9 +591,10 @@
 
                         // Delete Button Logic
                         let deleteBtn = '';
+                        // userId injected from Blade
                         if (c.user_id == {{ Auth::id() ?? 'null' }}) {
                            deleteBtn = `
-                             <button onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                             <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
                                <i class="bi bi-trash-fill"></i>
                              </button>
                            `;
@@ -580,27 +625,8 @@
                 myModal.show();
             }
 
-            // === Delete Comment Function ===
-            function deleteComment(id, btn) {
-                if(!confirm('Hapus komentar ini?')) return;
-
-                fetch(`/komentar/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(res => {
-                    if(res.ok) {
-                        const bubble = btn.closest('.d-flex.gap-2');
-                        if(bubble) bubble.remove();
-                    } else {
-                        alert('Gagal menghapus komentar');
-                    }
-                })
-                .catch(err => console.error(err));
-            }
+            // === Delete Comment Function (Now Global in main.blade.php) ===
+            // Removed local definition to prevent conflicts.
 
             // === 4. Logic Menu Dropdown ===
             function toggleMenu(event, menuId) {

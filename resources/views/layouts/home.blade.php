@@ -361,7 +361,8 @@
                 imagesLoaded(grid, function() {
                     msnry = new Masonry(grid, {
                         itemSelector: '.masonry-item',
-                        percentPosition: true
+                        percentPosition: true,
+                        transitionDuration: '0.25s' // Restore smooth animation but keep it snappy
                     });
                 });
             }
@@ -481,7 +482,7 @@
                 }
 
                 // 2. Username & Link
-                const profileUrl = "/user/" + (user.id || 0);
+                const profileUrl = "/user/" + (user.username || '#');
                 const userLinkEl = document.getElementById('modalUserLink');
                 if(userLinkEl) userLinkEl.href = profileUrl;
 
@@ -530,7 +531,7 @@
                         // userId injected from Blade
                         if (c.user_id == {{ Auth::id() ?? 'null' }}) {
                            deleteBtn = `
-                             <button onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                             <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
                                <i class="bi bi-trash-fill"></i>
                              </button>
                            `;
@@ -543,7 +544,7 @@
                     </div>
                     <div class="bg-light px-3 py-2 shadow-sm border w-100 comment-bubble position-relative">
                         <div class="d-flex justify-content-between align-items-start">
-                             <a href="/user/${cUser.id}" class="fw-bold small d-block text-dark text-decoration-none">${cUser.username || 'Anonim'}</a>
+                             <a href="/user/${cUser.username || '#'}" class="fw-bold small d-block text-dark text-decoration-none">${cUser.username || 'Anonim'}</a>
                              ${deleteBtn}
                         </div>
                         <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
@@ -561,28 +562,8 @@
                 myModal.show();
             }
 
-            // === Delete Comment Function ===
-            function deleteComment(id, btn) {
-                if(!confirm('Hapus komentar ini?')) return;
-
-                fetch(`/komentar/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(res => {
-                    if(res.ok) {
-                        // Remove element
-                        const bubble = btn.closest('.d-flex.gap-2');
-                        if(bubble) bubble.remove();
-                    } else {
-                        alert('Gagal menghapus komentar');
-                    }
-                })
-                .catch(err => console.error(err));
-            }
+            // === Delete Comment Function (Now Global in main.blade.php) ===
+            // Removed local definition to prevent conflicts.
 
             // === 4. Logic Menu Dropdown ===
             function toggleMenu(event, menuId) {

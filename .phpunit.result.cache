@@ -1,0 +1,1 @@
+{"version":2,"defects":{"Tests\\Feature\\FollowControllerTest::test_user_can_follow_another_user":8,"Tests\\Feature\\FollowControllerTest::test_user_can_unfollow_another_user":8},"times":{"Tests\\Feature\\FollowControllerTest::test_user_can_follow_another_user":0.081,"Tests\\Feature\\FollowControllerTest::test_user_can_unfollow_another_user":0.005}}

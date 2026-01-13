@@ -1,5 +1,5 @@
 @foreach ($foto as $item)
-    <div class="col-6 col-md-4 col-lg-3 mb-4 masonry-item">
+    <div class="custom-col mb-4 masonry-item">
 
         {{-- WRAPPER FOTO --}}
         <div class="pin-wrapper">
@@ -19,7 +19,7 @@
                     download class="pin-menu-item">
                     <i class="bi bi-download"></i> <span>Unduh gambar</span>
                 </a>
-                <a href="{{ route('profile.public', $item->user->id ?? 0) }}" class="pin-menu-item">
+                <a href="{{ route('profile.public', $item->user->username ?? 'anon') }}" class="pin-menu-item">
                     <i class="bi bi-person"></i> Lihat Profil
                 </a>
             </div>
