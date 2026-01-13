@@ -36,23 +36,26 @@
   {{-- HERO STATS SECTION (Pinned Style - Studio) --}}
   <div class="row g-4 mb-5">
       <div class="col-12">
-          <div class="bg-white rounded-5 p-4 shadow-sm d-flex flex-column flex-md-row align-items-center justify-content-between position-relative overflow-hidden">
+          <div class="bg-white rounded-5 p-4 shadow-sm d-flex align-items-center justify-content-between position-relative overflow-hidden">
               {{-- Decorative BG (Blue Gradient) --}}
               <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25"
                    style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); z-index:0;"></div>
 
-              <div class="position-relative z-1 d-flex align-items-center gap-3 mb-3 mb-md-0">
-                  <div class="bg-white p-3 rounded-circle shadow-sm text-primary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+              <div class="position-relative z-1 d-flex align-items-center gap-3">
+                  <div class="bg-white p-3 rounded-circle shadow-sm text-primary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; flex-shrink: 0;">
                       <i class="bi bi-palette-fill fs-3"></i>
                   </div>
-                  <div class="text-center text-md-start">
+                  <div>
                       <h1 class="fw-bold mb-0 fs-4 text-dark">Studio Saya</h1>
                       <p class="text-muted mb-0 small">Kelola karya dan album Anda.</p>
                   </div>
               </div>
 
-              <div class="position-relative z-1 d-flex gap-2">
-                   {{-- Stats Pills --}}
+              <div class="position-relative z-1 d-none d-md-flex gap-2">
+                   {{-- Stats Pills (Hidden on very small screens if needed, but lets keep d-md-flex or just handle overflow) --}}
+                   {{-- Actually, if I just use d-flex, it might overflow. Let's try to replicate the 'Liked' behavior but adapted. --}}
+                   {{-- User wants consistency. Liked page has stats on right. --}}
+                   {{-- Since Studio has 3 pills, maybe hide text label on mobile? --}}
                    <div class="bg-primary text-white px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2">
                       <span class="fs-5 fw-bold lh-1">{{ $totalPhotos }}</span>
                       <span class="small text-uppercase opacity-75" style="letter-spacing:1px; font-size: 9px;">Foto</span>
@@ -66,6 +69,12 @@
                       <span class="small text-uppercase opacity-75" style="letter-spacing:1px; font-size: 9px;">Komen</span>
                    </div>
               </div>
+
+               {{-- Mobile Stats (Compact) --}}
+               <div class="position-relative z-1 d-flex d-md-none gap-1 flex-column align-items-end">
+                   <span class="badge bg-primary rounded-pill">{{ $totalPhotos }} Foto</span>
+                   <span class="badge bg-danger rounded-pill">{{ $totalLikes }} Suka</span>
+               </div>
           </div>
       </div>
   </div>

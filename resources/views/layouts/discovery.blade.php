@@ -142,8 +142,22 @@
         if(!item) return;
 
         // Populate Modal Data
-        // Use Global Helper handling http/data: logic
         document.getElementById('modalImg').src = baseUrlFoto(item.lokasi_file);
+
+        // Helper untuk Avatar (Handle absolute URL vs Local)
+        // Definisikan root storage di sini untuk akurasi
+        const storageRoot = "{{ asset('storage') }}";
+
+        function getAvatarUrl(avatarPath) {
+            if (!avatarPath) return '';
+            if (avatarPath.startsWith('http') || avatarPath.startsWith('data:')) {
+                return avatarPath;
+            }
+
+            // Database menyimpan 'avatars/filename.png'
+            // Jadi kita hanya perlu append ke storage root
+            return storageRoot + '/' + avatarPath;
+        }
 
         // Cek elemen download sebelum assign
         const dlBtn = document.getElementById('modalDownloadBtn');
@@ -171,7 +185,7 @@
         const avatarContainer = document.getElementById('modalAvatarContainer');
         if(avatarContainer) {
             if(user.avatar) {
-                 avatarContainer.innerHTML = `<img src="${baseUrlAvatar}/${user.avatar}" class="rounded-circle border" width="40" height="40" style="object-fit: cover;">`;
+                 avatarContainer.innerHTML = `<img src="${getAvatarUrl(user.avatar)}" class="rounded-circle border" width="40" height="40" style="object-fit: cover;">`;
             } else {
                  avatarContainer.innerHTML = `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 40px;"></i>`;
             }
@@ -193,12 +207,13 @@
                 item.komentarfoto.forEach(c => {
                     const cUser = c.user || {};
                     let avHtml = cUser.avatar
-                        ? `<img src="${baseUrlAvatar}/${cUser.avatar}" class="rounded-circle" width="28" height="28" style="object-fit:cover;">`
+                        ? `<img src="${getAvatarUrl(cUser.avatar)}" class="rounded-circle" width="28" height="28" style="object-fit:cover;">`
                         : `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
 
 
                     // Delete Button Logic
                     let deleteBtn = '';
+                    // Gunakan Auth ID yang di-pass dari Blade
                     const currentUserId = {{ Auth::id() ?? 'null' }};
                     if (c.user_id == currentUserId) {
                        deleteBtn = `

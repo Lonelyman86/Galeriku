@@ -12,6 +12,13 @@
     </a>
 
     @auth
+        {{-- Following (New) --}}
+        <a href="/following" class="nav-link text-center {{ Request::is('following*') ? 'text-dark' : 'text-secondary' }}">
+            <i class="bi bi-people{{ Request::is('following*') ? '-fill' : '' }} fs-3"></i>
+        </a>
+    @endauth
+
+    @auth
         {{-- Create / Upload --}}
         <a href="/studio" class="nav-link text-center {{ Request::is('studio*') ? 'text-dark' : 'text-secondary' }}">
           <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -70,11 +77,19 @@
     </div>
 
     <div class="list-group list-group-flush">
-        <a href="{{ route('profile.public', Auth::user()->id) }}" class="list-group-item list-group-item-action border-0 px-0">
+        <a href="{{ route('profile.public', ['username' => Auth::user()->username]) }}" class="list-group-item list-group-item-action border-0 px-0">
             <i class="bi bi-person me-2"></i> Lihat Galeri Saya
         </a>
         <a href="{{ route('profile') }}" class="list-group-item list-group-item-action border-0 px-0">
             <i class="bi bi-pencil-square me-2"></i> Edit Profil
+        </a>
+
+        {{-- ADDED LINKS for Mobile Access --}}
+        <a href="{{ route('photo.liked') }}" class="list-group-item list-group-item-action border-0 px-0">
+            <i class="bi bi-heart-fill me-2 text-danger"></i> Koleksi Favorit
+        </a>
+        <a href="{{ route('feed.following') }}" class="list-group-item list-group-item-action border-0 px-0">
+            <i class="bi bi-people-fill me-2 text-success"></i> Mengikuti
         </a>
 
         @if(Auth::user()->role_id == 1)
