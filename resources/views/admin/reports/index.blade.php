@@ -51,13 +51,28 @@
                                 </td>
                                 <td>{{ $report->reason }}</td>
                                 <td>
-                                    @if($report->foto)
-                                        <a href="{{ asset('storage/foto/'.$report->foto->lokasi_file) }}" target="_blank">
-                                            <img src="{{ asset('storage/foto/'.$report->foto->lokasi_file) }}" width="100" class="rounded">
-                                        </a>
-                                        <div class="small mt-1">{{Str::limit($report->foto->judul_foto, 20)}}</div>
+                                    @php $target = $report->reportable; @endphp
+                                    @if($target)
+                                        @if($target instanceof \App\Models\Foto)
+                                            <a href="{{ asset('storage/foto/'.$target->lokasi_file) }}" target="_blank">
+                                                <img src="{{ asset('storage/foto/'.$target->lokasi_file) }}" width="100" class="rounded">
+                                            </a>
+                                            <div class="small mt-1">{{Str::limit($target->judul_foto, 20)}}</div>
+                                            <div class="badge bg-info">Foto</div>
+                                        @elseif($target instanceof \App\Models\Komentar)
+                                            <div class="p-2 bg-light border rounded">
+                                                <i class="fas fa-comment text-secondary"></i> "{{ Str::limit($target->isi_komentar, 50) }}"
+                                            </div>
+                                            <div class="badge bg-warning text-dark mt-1">Komentar</div>
+                                        @elseif($target instanceof \App\Models\User)
+                                            <div class="d-flex align-items-center gap-2">
+                                                 <img src="{{ $target->avatar ? asset('storage/'.$target->avatar) : asset('assets/img/default-profile.png') }}" width="32" height="32" class="rounded-circle" style="object-fit:cover;">
+                                                 <strong>{{ $target->username }}</strong>
+                                            </div>
+                                            <div class="badge bg-primary mt-1">User</div>
+                                        @endif
                                     @else
-                                        <span class="text-muted font-italic">Foto Terhapus</span>
+                                        <span class="text-muted font-italic">Konten Terhapus</span>
                                     @endif
                                 </td>
                                 <td>{{ $report->created_at->format('d M Y H:i') }}</td>

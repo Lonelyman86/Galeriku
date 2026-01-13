@@ -63,9 +63,7 @@
 
           <a class="nav-link dropdown-toggle ms-1 px-2 d-flex align-items-center gap-1" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-chevron-down dropdown-icon-anim" style="font-size: 12px;"></i>
-            @if(Auth::user()->role_id == 1)
-               <span class="badge bg-danger" style="font-size: 10px;">Admin</span>
-            @endif
+
           </a>
 
           {{-- 3. ISI MENU DROPDOWN --}}
@@ -92,7 +90,7 @@
               </li>
               <li>
                 <a class="dropdown-item py-2" href="/admin/foto">
-                  <i class="bi bi-images me-2 text-danger"></i> Kelola Foto
+                  <i class="bi bi-images me-2 text-danger"></i> Moderasi Konten
                 </a>
               </li>
             @endif

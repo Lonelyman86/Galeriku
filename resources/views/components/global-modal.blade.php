@@ -4,12 +4,12 @@
     <div class="modal-content" style="border-radius: 20px; overflow: hidden; border:none;">
       <div class="modal-body p-0">
         <div class="row g-0" style="min-height: 500px;">
-          
+
           {{-- Kiri: Gambar Full --}}
           <div class="col-lg-8 bg-light d-flex align-items-center justify-content-center position-relative">
             <div class="modal-image-wrapper">
               <img id="modalImg" src="" alt="">
-              
+
               {{-- Menu 3 Titik di Modal --}}
               <button type="button" class="pin-menu-btn pin-menu-btn-modal" onclick="toggleMenu(event, 'pin-menu-modal-global')">
                 <i class="bi bi-three-dots"></i>
@@ -19,7 +19,7 @@
                   <i class="bi bi-download"></i><span>Unduh gambar</span>
                 </a>
                 {{-- REPORT BUTTON --}}
-                <button type="button" class="pin-menu-item text-danger" onclick="openReportModal()">
+                <button type="button" id="globalReportBtn" class="pin-menu-item text-danger">
                    <i class="bi bi-flag"></i> <span>Laporkan Gambar</span>
                 </button>
               </div>
@@ -96,14 +96,16 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold">Laporkan Foto</h5>
+        <h5 class="modal-title fw-bold" id="reportModalTitle">Laporkan</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form action="{{ route('report.store') }}" method="POST">
         @csrf
-        <input type="hidden" name="foto_id" id="reportFotoId">
+        <input type="hidden" name="reportable_id" id="reportableId">
+        <input type="hidden" name="reportable_type" id="reportableType">
+
         <div class="modal-body">
-            <p class="mb-3">Mengapa Anda melaporkan foto ini?</p>
+            <p class="mb-3">Mengapa Anda melaporkan ini?</p>
             <div class="form-check mb-2">
                 <input class="form-check-input" type="radio" name="reason" value="Konten seksual atau telanjang" id="r1" required>
                 <label class="form-check-label" for="r1">Konten seksual atau telanjang</label>
@@ -129,3 +131,25 @@
     </div>
   </div>
 </div>
+
+<script>
+    // Global Report Function
+    function openReportModal(type, id) {
+        // Set hidden inputs
+        document.getElementById('reportableType').value = type;
+        document.getElementById('reportableId').value = id;
+
+        // Update Title
+        const labels = {
+            'foto': 'Laporkan Foto',
+            'user': 'Laporkan Pengguna',
+            'komentar': 'Laporkan Komentar'
+        };
+        document.getElementById('reportModalTitle').innerText = labels[type] || 'Laporkan';
+
+        // Show Modal
+        const reportModalEl = document.getElementById('reportModal');
+        const reportModal = new bootstrap.Modal(reportModalEl);
+        reportModal.show();
+    }
+</script>

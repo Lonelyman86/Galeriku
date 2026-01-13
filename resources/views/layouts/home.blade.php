@@ -308,48 +308,46 @@
     </div>
 
 
-    {{-- REPORT MODAL --}}
-    <div class="modal fade" id="reportModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Laporkan Foto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="{{ route('report.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="foto_id" id="reportFotoId">
-                    <div class="modal-body">
-                        <p class="mb-3">Mengapa Anda melaporkan foto ini?</p>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="reason"
-                                value="Konten seksual atau telanjang" id="r1" required>
-                            <label class="form-check-label" for="r1">Konten seksual atau telanjang</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="reason"
-                                value="Kekerasan atau berbahaya" id="r2">
-                            <label class="form-check-label" for="r2">Kekerasan atau berbahaya</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="reason"
-                                value="Pelecehan atau intimidasi" id="r3">
-                            <label class="form-check-label" for="r3">Pelecehan atau intimidasi</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="reason" value="Spam atau menyesatkan"
-                                id="r4">
-                            <label class="form-check-label" for="r4">Spam atau menyesatkan</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-danger rounded-pill px-4">Kirim Laporan</button>
-                    </div>
-                </form>
+    {{-- REPORT MODAL (Polymorphic) --}}
+<div class="modal fade" id="reportModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="reportModalTitle">Laporkan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ route('report.store') }}" method="POST">
+        @csrf
+        <input type="hidden" name="reportable_id" id="reportableId">
+        <input type="hidden" name="reportable_type" id="reportableType">
+
+        <div class="modal-body">
+            <p class="mb-3">Mengapa Anda melaporkan ini?</p>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Konten seksual atau telanjang" id="r1" required>
+                <label class="form-check-label" for="r1">Konten seksual atau telanjang</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Kekerasan atau berbahaya" id="r2">
+                <label class="form-check-label" for="r2">Kekerasan atau berbahaya</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Pelecehan atau intimidasi" id="r3">
+                <label class="form-check-label" for="r3">Pelecehan atau intimidasi</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="reason" value="Spam atau menyesatkan" id="r4">
+                <label class="form-check-label" for="r4">Spam atau menyesatkan</label>
             </div>
         </div>
+        <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-danger rounded-pill px-4">Kirim Laporan</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
 
     @push('scripts')
         <script>
@@ -526,28 +524,59 @@
                                 `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
                         }
 
-                        // Delete Button Logic
-                        let deleteBtn = '';
-                        // userId injected from Blade
-                        if (c.user_id == {{ Auth::id() ?? 'null' }}) {
-                           deleteBtn = `
-                             <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
-                               <i class="bi bi-trash-fill"></i>
-                             </button>
-                           `;
+                        // Delete & Edit & Report Logic
+                        let actionBtns = '';
+                        const currentUserId = {{ Auth::id() ?? 'null' }};
+
+                        if (c.user_id == currentUserId) {
+                             // Delete Button
+                             actionBtns += `
+                               <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                                 <i class="bi bi-trash-fill"></i>
+                               </button>
+                             `;
+
+                             // Edit Button (24h)
+                             const createdAt = new Date(c.created_at);
+                             const now = new Date();
+                             const diffHours = (now - createdAt) / (1000 * 60 * 60);
+
+                             if (diffHours <= 24) {
+                                 actionBtns += `
+                                   <button type="button" onclick="editComment(${c.id}, this)" class="comment-edit-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Edit">
+                                     <i class="bi bi-pencil-fill"></i>
+                                   </button>
+                                 `;
+                             }
+                        } else {
+                             // Report Button
+                             actionBtns += `
+                               <button type="button" onclick="openReportModal('komentar', ${c.id})" class="btn btn-link text-danger p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Laporkan">
+                                 <i class="bi bi-flag"></i>
+                               </button>
+                             `;
                         }
 
                         const html = `
-                <div class="mb-3 d-flex gap-2 comment-item">
+                <div class="mb-3 d-flex gap-2 comment-item" id="comment-row-${c.id}">
                     <div class="flex-shrink-0">
                         ${avatarHtml}
                     </div>
                     <div class="bg-light px-3 py-2 shadow-sm border w-100 comment-bubble position-relative">
                         <div class="d-flex justify-content-between align-items-start">
                              <a href="/user/${cUser.username || '#'}" class="fw-bold small d-block text-dark text-decoration-none">${cUser.username || 'Anonim'}</a>
-                             ${deleteBtn}
+                             <div>${actionBtns}</div>
                         </div>
-                        <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
+                        <div id="comment-text-${c.id}">
+                             <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
+                        </div>
+                        <div id="comment-edit-form-${c.id}" style="display:none;" class="mt-2">
+                            <textarea class="form-control form-control-sm mb-2" id="edit-input-${c.id}">${c.isi_komentar}</textarea>
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button class="btn btn-sm btn-secondary" onclick="cancelEdit(${c.id})">Batal</button>
+                                <button class="btn btn-sm btn-primary" onclick="saveEditComment(${c.id})">Simpan</button>
+                            </div>
+                        </div>
                     </div>
                 </div>`;
                         listDiv.innerHTML += html;
@@ -576,25 +605,73 @@
             }
 
             // === Global Variable for Report ===
-            let currentReportFotoId = null;
+            let currentDetailPhotoId = null;
 
-            function openReportModal() {
-                // Ambil ID dari modal yg sedang terbuka (globalDetailModal)
-                // Kita butuh ID foto yang sedang dilihat.
-                // Trik: Kita simpan ID saat openSingleModal dipanggil
-                if (currentReportFotoId) {
-                    document.getElementById('reportFotoId').value = currentReportFotoId;
-                    const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
-                    reportModal.show();
+            function openReportModal(type, id) {
+                // Fallback for photo button calling without args
+                if (!type && !id && currentDetailPhotoId) {
+                     type = 'foto';
+                     id = currentDetailPhotoId;
                 }
+
+                document.getElementById('reportableType').value = type;
+                document.getElementById('reportableId').value = id;
+
+                const labels = {
+                    'foto': 'Laporkan Foto',
+                    'user': 'Laporkan Pengguna',
+                    'komentar': 'Laporkan Komentar'
+                };
+                document.getElementById('reportModalTitle').innerText = labels[type] || 'Laporkan';
+
+                const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+                reportModal.show();
             }
 
             // Inject logic ke openSingleModal
             const originalOpenModal = openSingleModal;
             openSingleModal = function(id) {
-                currentReportFotoId = id; // Simpan ID
+                currentDetailPhotoId = id; // Simpan ID
                 originalOpenModal(id);
             }
+
+            // Edit Helper Functions
+            window.editComment = function(id) {
+                document.getElementById(`comment-text-${id}`).style.display = 'none';
+                document.getElementById(`comment-edit-form-${id}`).style.display = 'block';
+            };
+
+            window.cancelEdit = function(id) {
+                 document.getElementById(`comment-text-${id}`).style.display = 'block';
+                 document.getElementById(`comment-edit-form-${id}`).style.display = 'none';
+            };
+
+            window.saveEditComment = function(id) {
+                const newText = document.getElementById(`edit-input-${id}`).value;
+
+                fetch(`{{ url('komentar') }}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isi_komentar: newText })
+                })
+                .then(res => res.json().then(data => ({ status: res.status, body: data })))
+                .then(result => {
+                     if (result.status === 200) {
+                         const pTag = document.querySelector(`#comment-text-${id} p`);
+                         if(pTag) pTag.innerText = result.body.isi_komentar;
+                         window.cancelEdit(id);
+                     } else {
+                         alert(result.body.message || 'Gagal mengedit komentar.');
+                     }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Terjadi kesalahan koneksi.');
+                });
+            };
 
             document.addEventListener('click', function() {
                 document.querySelectorAll('.pin-menu').forEach(m => m.classList.remove('show'));

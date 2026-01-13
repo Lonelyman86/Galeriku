@@ -74,6 +74,9 @@ class FotoController extends Controller
             $foto->tanggal_unggah = now();
             // $foto->album_id = $request->album_id;
 
+            // AUTO-APPROVE if Admin (role_id 1)
+            $foto->status = (Auth::user()->role_id == 1) ? 'approved' : 'pending';
+
             // 1. Simpan Category
             if ($request->filled('category_id')) {
                 $foto->category_id = $request->category_id;

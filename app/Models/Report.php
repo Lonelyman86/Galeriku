@@ -9,15 +9,15 @@ class Report extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'foto_id', 'reason', 'status'];
+    protected $fillable = ['user_id', 'reportable_id', 'reportable_type', 'reason', 'status'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function foto()
+    public function reportable()
     {
-        return $this->belongsTo(Foto::class);
+        return $this->morphTo();
     }
 }

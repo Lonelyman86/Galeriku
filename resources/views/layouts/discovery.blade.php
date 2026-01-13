@@ -211,27 +211,57 @@
                         : `<i class="bi bi-person-circle default-avatar-icon" style="font-size: 28px;"></i>`;
 
 
-                    // Delete Button Logic
-                    let deleteBtn = '';
-                    // Gunakan Auth ID yang di-pass dari Blade
+                    // Delete & Edit & Report Button Logic
+                    let actionBtns = '';
                     const currentUserId = {{ Auth::id() ?? 'null' }};
+
                     if (c.user_id == currentUserId) {
-                       deleteBtn = `
+                       // Delete Button
+                       actionBtns += `
                          <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
                            <i class="bi bi-trash-fill"></i>
                          </button>
                        `;
+
+                       // Check 24h Limit for Edit
+                       const createdAt = new Date(c.created_at);
+                       const now = new Date();
+                       const diffHours = (now - createdAt) / (1000 * 60 * 60);
+
+                       if (diffHours <= 24) {
+                           actionBtns += `
+                             <button type="button" onclick="editComment(${c.id}, this)" class="comment-edit-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Edit">
+                               <i class="bi bi-pencil-fill"></i>
+                             </button>
+                           `;
+                       }
+                    } else {
+                        // Report Button for others' comments
+                        actionBtns += `
+                             <button type="button" onclick="openReportModal('komentar', ${c.id})" class="btn btn-link text-danger p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Laporkan">
+                               <i class="bi bi-flag"></i>
+                             </button>
+                        `;
                     }
 
                     listDiv.innerHTML += `
-                        <div class="mb-2 d-flex gap-2 comment-item">
+                        <div class="mb-2 d-flex gap-2 comment-item" id="comment-row-${c.id}">
                             <div class="flex-shrink-0">${avHtml}</div>
                             <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <span class="fw-bold small d-block">${cUser.username || 'Anonim'}</span>
-                                    ${deleteBtn}
+                                    <div>${actionBtns}</div>
                                 </div>
-                                <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
+                                <div id="comment-text-${c.id}">
+                                    <p class="mb-0 small text-dark lh-sm mt-1">${c.isi_komentar}</p>
+                                </div>
+                                <div id="comment-edit-form-${c.id}" style="display:none;" class="mt-2">
+                                    <textarea class="form-control form-control-sm mb-2" id="edit-input-${c.id}">${c.isi_komentar}</textarea>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button class="btn btn-sm btn-secondary" onclick="cancelEdit(${c.id})">Batal</button>
+                                        <button class="btn btn-sm btn-primary" onclick="saveEditComment(${c.id})">Simpan</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>`;
                 });
@@ -240,12 +270,61 @@
             }
         }
 
+        // Bind Report Logic for Photo
+        const reportBtn = document.getElementById('globalReportBtn');
+        if(reportBtn) {
+            reportBtn.onclick = function() {
+                openReportModal('foto', item.id);
+            };
+        }
+
         // Show Modal
         const modalEl = document.getElementById('globalDetailModal');
         if(modalEl) {
             const myModal = new bootstrap.Modal(modalEl);
             myModal.show();
         }
+    };
+
+    // Global Edit Functions (must be attached to window)
+    window.editComment = function(id) {
+        document.getElementById(`comment-text-${id}`).style.display = 'none';
+        document.getElementById(`comment-edit-form-${id}`).style.display = 'block';
+    };
+
+    window.cancelEdit = function(id) {
+         document.getElementById(`comment-text-${id}`).style.display = 'block';
+         document.getElementById(`comment-edit-form-${id}`).style.display = 'none';
+    };
+
+    window.saveEditComment = function(id) {
+        const newText = document.getElementById(`edit-input-${id}`).value;
+
+        fetch(`{{ url('komentar') }}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isi_komentar: newText })
+        })
+        .then(res => res.json().then(data => ({ status: res.status, body: data })))
+        .then(result => {
+             if (result.status === 200) {
+                 // Update UI
+                 const pTag = document.querySelector(`#comment-text-${id} p`);
+                 if(pTag) pTag.innerText = result.body.isi_komentar;
+
+                 // Close Form
+                 window.cancelEdit(id);
+             } else {
+                 alert(result.body.message || 'Gagal mengedit komentar.');
+             }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Terjadi kesalahan koneksi.');
+        });
     };
 
     // 5. Logic Menu Dropdown (untuk tombol titik 3)

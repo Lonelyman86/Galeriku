@@ -4,7 +4,7 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark mb-0">
-            <i class="bi bi-images text-danger me-2"></i>Kelola Foto User
+            <i class="bi bi-images text-danger me-2"></i>Moderasi Konten
         </h2>
         <span class="badge bg-danger fs-6 px-3 py-2">Admin Panel</span>
     </div>
@@ -103,7 +103,7 @@
                                 <tr>
                                     <th>Pelapor</th>
                                     <th>Alasan</th>
-                                    <th>Foto Dilaporkan</th>
+                                    <th>Konten Dilaporkan</th>
                                     <th>Tanggal</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -117,29 +117,47 @@
                                     </td>
                                     <td>{{ $report->reason }}</td>
                                     <td>
-                                        @if($report->foto)
-                                            <div class="d-flex align-items-center gap-2">
-                                                <a href="{{ Str::startsWith($report->foto->lokasi_file, ['http', 'data:']) ? $report->foto->lokasi_file : asset('storage/foto/'.$report->foto->lokasi_file) }}" target="_blank">
-                                                    <img src="{{ Str::startsWith($report->foto->lokasi_file, ['http', 'data:']) ? $report->foto->lokasi_file : asset('storage/foto/'.$report->foto->lokasi_file) }}" width="60" class="rounded" style="object-fit:cover;">
-                                                </a>
-                                                <div class="small lh-sm">
-                                                    <strong>{{Str::limit($report->foto->judul_foto, 20)}}</strong><br>
-                                                    <span class="text-muted">by {{ $report->foto->user->username ?? '?' }}</span>
+                                        @php $target = $report->reportable; @endphp
+                                        @if($target)
+                                            @if($target instanceof \App\Models\Foto)
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <a href="{{ Str::startsWith($target->lokasi_file, ['http', 'data:']) ? $target->lokasi_file : asset('storage/foto/'.$target->lokasi_file) }}" target="_blank">
+                                                        <img src="{{ Str::startsWith($target->lokasi_file, ['http', 'data:']) ? $target->lokasi_file : asset('storage/foto/'.$target->lokasi_file) }}" width="60" class="rounded" style="object-fit:cover;">
+                                                    </a>
+                                                    <div class="small lh-sm">
+                                                        <span class="badge bg-info mb-1">Foto</span><br>
+                                                        <strong>{{Str::limit($target->judul_foto, 20)}}</strong><br>
+                                                        <span class="text-muted">by {{ $target->user->username ?? '?' }}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            @elseif($target instanceof \App\Models\Komentar)
+                                                 <div class="p-2 bg-light border rounded small">
+                                                    <span class="badge bg-warning text-dark mb-1">Komentar</span><br>
+                                                    <i class="bi bi-chat-quote-fill text-secondary"></i> "{{ Str::limit($target->isi_komentar, 50) }}"
+                                                    <br><span class="text-muted">by {{ $target->user->username ?? '?' }}</span>
+                                                 </div>
+                                            @elseif($target instanceof \App\Models\User)
+                                                 <div class="d-flex align-items-center gap-2">
+                                                     <img src="{{ $target->avatar ? asset('storage/'.$target->avatar) : asset('assets/img/default-profile.png') }}" width="32" height="32" class="rounded-circle" style="object-fit:cover;">
+                                                     <div>
+                                                         <span class="badge bg-primary mb-1">User</span><br>
+                                                         <strong>{{ $target->username }}</strong>
+                                                     </div>
+                                                 </div>
+                                            @endif
                                         @else
-                                            <span class="badge bg-secondary">Foto Terhapus</span>
+                                            <span class="badge bg-secondary">Konten Terhapus</span>
                                         @endif
                                     </td>
                                     <td>{{ $report->created_at->format('d M Y') }}</td>
                                     <td>
-                                        <form action="{{ route('admin.reports.ban', $report->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus foto ini? Tindakan ini tidak dapat dibatalkan.')">
+                                        <form action="{{ route('admin.reports.ban', $report->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tindak lanjuti laporan ini? (Konten akan dihapus/di-resolve)')">
                                             @csrf @method('PATCH')
-                                            <button class="btn btn-danger btn-sm" title="Hapus Foto & Resolve"><i class="bi bi-trash-fill"></i> Hapus</button>
+                                            <button class="btn btn-danger btn-sm" title="Resolve & Hapus"><i class="bi bi-check-lg"></i> Tindak</button>
                                         </form>
                                         <form action="{{ route('admin.reports.dismiss', $report->id) }}" method="POST" class="d-inline">
                                             @csrf @method('PATCH')
-                                            <button class="btn btn-secondary btn-sm" title="Abaikan Laporan"><i class="bi bi-x-lg"></i> Abaikan</button>
+                                            <button class="btn btn-secondary btn-sm" title="Abaikan"><i class="bi bi-x-lg"></i></button>
                                         </form>
                                     </td>
                                 </tr>

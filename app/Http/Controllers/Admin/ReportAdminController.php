@@ -12,11 +12,11 @@ class ReportAdminController extends Controller
 {
     public function index()
     {
-        $reports = Report::with(['user', 'foto'])
+        $reports = Report::with(['user', 'reportable'])
                          ->where('status', 'pending')
                          ->latest()
                          ->paginate(10);
-                         
+
         return view('admin.reports.index', compact('reports'));
     }
 
@@ -24,30 +24,35 @@ class ReportAdminController extends Controller
     {
         $report = Report::findOrFail($id);
         $report->update(['status' => 'dismissed']);
-        
+
         return back()->with('success', 'Laporan diabaikan.');
     }
 
     public function ban(Request $request, $id)
     {
         $report = Report::findOrFail($id);
-        $foto = $report->foto;
+        $target = $report->reportable;
 
-        if ($foto) {
-             // Hapus file
-             if ($foto->lokasi_file) {
-                Storage::delete('public/foto/' . $foto->lokasi_file);
-             }
-             // Hapus record foto
-             $foto->delete();
+        $msg = 'Laporan diselesaikan.';
+
+        if ($target) {
+            if ($target instanceof \App\Models\Foto) {
+                 if ($target->lokasi_file && Storage::exists('foto/' . $target->lokasi_file)) {
+                    Storage::delete('foto/' . $target->lokasi_file);
+                 }
+                 $target->delete();
+                 $msg = 'Foto berhasil dihapus.';
+            } elseif ($target instanceof \App\Models\Komentar) {
+                 $target->delete();
+                 $msg = 'Komentar berhasil dihapus.';
+            } elseif ($target instanceof \App\Models\User) {
+                 // Implementasi Ban User belum ada, sementara hanya resolve report
+                 $msg = 'Laporan user diselesaikan (User tidak dihapus).';
+            }
         }
 
-        // Tandai laporan selesai
         $report->update(['status' => 'resolved']);
-        
-        // Opsional: Tandai semua laporan lain untuk foto yang sama sebagai resolved?
-        // Report::where('foto_id', $report->foto_id)->update(['status' => 'resolved']);
 
-        return back()->with('success', 'Foto telah dihapus dan laporan diselesaikan.');
+        return back()->with('success', $msg);
     }
 }

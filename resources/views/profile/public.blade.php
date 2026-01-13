@@ -89,23 +89,30 @@
             </p>
         @endif
 
-        {{-- TOMBOL FOLLOW / UNFOLLOW --}}
-        @auth
-            @if(Auth::id() !== $user->id)
-                <form action="{{ route('user.follow', $user->id) }}" method="POST" class="d-inline-block mb-4">
-                    @csrf
-                    @if(Auth::user()->isFollowing($user))
-                        <button type="submit" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
-                            <i class="bi bi-person-check-fill me-1"></i> Mengikuti
-                        </button>
-                    @else
-                        <button type="submit" class="btn btn-dark rounded-pill px-5 fw-bold">
-                            <i class="bi bi-person-plus-fill me-1"></i> Ikuti
-                        </button>
-                    @endif
-                </form>
-            @endif
-        @endauth
+        {{-- TOMBOL FOLLOW / UNFOLLOW & REPORT --}}
+        <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
+            @auth
+                @if(Auth::id() !== $user->id)
+                    <form action="{{ route('user.follow', $user->id) }}" method="POST" class="d-inline-block m-0">
+                        @csrf
+                        @if(Auth::user()->isFollowing($user))
+                            <button type="submit" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+                                <i class="bi bi-person-check-fill me-1"></i> Mengikuti
+                            </button>
+                        @else
+                            <button type="submit" class="btn btn-dark rounded-pill px-5 fw-bold">
+                                <i class="bi bi-person-plus-fill me-1"></i> Ikuti
+                            </button>
+                        @endif
+                    </form>
+
+                    {{-- REPORT USER BUTTON --}}
+                    <button type="button" class="btn btn-outline-danger rounded-circle p-2" title="Laporkan Pengguna" onclick="openReportModal('user', {{ $user->id }})">
+                        <i class="bi bi-flag-fill"></i>
+                    </button>
+                @endif
+            @endauth
+        </div>
 
         {{-- STATISTIK (CLEAN TEXT) --}}
         <div class="d-flex justify-content-center gap-4 gap-md-5 mt-2">
@@ -261,19 +268,21 @@
   </div>
 </div>
 
-{{-- REPORT MODAL --}}
+{{-- REPORT MODAL (Polymorphic) --}}
 <div class="modal fade" id="reportModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold">Laporkan Foto</h5>
+        <h5 class="modal-title fw-bold" id="reportModalTitle">Laporkan</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form action="{{ route('report.store') }}" method="POST">
         @csrf
-        <input type="hidden" name="foto_id" id="reportFotoId">
+        <input type="hidden" name="reportable_id" id="reportableId">
+        <input type="hidden" name="reportable_type" id="reportableType">
+
         <div class="modal-body">
-            <p class="mb-3">Mengapa Anda melaporkan foto ini?</p>
+            <p class="mb-3">Mengapa Anda melaporkan ini?</p>
             <div class="form-check mb-2">
                 <input class="form-check-input" type="radio" name="reason" value="Konten seksual atau telanjang" id="r1" required>
                 <label class="form-check-label" for="r1">Konten seksual atau telanjang</label>
@@ -451,32 +460,39 @@
                }
 
 
-               // Delete Button Logic
-               let deleteBtn = '';
-               const currentUserId = {{ Auth::id() ?? 'null' }};
-               if (c.user_id == currentUserId) {
-                   deleteBtn = `
-                     <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
-                       <i class="bi bi-trash-fill"></i>
-                     </button>
-                   `;
-               }
+                // Delete & Report Logic
+                let actionBtns = '';
+                const currentUserId = {{ Auth::id() ?? 'null' }};
 
-               const html = `
-                 <div class="mb-2 d-flex gap-2 comment-item">
-                     <div class="flex-shrink-0">${avatarHtml}</div>
-                     <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble position-relative">
-                        <div class="d-flex justify-content-between align-items-start">
-                             <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
-                             ${deleteBtn}
-                        </div>
-                        <p class="mb-0 small text-dark lh-sm mt-1 comment-text">${c.isi_komentar}</p>
-                     </div>
-                 </div>`;
-               listDiv.innerHTML += html;
-           });
+                if (c.user_id == currentUserId) {
+                    actionBtns = `
+                      <button type="button" onclick="deleteComment(${c.id}, this)" class="comment-delete-btn btn btn-link text-secondary p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Hapus">
+                        <i class="bi bi-trash-fill"></i>
+                      </button>
+                    `;
+                } else {
+                     actionBtns = `
+                      <button type="button" onclick="openReportModal('komentar', ${c.id})" class="btn btn-link text-danger p-0 ms-2" style="font-size: 14px; text-decoration: none;" title="Laporkan">
+                        <i class="bi bi-flag"></i>
+                      </button>
+                    `;
+                }
+
+                const html = `
+                  <div class="mb-2 d-flex gap-2 comment-item">
+                      <div class="flex-shrink-0">${avatarHtml}</div>
+                      <div class="bg-white px-3 py-2 rounded-3 shadow-sm border w-100 comment-bubble position-relative">
+                         <div class="d-flex justify-content-between align-items-start">
+                              <span class="fw-bold small d-block comment-user">${cUser.username || 'Anonim'}</span>
+                              <div>${actionBtns}</div>
+                         </div>
+                         <p class="mb-0 small text-dark lh-sm mt-1 comment-text">${c.isi_komentar}</p>
+                      </div>
+                  </div>`;
+                listDiv.innerHTML += html;
+            });
         } else {
-           listDiv.innerHTML = '<div class="text-center py-4"><p class="text-muted small">Belum ada komentar.</p></div>';
+            listDiv.innerHTML = '<div class="text-center py-4"><p class="text-muted small">Belum ada komentar.</p></div>';
         }
 
         const myModal = new bootstrap.Modal(document.getElementById('globalDetailModal'));
@@ -494,17 +510,34 @@
     }
 
     // 7. Report Logic
-    let currentReportFotoId = null;
-    function openReportModal() {
-        if(currentReportFotoId) {
-            document.getElementById('reportFotoId').value = currentReportFotoId;
-            const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
-            reportModal.show();
+    // 7. Report Logic (Polymorphic)
+    let currentDetailPhotoId = null;
+
+    function openReportModal(type, id) {
+        // Fallback for photo button calling without args
+        if (!type && !id && currentDetailPhotoId) {
+             type = 'foto';
+             id = currentDetailPhotoId;
         }
+
+        document.getElementById('reportableType').value = type;
+        document.getElementById('reportableId').value = id;
+
+        const labels = {
+            'foto': 'Laporkan Foto',
+            'user': 'Laporkan Pengguna',
+            'komentar': 'Laporkan Komentar'
+        };
+        document.getElementById('reportModalTitle').innerText = labels[type] || 'Laporkan';
+
+        const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+        reportModal.show();
     }
+
+    // Capture ID when opening single modal
     const originalOpenModal = openSingleModal;
     openSingleModal = function(id) {
-       currentReportFotoId = id;
+       currentDetailPhotoId = id;
        originalOpenModal(id);
     }
 

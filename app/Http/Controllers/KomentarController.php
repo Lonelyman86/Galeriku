@@ -36,4 +36,27 @@ class KomentarController extends Controller
 
         return response()->json(['message' => 'Komentar berhasil dihapus']);
     }
+
+    public function update(Request $request, $id)
+    {
+        $comment = Komentar::findOrFail($id);
+
+        if (Auth::id() !== $comment->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($comment->created_at->diffInHours(now()) > 24) {
+            return response()->json(['message' => 'Batas waktu edit 24 jam telah berakhir.'], 403);
+        }
+
+        $request->validate([
+            'isi_komentar' => 'required|string|max:500',
+        ]);
+
+        $comment->update([
+            'isi_komentar' => $request->input('isi_komentar')
+        ]);
+
+        return response()->json(['message' => 'Komentar diperbarui', 'isi_komentar' => $comment->isi_komentar]);
+    }
 }

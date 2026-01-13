@@ -18,7 +18,7 @@ class FotoAdminController extends Controller
                      ->paginate(100, ['*'], 'page');
 
         // Reports Pagination (custom 'reports_page' to avoid conflict)
-        $reports = Report::with(['user', 'foto'])
+        $reports = Report::with(['user', 'reportable'])
                          ->where('status', 'pending')
                          ->latest()
                          ->paginate(10, ['*'], 'reports_page');

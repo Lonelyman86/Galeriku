@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/albums/{photo}/check-like', [LikeController::class, 'checkLike'])->name('likes.check');
     Route::post('/photos/{photo}/komentar', [KomentarController::class, 'store'])->name('komentar.store');
     Route::delete('/komentar/{komentar}', [KomentarController::class, 'destroy'])->name('komentar.destroy');
+    Route::put('/komentar/{komentar}', [KomentarController::class, 'update'])->name('komentar.update'); // <--- Edit Comment
     Route::get('/liked', [HomeController::class, 'likedPhotos'])->name('photo.liked');
 
 
